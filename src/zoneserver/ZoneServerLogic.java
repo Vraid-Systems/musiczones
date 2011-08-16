@@ -12,21 +12,22 @@ import multicastmusiccontroller.MulticastClient;
  * @author Jason Zerbe
  */
 public class ZoneServerLogic {
-
+    
     protected String global_NodeUUID = null;
     protected String global_NodeName = null;
     protected MulticastClient mcc = null;
-
+    
     public ZoneServerLogic(String theNodeUUID, String theNodeName) {
         global_NodeUUID = theNodeUUID;
         global_NodeName = theNodeName;
         mcc = new MulticastClient();
+        
+        System.out.println("ZMS Logic started");
     }
-
+    
     @Override
     public void finalize() throws Throwable {
         mcc.closeClient();
-
         super.finalize();
     }
 
@@ -37,8 +38,8 @@ public class ZoneServerLogic {
      * @return boolean - were we able to process the command?
      */
     public boolean processNetworkCommand(String theNetworkCommand) {
-        System.err.println("recieved network comand to process:\n" + theNetworkCommand + "\n");
-
+        System.err.println("ZMS Logic recieved network comand to process:\n" + theNetworkCommand + "\n");
+        
         if (!theNetworkCommand.isEmpty() && theNetworkCommand.contains("\n")) {
             String[] theNetworkCommandArray = theNetworkCommand.split("\n");
             if (theNetworkCommandArray.length == 2) { //single-line command
@@ -72,7 +73,7 @@ public class ZoneServerLogic {
         } else {
             return false;
         }
-
+        
         return true;
     }
 
@@ -85,7 +86,7 @@ public class ZoneServerLogic {
                 + "name=" + global_NodeName + "\n";
         mcc.sendNetworkCommand(theResponseStr);
     }
-
+    
     private void doNodePlayUrl(String thePlayingUrlStr) {
         String theResponseStr = "zone=" + global_NodeUUID + "\n"
                 + "playurl=" + thePlayingUrlStr + "\n";

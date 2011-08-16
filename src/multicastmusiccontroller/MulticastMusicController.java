@@ -34,7 +34,7 @@ public class MulticastMusicController {
         Random generator = new Random(19580427);
         int randomIndex = generator.nextInt(19580427);
         global_nodeName += String.valueOf(randomIndex);
-        System.out.println("default global_nodeName = " + global_nodeName);
+        System.out.println("default zone-name = " + global_nodeName);
 
         if (args.length > 1) { //need to process arguments
             for (int i = 0; i < args.length; i++) {
@@ -60,13 +60,14 @@ public class MulticastMusicController {
         }
 
         ZoneMulticastServer theZoneServer = new ZoneMulticastServer(mainServerLogic);
+        theZoneServer.startServer();
 
         JettyWebServer theWebServer = new JettyWebServer(global_webInterfacePortInt);
         theWebServer.startServer();
     }
 
     /**
-     * generates a UUID from the startup time, and the name of node + vlcpath
+     * generates a UUID from the startup time, and the name of node
      * if they are available
      * @return String - the node UUID
      */
@@ -84,7 +85,7 @@ public class MulticastMusicController {
         } catch (UnsupportedEncodingException ex) {
             Logger.getLogger(MulticastMusicController.class.getName()).log(Level.SEVERE, null, ex);
         }
-        System.out.println("hashed = " + hashedString);
+        System.out.println("Node UUID = " + hashedString);
 
         return hashedString;
     }

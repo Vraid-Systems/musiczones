@@ -24,15 +24,15 @@ public class MulticastClient implements ProgramConstants {
             clientSocket = new MulticastSocket();
         } catch (IOException ex) {
             Logger.getLogger(MulticastClient.class.getName()).log(Level.SEVERE, null, ex);
-            return;
         }
 
         try {
             clientSocket.setTimeToLive(groupTTL);
         } catch (IOException ex) {
             Logger.getLogger(MulticastClient.class.getName()).log(Level.SEVERE, null, ex);
-            return;
         }
+        
+        System.out.println("ZMS Client socket started");
     }
 
     /**
@@ -41,7 +41,7 @@ public class MulticastClient implements ProgramConstants {
      * @return boolean - was the command sent?
      */
     public boolean sendNetworkCommand(String theNetworkCommand) {
-        byte[] buffer = new byte[65535];
+        byte[] buffer = new byte[maxByteSize];
         buffer = theNetworkCommand.getBytes();
 
         InetAddress groupAddress;

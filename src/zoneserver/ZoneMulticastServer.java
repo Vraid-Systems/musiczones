@@ -33,7 +33,13 @@ public class ZoneMulticastServer implements ProgramConstants {
         serverLogic = theServerLogic;
     }
 
-    public void StopServer() {
+    public void startServer() {
+        ZoneThread aZoneThread = new ZoneThread();
+    }
+
+    public void stopServer() {
+        System.out.print("ZMS thread and socket stopping ...");
+
         serverThread.interrupt();
         try {
             serverThread.join();
@@ -42,20 +48,24 @@ public class ZoneMulticastServer implements ProgramConstants {
         }
         serverSocket.close();
 
+        System.out.println("ZMS thread joined and socket closed");
+
         serverSocket = null;
         serverThread = null;
     }
 
-    public class StartServer implements Runnable {
+    protected class ZoneThread implements Runnable {
 
-        StartServer() {
+        public ZoneThread() {
+            System.out.println("ZMS thread starting ...");
             serverThread = new Thread(this);
             serverThread.start();
+            System.out.println("ZMS thread started");
         }
 
         @Override
         public void run() {
-            byte[] buffer = new byte[65535];
+            byte[] buffer = new byte[maxByteSize];
 
             try {
                 serverSocket = new MulticastSocket(groupPortInt);
@@ -82,7 +92,7 @@ public class ZoneMulticastServer implements ProgramConstants {
                 Logger.getLogger(ZoneMulticastServer.class.getName()).log(Level.SEVERE, null, ex);
             }
 
-            System.out.println("MulticastServer started and joined group");
+            System.out.println("ZMS started and listening to group");
 
             while (true) {
                 // receive request from client
@@ -96,7 +106,7 @@ public class ZoneMulticastServer implements ProgramConstants {
                 // process said request
                 String netCmd = new String(buffer).trim().toLowerCase();
                 if (!serverLogic.processNetworkCommand(netCmd)) {
-                    System.err.println("failed to process network comand:\n" + netCmd + "\n");
+                    System.err.println("ZMS Logic failed to process comand:\n" + netCmd + "\n");
                 }
             }
         }
