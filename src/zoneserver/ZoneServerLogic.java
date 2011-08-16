@@ -23,6 +23,13 @@ public class ZoneServerLogic {
         mcc = new MulticastClient();
     }
 
+    @Override
+    public void finalize() throws Throwable {
+        mcc.closeClient();
+
+        super.finalize();
+    }
+
     /**
      * master abstraction for processing any old command that comes in off
      * the multicast group
