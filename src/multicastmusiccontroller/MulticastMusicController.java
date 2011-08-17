@@ -9,7 +9,6 @@ import zoneserver.ZoneMulticastServer;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
-import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,7 +18,7 @@ import java.util.logging.Logger;
  */
 public class MulticastMusicController {
 
-    protected static String global_nodeName = "zone controller ";
+    protected static String global_nodeName = null;
     protected static int global_webInterfacePortInt = 80;
     protected static final String global_usageStr = "usage: java -jar mmc.jar "
             + "--zone-name=[zone controller's name] "
@@ -31,11 +30,6 @@ public class MulticastMusicController {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        Random generator = new Random(19580427);
-        int randomIndex = generator.nextInt(19580427);
-        global_nodeName += String.valueOf(randomIndex);
-        System.out.println("default zone-name = " + global_nodeName);
-
         if (args.length > 1) { //need to process arguments
             for (int i = 0; i < args.length; i++) {
                 String currentArg = args[i];
@@ -51,7 +45,10 @@ public class MulticastMusicController {
             }
         } //done processing arguments
 
-        ZoneServerLogic mainServerLogic = new ZoneServerLogic(generateNodeUUID(), global_nodeName);
+        ZoneServerLogic mainServerLogic = ZoneServerLogic.getInstance();
+        if ((global_nodeName != null) && (!global_nodeName.isEmpty())) {
+            mainServerLogic.setZoneName(global_nodeName);
+        }
 
         try {
             Thread.sleep(100); //pause just enough (1/10 second) so that we don't get any own init messages from group
@@ -59,34 +56,10 @@ public class MulticastMusicController {
             Logger.getLogger(MulticastMusicController.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        ZoneMulticastServer theZoneServer = new ZoneMulticastServer(mainServerLogic);
+        ZoneMulticastServer theZoneServer = new ZoneMulticastServer();
         theZoneServer.startServer();
 
         JettyWebServer theWebServer = new JettyWebServer(global_webInterfacePortInt);
         theWebServer.startServer();
-    }
-
-    /**
-     * generates a UUID from the startup time, and the name of node
-     * if they are available
-     * @return String - the node UUID
-     */
-    public static String generateNodeUUID() {
-        Date aDate = new Date();
-        String stringToHash = global_nodeName + " was started on "
-                + aDate.toString() + ".";
-        System.out.println(stringToHash);
-
-        String hashedString = null;
-        try {
-            hashedString = contrib.AeSimpleSHA1.SHA1(stringToHash);
-        } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(MulticastMusicController.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(MulticastMusicController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        System.out.println("Node UUID = " + hashedString);
-
-        return hashedString;
     }
 }

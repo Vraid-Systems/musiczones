@@ -27,10 +27,8 @@ public class ZoneMulticastServer implements ProgramConstants {
 
     protected Thread serverThread = null;
     protected MulticastSocket serverSocket = null;
-    protected ZoneServerLogic serverLogic = null;
 
-    public ZoneMulticastServer(ZoneServerLogic theServerLogic) {
-        serverLogic = theServerLogic;
+    public ZoneMulticastServer() {
     }
 
     public void startServer() {
@@ -104,10 +102,7 @@ public class ZoneMulticastServer implements ProgramConstants {
                 }
 
                 // process said request
-                String netCmd = new String(buffer).trim().toLowerCase();
-                if (!serverLogic.processNetworkCommand(netCmd)) {
-                    System.err.println("ZMS Logic failed to process comand:\n" + netCmd + "\n");
-                }
+                ZoneServerLogic.getInstance().processNetworkCommand(new String(buffer).trim().toLowerCase());
             }
         }
     }

@@ -8,8 +8,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import multicastmusiccontroller.ProgramConstants;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.servlet.Context;
+import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.springframework.core.io.ClassPathResource;
+import servlets.ZoneControllerListDialog;
 
 /**
  * @author Mort Bay Consulting / Codehaus / Eclipse
@@ -31,6 +34,9 @@ public class JettyWebServer implements ProgramConstants {
             Logger.getLogger(JettyWebServer.class.getName()).log(Level.SEVERE, null, ex);
         }
         serverInstance.addHandler(webAppContext);
+
+        Context context = new Context(serverInstance, "/servlets", Context.SESSIONS);
+        context.addServlet(new ServletHolder(new ZoneControllerListDialog()), "/list-zones-html");
     }
 
     public boolean startServer() {

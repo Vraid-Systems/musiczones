@@ -21,13 +21,20 @@
                 margin: 0 auto;
             }
         </style>
+
+        <script type="text/javascript">
+            function selectZonePage() {
+                var pageLoadUrl = "/servlets/list-zones-html";
+                $.mobile.changePage(pageLoadUrl);
+            }
+        </script>
     </head>
     <body>
         <div id="playListPage" data-role="page" data-theme="d">
             <div data-role="header" data-theme="b" data-position="fixed">
-                <a href="#selectZonePage" data-role="button" data-icon="grid">Select</a>
+                <a href="javascript:selectZonePage();" data-role="button" data-icon="grid">Select</a>
                 <h1>Now Playing</h1>
-                <a href="#settingsPage" data-role="button" data-icon="gear">Settings</a>
+                <a href="javascript:settingsPage();" data-role="button" data-icon="gear">Settings</a>
             </div>
 
             <div data-role="content">
@@ -36,7 +43,7 @@
             <div data-id="mainNavFooter" data-role="footer" data-position="fixed">
                 <div data-role="navbar">
                     <ul>
-                        <li><a href="javascript:alert('shuffled');">Shuffle</a></li>
+                        <li><a href="javascript:shuffleNowPlaying();">Shuffle</a></li>
                         <li><a href="#playListPage" class="ui-btn-active ui-state-persist">Now Playing</a></li>
                         <li><a href="#libraryPage">Library</a></li>
                     </ul>
@@ -46,9 +53,9 @@
 
         <div id="libraryPage" data-role="page" data-theme="d">
             <div data-role="header" data-theme="b" data-position="fixed">
-                <a href="#selectZonePage" data-role="button" data-icon="grid">Select</a>
+                <a href="javascript:selectZonePage();" data-role="button" data-icon="grid">Select</a>
                 <h1>Library</h1>
-                <a href="#settingsPage" data-role="button" data-icon="gear">Settings</a>
+                <a href="javascript:settingsPage();" data-role="button" data-icon="gear">Settings</a>
             </div>
 
             <div data-role="content">
@@ -57,7 +64,7 @@
             <div data-id="mainNavFooter" data-role="footer" data-position="fixed">
                 <div data-role="navbar">
                     <ul>
-                        <li><a href="javascript:alert('shuffled');">Shuffle</a></li>
+                        <li><a href="javascript:shuffleNowPlaying();">Shuffle</a></li>
                         <li><a href="#playListPage">Now Playing</a></li>
                         <li><a href="#libraryPage" class="ui-btn-active ui-state-persist">Library</a></li>
                     </ul>
