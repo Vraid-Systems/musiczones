@@ -12,6 +12,7 @@
     <property name="build" location="build"/>
     <property name="dist" location="dist"/>
     <property name="docs" location="docs"/>
+    <property name="debug" location="debug"/>
     
     <property name="init.mem.size" value="128m"/>
     <property name="max.mem.size" value="256m"/>

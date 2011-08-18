@@ -64,8 +64,6 @@ public class ZoneMulticastServer implements ProgramConstants {
 
         @Override
         public void run() {
-            byte[] buffer = new byte[groupMaxByteSize];
-
             try {
                 serverSocket = new MulticastSocket(groupPortInt);
             } catch (IOException ex) {
@@ -95,17 +93,17 @@ public class ZoneMulticastServer implements ProgramConstants {
 
             while (true) {
                 // receive request from client
-                DatagramPacket packet = new DatagramPacket(buffer, buffer.length, groupAddress, groupPortInt);
+                final byte[] buffer = new byte[groupMaxByteSize];
+                final DatagramPacket packet = new DatagramPacket(buffer, buffer.length, groupAddress, groupPortInt);
                 try {
                     serverSocket.receive(packet);
                 } catch (IOException ex) {
                     Logger.getLogger(ZoneMulticastServer.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                String theNetworkCommand = new String(buffer).trim().toLowerCase();
+                final String theNetworkCommand = new String(buffer).trim().toLowerCase();
 
                 //notify via the console of datagram
-                System.out.println("\n" + new Date().toString()
-                        + " - recieved:\n" + theNetworkCommand + "\n");
+                System.out.println(new Date().toString() + " - recieved:\n" + theNetworkCommand);
 
                 // process said request
                 ZoneServerLogic.getInstance().processNetworkCommand(theNetworkCommand);

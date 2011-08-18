@@ -41,11 +41,8 @@ public class MulticastClient implements ProgramConstants {
      * @param theNetworkCommand String
      * @return boolean - was the command sent?
      */
-    public boolean sendNetworkCommand(String theNetworkCommand) {
-        byte[] buffer = new byte[groupMaxByteSize];
-        buffer = theNetworkCommand.getBytes();
-
-        InetAddress groupAddress;
+    public boolean sendNetworkCommand(final String theNetworkCommand) {
+        final InetAddress groupAddress;
         try {
             groupAddress = InetAddress.getByName(groupAddressStr);
         } catch (UnknownHostException ex) {
@@ -53,7 +50,8 @@ public class MulticastClient implements ProgramConstants {
             return false;
         }
 
-        DatagramPacket pack = new DatagramPacket(buffer, buffer.length, groupAddress, groupPortInt);
+        final byte[] buffer = theNetworkCommand.getBytes();
+        final DatagramPacket pack = new DatagramPacket(buffer, buffer.length, groupAddress, groupPortInt);
         try {
             clientSocket.send(pack);
         } catch (IOException ex) {
@@ -61,8 +59,7 @@ public class MulticastClient implements ProgramConstants {
             return false;
         }
 
-        System.out.println("\n" + new Date().toString()
-                + " - sent:\n" + theNetworkCommand + "\n");
+        System.out.println(new Date().toString() + " - sent:\n" + theNetworkCommand);
 
         return true;
     }

@@ -23,8 +23,8 @@ public class ZoneControllerListDialog extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         //get the data necessary
-        HashMap<String, String> global_NodeInfoMap = ZoneServerLogic.getInstance().getNodeInfoMap();
-        HashMap<String, String> global_NodeDashBoardMap = ZoneServerLogic.getInstance().getNodeDashBoardMap();
+        HashMap<String, String> zcld_ZoneInfoMap = ZoneServerLogic.getInstance().getNodeInfoMap();
+        HashMap<String, String> zcld_ZoneDashBoardMap = ZoneServerLogic.getInstance().getNodeDashBoardMap();
 
         //setup the response
         PrintWriter out = resp.getWriter();
@@ -39,9 +39,9 @@ public class ZoneControllerListDialog extends HttpServlet {
                 + "<div data-role='content'>"
                 + "<ul data-role='listview'>\n";
         String aPageContentPartListStr = "";
-        for (String aNodeUUIDStr : global_NodeInfoMap.keySet()) {
-            String aNodeDashBoardUrlStr = global_NodeDashBoardMap.get(aNodeUUIDStr);
-            String aNodeName = global_NodeInfoMap.get(aNodeUUIDStr);
+        for (String aNodeUUIDStr : zcld_ZoneInfoMap.keySet()) {
+            String aNodeDashBoardUrlStr = zcld_ZoneDashBoardMap.get(aNodeUUIDStr);
+            String aNodeName = zcld_ZoneInfoMap.get(aNodeUUIDStr);
             aPageContentPartListStr += "<li><a href='" + aNodeDashBoardUrlStr + "'>" + aNodeName + "</a></li>\n";
         }
         String aPageContentPartBottomStr = "</ul>\n"

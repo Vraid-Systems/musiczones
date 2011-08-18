@@ -30,7 +30,16 @@
                 <action name="run">
                     <target>run</target>
                 </action>
+                <action name="debug">
+                    <script>nbproject/ide-targets.xml</script>
+                    <target>debug-nb</target>
+                </action>
             </ide-actions>
+            <export>
+                <type>folder</type>
+                <location>build</location>
+                <build-target>dist</build-target>
+            </export>
             <view>
                 <items>
                     <source-folder style="packages">
@@ -47,6 +56,7 @@
                     <ide-action name="clean"/>
                     <ide-action name="javadoc"/>
                     <ide-action name="run"/>
+                    <ide-action name="debug"/>
                 </context-menu>
             </view>
             <subprojects/>
@@ -55,6 +65,7 @@
             <compilation-unit>
                 <package-root>src</package-root>
                 <classpath mode="compile">contrib/jetty-6.1.26/jetty-6.1.26.jar;contrib/jetty-6.1.26/jetty-util-6.1.26.jar;contrib/jetty-6.1.26/servlet-api-2.5-20081211.jar;contrib/MpegAudioSPI1.9.5/jl1.0.1.jar;contrib/MpegAudioSPI1.9.5/mp3spi1.9.5.jar;contrib/MpegAudioSPI1.9.5/tritonus_share.jar;contrib/springframework/spring-1.2.6.jar</classpath>
+                <built-to>build</built-to>
                 <source-level>1.5</source-level>
             </compilation-unit>
         </java-data>
