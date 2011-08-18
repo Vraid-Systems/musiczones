@@ -15,6 +15,7 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.UnknownHostException;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import multicastmusiccontroller.ProgramConstants;
@@ -63,7 +64,7 @@ public class ZoneMulticastServer implements ProgramConstants {
 
         @Override
         public void run() {
-            byte[] buffer = new byte[maxByteSize];
+            byte[] buffer = new byte[groupMaxByteSize];
 
             try {
                 serverSocket = new MulticastSocket(groupPortInt);
@@ -100,9 +101,14 @@ public class ZoneMulticastServer implements ProgramConstants {
                 } catch (IOException ex) {
                     Logger.getLogger(ZoneMulticastServer.class.getName()).log(Level.SEVERE, null, ex);
                 }
+                String theNetworkCommand = new String(buffer).trim().toLowerCase();
+
+                //notify via the console of datagram
+                System.out.println("\n" + new Date().toString()
+                        + " - recieved:\n" + theNetworkCommand + "\n");
 
                 // process said request
-                ZoneServerLogic.getInstance().processNetworkCommand(new String(buffer).trim().toLowerCase());
+                ZoneServerLogic.getInstance().processNetworkCommand(theNetworkCommand);
             }
         }
     }

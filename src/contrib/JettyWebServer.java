@@ -1,5 +1,8 @@
 /*
  * provides Jetty 6.1.26 embedding bindings and control
+ * 
+ * THIS IS A SINGLETON IMPLEMENTATION see:
+ * http://www.javaworld.com/javaworld/jw-04-2003/jw-0425-designpatterns.html
  */
 package contrib;
 
@@ -20,42 +23,57 @@ import servlets.ZoneControllerListDialog;
  */
 public class JettyWebServer implements ProgramConstants {
 
-    protected Server serverInstance = null;
+    private static JettyWebServer jws_SingleInstance = null;
+    protected Server jws_serverInstance = null;
+    protected int jws_serverPortInt = 80;
 
-    public JettyWebServer(int theWebServerPort) {
-        serverInstance = new Server(theWebServerPort);
+    protected JettyWebServer(int theServerPortInt) {
+        jws_serverInstance = new Server(theServerPortInt);
+        jws_serverPortInt = theServerPortInt;
 
         WebAppContext webAppContext = new WebAppContext();
-        webAppContext.setServer(serverInstance);
+        webAppContext.setServer(jws_serverInstance);
         webAppContext.setContextPath(webAppContextPathStr);
         try {
             webAppContext.setResourceBase(new ClassPathResource(webAppDirStr).getURL().toString());
         } catch (IOException ex) {
             Logger.getLogger(JettyWebServer.class.getName()).log(Level.SEVERE, null, ex);
         }
-        serverInstance.addHandler(webAppContext);
-
-        Context context = new Context(serverInstance, "/servlets", Context.SESSIONS);
-        context.addServlet(new ServletHolder(new ZoneControllerListDialog()), "/list-zones-html");
+        webAppContext.addServlet(new ServletHolder(new ZoneControllerListDialog()), "/servlets/list-zones-html");
+        jws_serverInstance.addHandler(webAppContext);
     }
 
-    public boolean startServer() {
-        try {
-            serverInstance.start();
-        } catch (Exception ex) {
-            Logger.getLogger(JettyWebServer.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
+    public static JettyWebServer getInstance() {
+        if (jws_SingleInstance == null) {
+            jws_SingleInstance = new JettyWebServer(80);
         }
-        return true;
+        return jws_SingleInstance;
     }
 
-    public boolean stopServer() {
+    public static JettyWebServer getInstance(int theServerPortInt) {
+        if (jws_SingleInstance == null) {
+            jws_SingleInstance = new JettyWebServer(theServerPortInt);
+        }
+        return jws_SingleInstance;
+    }
+
+    public int getServerPortInt() {
+        return jws_serverPortInt;
+    }
+
+    public void startServer() {
         try {
-            serverInstance.stop();
+            jws_serverInstance.start();
         } catch (Exception ex) {
             Logger.getLogger(JettyWebServer.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
         }
-        return true;
+    }
+
+    public void stopServer() {
+        try {
+            jws_serverInstance.stop();
+        } catch (Exception ex) {
+            Logger.getLogger(JettyWebServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

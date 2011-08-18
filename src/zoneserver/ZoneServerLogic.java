@@ -1,12 +1,13 @@
 /*
  * logic for processing the commands send over the network that the
- * server recieves.
+ * server recieves
  * 
  * THIS IS A SINGLETON IMPLEMENTATION see:
  * http://www.javaworld.com/javaworld/jw-04-2003/jw-0425-designpatterns.html
  */
 package zoneserver;
 
+import contrib.JettyWebServer;
 import contrib.Mp3Audio;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
@@ -28,44 +29,48 @@ import multicastmusiccontroller.ProgramConstants;
  */
 public class ZoneServerLogic implements ProgramConstants {
 
-    private static ZoneServerLogic instance = null;
-    protected String global_NodeUUID = null;
-    protected String global_NodeName = null;
-    protected MulticastClient mcc = null;
-    protected HashMap<String, String> global_NodeInfoMap = null;
-    protected HashMap<String, Calendar> global_NodeExpireMap = null;
-    protected HashMap<String, String> global_NodeDashBoardMap = null;
-    protected Timer global_Timer = null;
+    private static ZoneServerLogic zsl_SingleInstance = null;
+    protected String zsl_ZoneUUID = null;
+    protected String zsl_ZoneName = null;
+    protected String zsl_ZoneDashBoardStr = null;
+    protected MulticastClient zsl_MulticastClient = null;
+    protected HashMap<String, String> zsl_ZoneInfoMap = null;
+    protected HashMap<String, Calendar> zsl_ZoneExpireMap = null;
+    protected HashMap<String, String> zsl_ZoneDashBoardMap = null;
+    protected Timer zsl_Timer = null;
 
     protected ZoneServerLogic() {
-        global_NodeName = "zone controller ";
+        zsl_ZoneName = "zone controller ";
         Random generator = new Random(19580427);
         int randomIndex = generator.nextInt(19580427);
-        global_NodeName += String.valueOf(randomIndex);
-        System.out.println("default zone-name = " + global_NodeName);
-        global_NodeUUID = generateNodeUUID();
+        zsl_ZoneName += String.valueOf(randomIndex);
+        System.out.println("default zone-name = " + zsl_ZoneName);
+        zsl_ZoneUUID = generateZoneUUID();
+        zsl_ZoneDashBoardStr = "http://" + ZoneServerUtility.getInstance().getIPv4LanAddress()
+                + ":" + JettyWebServer.getInstance().getServerPortInt();
 
-        global_NodeInfoMap = new HashMap<String, String>();
-        global_NodeExpireMap = new HashMap<String, Calendar>();
-        global_NodeDashBoardMap = new HashMap<String, String>();
-        mcc = new MulticastClient();
+        zsl_ZoneInfoMap = new HashMap<String, String>();
+        zsl_ZoneExpireMap = new HashMap<String, Calendar>();
+        zsl_ZoneDashBoardMap = new HashMap<String, String>();
+        zsl_MulticastClient = new MulticastClient();
         System.out.println("ZSL started");
 
-        global_Timer = new Timer();
-        global_Timer.schedule(new AllNodesPingTimerTask(), allNodesPingInterval * 1000);
+        zsl_Timer = new Timer();
+        zsl_Timer.schedule(new AllNodesPingTimerTask(), 0, allNodesPingInterval * 1000);
+        zsl_Timer.schedule(new RemoveHardExpiredNodesTimerTask(), allNodesHardExpire * 1000, allNodesHardExpire * 1000);
         System.out.println("ZSL timed events added");
     }
 
     public static ZoneServerLogic getInstance() {
-        if (instance == null) {
-            instance = new ZoneServerLogic();
+        if (zsl_SingleInstance == null) {
+            zsl_SingleInstance = new ZoneServerLogic();
         }
-        return instance;
+        return zsl_SingleInstance;
     }
 
     @Override
     public void finalize() throws Throwable {
-        mcc.closeClient();
+        zsl_MulticastClient.closeClient();
         super.finalize();
     }
 
@@ -74,8 +79,8 @@ public class ZoneServerLogic implements ProgramConstants {
      * @param theZoneName String
      */
     public void setZoneName(String theZoneName) {
-        global_NodeName = theZoneName;
-        global_NodeUUID = generateNodeUUID();
+        zsl_ZoneName = theZoneName;
+        zsl_ZoneUUID = generateZoneUUID();
     }
 
     /**
@@ -84,31 +89,38 @@ public class ZoneServerLogic implements ProgramConstants {
      * @param theNetworkCommand String
      */
     public void processNetworkCommand(String theNetworkCommand) {
-        System.err.println("ZSL recieved network comand to process:\n" + theNetworkCommand + "\n");
-
         if (!theNetworkCommand.isEmpty() && theNetworkCommand.contains("\n")) {
             String[] theNetworkCommandArray = theNetworkCommand.split("\n");
             if (theNetworkCommandArray.length == 2) { //1-line command
                 String[] singleLineStrArray = theNetworkCommandArray[0].split("=");
                 if (singleLineStrArray[0].equals("zone")) {
                     if (singleLineStrArray[1].equals("")) { //requires full ID response
-                        doNodeUUIDResponse();
+                        doZoneUUIDResponse();
+                        doZoneDashBoardResponse();
                     }
                 }
             } else if (theNetworkCommandArray.length == 3) { //2-line command
                 String[] firstLineArray = theNetworkCommandArray[0].split("=");
                 String[] secondLineArray = theNetworkCommandArray[1].split("=");
                 if (firstLineArray[0].equals("zone")) {
-                    if (firstLineArray[1].equals(global_NodeUUID)
+                    if (firstLineArray[1].equals(zsl_ZoneUUID) //this is referring to my UUID
                             && secondLineArray[0].equals("playurl")
                             && !secondLineArray[1].isEmpty()) { //play an audio URL
                         Mp3Audio aMp3Audio = new Mp3Audio();
-                        doNodePlayUrl(secondLineArray[1], aMp3Audio.playURL(secondLineArray[1])); //notify the group of what is playing
-                    } else if (!firstLineArray[1].equals(global_NodeUUID)
-                            && secondLineArray[0].equals("name")
-                            && !secondLineArray[1].isEmpty()) { //store full ID response in table
-                        if (!global_NodeInfoMap.containsKey(firstLineArray[1]) || nodeIsExpired(firstLineArray[1])) {
-                            global_NodeInfoMap.put(firstLineArray[1], secondLineArray[1]);
+                        doZonePlayUrl(secondLineArray[1], aMp3Audio.playURL(secondLineArray[1])); //notify the group of what is playing
+                    } else if (!firstLineArray[1].equals(zsl_ZoneUUID)) { //not my own UUID
+                        if (secondLineArray[0].equals("name")
+                                && !secondLineArray[1].isEmpty()) { //store full ID response in table
+                            if (!zsl_ZoneInfoMap.containsKey(firstLineArray[1])
+                                    || isExpiredZone(firstLineArray[1], allNodesExpireInterval)) {
+                                zsl_ZoneInfoMap.put(firstLineArray[1], secondLineArray[1]);
+                            }
+                        } else if (secondLineArray[0].equals("dashboard")
+                                && !secondLineArray[1].isEmpty()) { //store dashboard location in table
+                            if (!zsl_ZoneDashBoardMap.containsKey(firstLineArray[1])
+                                    || isExpiredZone(firstLineArray[1], allNodesExpireInterval)) {
+                                zsl_ZoneDashBoardMap.put(firstLineArray[1], secondLineArray[1]);
+                            }
                         }
                     }
                 }
@@ -126,7 +138,7 @@ public class ZoneServerLogic implements ProgramConstants {
      * @return HashMap<String, String>
      */
     public HashMap<String, String> getNodeInfoMap() {
-        return global_NodeInfoMap;
+        return zsl_ZoneInfoMap;
     }
 
     /**
@@ -138,17 +150,23 @@ public class ZoneServerLogic implements ProgramConstants {
      * @return HashMap<String, String>
      */
     public HashMap<String, String> getNodeDashBoardMap() {
-        return global_NodeDashBoardMap;
+        return zsl_ZoneDashBoardMap;
     }
 
     /**
      * constructs and sends a datagram to the multicast group with
      * all relevant identifiers
      */
-    private void doNodeUUIDResponse() {
-        String theResponseStr = "zone=" + global_NodeUUID + "\n"
-                + "name=" + global_NodeName + "\n";
-        mcc.sendNetworkCommand(theResponseStr);
+    private void doZoneUUIDResponse() {
+        String theResponseStr = "zone=" + zsl_ZoneUUID + "\n"
+                + "name=" + zsl_ZoneName + "\n";
+        zsl_MulticastClient.sendNetworkCommand(theResponseStr);
+    }
+
+    private void doZoneDashBoardResponse() {
+        String theResponseStr = "zone=" + zsl_ZoneUUID + "\n"
+                + "dashboard=" + zsl_ZoneDashBoardStr + "\n";
+        zsl_MulticastClient.sendNetworkCommand(theResponseStr);
     }
 
     /**
@@ -157,28 +175,29 @@ public class ZoneServerLogic implements ProgramConstants {
      * @param thePlayingUrlStr String
      * @param theUrlIsPlaying boolean
      */
-    private void doNodePlayUrl(String thePlayingUrlStr, boolean theUrlIsPlaying) {
+    private void doZonePlayUrl(String thePlayingUrlStr, boolean theUrlIsPlaying) {
         int status = 1;
         if (theUrlIsPlaying) {
             status = 0;
         }
 
-        String theResponseStr = "zone=" + global_NodeUUID + "\n"
+        String theResponseStr = "zone=" + zsl_ZoneUUID + "\n"
                 + "playurl=" + thePlayingUrlStr + "\n"
                 + "status=" + String.valueOf(status) + "\n";
-        mcc.sendNetworkCommand(theResponseStr);
+        zsl_MulticastClient.sendNetworkCommand(theResponseStr);
     }
 
     /**
-     * check if the give node (via UUID) is past the expiration time (TTL)
-     * @param theNodeUUID String
+     * check if the given zone (via UUID) is past the expiration time (TTL) passed in
+     * @param theZoneUUID String
+     * @param timeLapseInSecondsInt integer
      * @return boolean - is the node record past expiration?
      */
-    private boolean nodeIsExpired(String theNodeUUID) {
+    private boolean isExpiredZone(String theZoneUUID, int timeLapseInSecondsInt) {
         Calendar theCurrentCalendar = new GregorianCalendar();
-        theCurrentCalendar.setTimeInMillis(theCurrentCalendar.getTimeInMillis() - (allNodesExpireInterval * 1000));
-        for (String aNodeUUIDStr : global_NodeExpireMap.keySet()) {
-            if (global_NodeExpireMap.get(aNodeUUIDStr).before(theCurrentCalendar)) {
+        theCurrentCalendar.setTimeInMillis(theCurrentCalendar.getTimeInMillis() - (timeLapseInSecondsInt * 1000));
+        if (zsl_ZoneExpireMap.containsKey(theZoneUUID)) {
+            if (zsl_ZoneExpireMap.get(theZoneUUID).before(theCurrentCalendar)) {
                 return true;
             }
         }
@@ -186,13 +205,13 @@ public class ZoneServerLogic implements ProgramConstants {
     }
 
     /**
-     * generates a UUID from the startup time, and the name of node
+     * generates a UUID from the startup time, and the name of zone
      * if they are available
-     * @return String - the node UUID
+     * @return String - the Zone UUID
      */
-    private String generateNodeUUID() {
+    private String generateZoneUUID() {
         Date aDate = new Date();
-        String stringToHash = global_NodeName + " was started on "
+        String stringToHash = zsl_ZoneName + " was started on "
                 + aDate.toString() + ".";
         System.out.println(stringToHash);
 
@@ -204,7 +223,7 @@ public class ZoneServerLogic implements ProgramConstants {
         } catch (UnsupportedEncodingException ex) {
             Logger.getLogger(ZoneServerLogic.class.getName()).log(Level.SEVERE, null, ex);
         }
-        System.out.println("Node UUID = " + hashedString);
+        System.out.println("Zone UUID = " + hashedString);
 
         return hashedString;
     }
@@ -216,7 +235,25 @@ public class ZoneServerLogic implements ProgramConstants {
     private class AllNodesPingTimerTask extends TimerTask {
 
         public void run() {
-            doNodeUUIDResponse();
+            doZoneUUIDResponse();
+            doZoneDashBoardResponse();
+        }
+    }
+
+    /**
+     * internal task for removing all node information once said node has been
+     * unreachable for a certain time
+     */
+    private class RemoveHardExpiredNodesTimerTask extends TimerTask {
+
+        public void run() {
+            for (String aNodeUUID : zsl_ZoneExpireMap.keySet()) {
+                if (isExpiredZone(aNodeUUID, allNodesHardExpire)) {
+                    zsl_ZoneInfoMap.remove(aNodeUUID);
+                    zsl_ZoneDashBoardMap.remove(aNodeUUID);
+                    zsl_ZoneExpireMap.remove(aNodeUUID);
+                }
+            }
         }
     }
 }

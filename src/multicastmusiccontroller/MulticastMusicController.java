@@ -6,9 +6,6 @@ package multicastmusiccontroller;
 import contrib.JettyWebServer;
 import zoneserver.ZoneServerLogic;
 import zoneserver.ZoneMulticastServer;
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,11 +15,11 @@ import java.util.logging.Logger;
  */
 public class MulticastMusicController {
 
-    protected static String global_nodeName = null;
+    protected static String global_ZoneName = null;
     protected static int global_webInterfacePortInt = 80;
     protected static final String global_usageStr = "usage: java -jar mmc.jar "
             + "--zone-name=[zone controller's name] "
-            + "--web-port=[web interface port number (default=8080)]";
+            + "--web-port=[web interface port number (default=80)]";
 
     /**
      * master start of application
@@ -33,9 +30,12 @@ public class MulticastMusicController {
         if (args.length > 1) { //need to process arguments
             for (int i = 0; i < args.length; i++) {
                 String currentArg = args[i];
-                if (currentArg.contains("--zone-name=")) {
+                if (currentArg.contains("-h")) {
+                    System.out.println(global_usageStr);
+                    System.exit(0);
+                } else if (currentArg.contains("--zone-name=")) {
                     String currentArgArray[] = currentArg.split("=");
-                    global_nodeName = currentArgArray[1];
+                    global_ZoneName = currentArgArray[1];
                 } else if (currentArg.contains("--web-port=")) {
                     String currentArgArray[] = currentArg.split("=");
                     if (!currentArgArray[1].isEmpty()) {
@@ -46,8 +46,8 @@ public class MulticastMusicController {
         } //done processing arguments
 
         ZoneServerLogic mainServerLogic = ZoneServerLogic.getInstance();
-        if ((global_nodeName != null) && (!global_nodeName.isEmpty())) {
-            mainServerLogic.setZoneName(global_nodeName);
+        if ((global_ZoneName != null) && (!global_ZoneName.isEmpty())) {
+            mainServerLogic.setZoneName(global_ZoneName);
         }
 
         try {
@@ -59,7 +59,7 @@ public class MulticastMusicController {
         ZoneMulticastServer theZoneServer = new ZoneMulticastServer();
         theZoneServer.startServer();
 
-        JettyWebServer theWebServer = new JettyWebServer(global_webInterfacePortInt);
+        JettyWebServer theWebServer = JettyWebServer.getInstance(global_webInterfacePortInt);
         theWebServer.startServer();
     }
 }

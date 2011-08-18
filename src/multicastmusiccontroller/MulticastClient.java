@@ -8,6 +8,7 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.UnknownHostException;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,8 +32,8 @@ public class MulticastClient implements ProgramConstants {
         } catch (IOException ex) {
             Logger.getLogger(MulticastClient.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        System.out.println("ZMS Client socket started");
+
+        System.out.println("MulticastClient socket ready");
     }
 
     /**
@@ -41,7 +42,7 @@ public class MulticastClient implements ProgramConstants {
      * @return boolean - was the command sent?
      */
     public boolean sendNetworkCommand(String theNetworkCommand) {
-        byte[] buffer = new byte[maxByteSize];
+        byte[] buffer = new byte[groupMaxByteSize];
         buffer = theNetworkCommand.getBytes();
 
         InetAddress groupAddress;
@@ -59,6 +60,9 @@ public class MulticastClient implements ProgramConstants {
             Logger.getLogger(MulticastClient.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
+
+        System.out.println("\n" + new Date().toString()
+                + " - sent:\n" + theNetworkCommand + "\n");
 
         return true;
     }
