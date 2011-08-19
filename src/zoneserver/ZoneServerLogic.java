@@ -8,7 +8,7 @@
 package zoneserver;
 
 import contrib.JettyWebServer;
-import contrib.Mp3Audio;
+import contrib.VLCMediaPlayer;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
@@ -100,10 +100,9 @@ public class ZoneServerLogic implements ProgramConstants {
                 String[] secondLineArray = theNetworkCommandArray[1].split("=");
                 if (firstLineArray[0].equals("zone")) {
                     if (firstLineArray[1].equals(zsl_ZoneUUID)
-                            && secondLineArray[0].equals("playurl")
+                            && secondLineArray[0].equals("mediaurl")
                             && !secondLineArray[1].isEmpty()) { //play an audio URL
-                        Mp3Audio aMp3Audio = new Mp3Audio();
-                        doZonePlayUrl(secondLineArray[1], aMp3Audio.playURL(secondLineArray[1])); //notify the group of what is playing
+                        VLCMediaPlayer.getInstance().addMediaUrl(secondLineArray[1]);
                     }
                 }
             } else if (theNetworkCommandArray.length == 3) {
@@ -124,6 +123,17 @@ public class ZoneServerLogic implements ProgramConstants {
                 }
             }
         }
+    }
+
+    /**
+     * send a packet to the multicast group telling this node to add a certain
+     * URL string of a media resource to the list of media URLs
+     * @param theMediaUrlStr String
+     */
+    public void sendAddMediaUrlStr(String theMediaUrlStr) {
+        String theMediaUrlPacketStr = "zone=" + zsl_ZoneUUID + "\n"
+                + "mediaurl=" + theMediaUrlStr + "\n";
+        zsl_MulticastClient.sendNetworkCommand(theMediaUrlPacketStr);
     }
 
     /**
@@ -162,24 +172,6 @@ public class ZoneServerLogic implements ProgramConstants {
         String theResponseStr = "zone=" + zsl_ZoneUUID + "\n"
                 + "name=" + zsl_ZoneName + "\n"
                 + "dashboard=" + aZoneDashBoardStr + "\n";
-        zsl_MulticastClient.sendNetworkCommand(theResponseStr);
-    }
-
-    /**
-     * constructs and sends a datagram that notifies the group that the Zone
-     * Controller is currently playing a certain URL
-     * @param thePlayingUrlStr String
-     * @param theUrlIsPlaying boolean
-     */
-    private void doZonePlayUrl(String thePlayingUrlStr, boolean theUrlIsPlaying) {
-        int status = 1;
-        if (theUrlIsPlaying) {
-            status = 0;
-        }
-
-        String theResponseStr = "zone=" + zsl_ZoneUUID + "\n"
-                + "playurl=" + thePlayingUrlStr + "\n"
-                + "status=" + String.valueOf(status) + "\n";
         zsl_MulticastClient.sendNetworkCommand(theResponseStr);
     }
 
