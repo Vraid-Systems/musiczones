@@ -21,4 +21,6 @@ public interface ProgramConstants {
     //jetty web server
     public static final String webAppContextPathStr = "/";
     public static final String webAppDirStr = "../webapp"; //root is the directory or the Jetty calling class
+    //for saving/loading prefs
+    public static final String prefMediaDirectoryDirKeyStr = "media-dir";
 }

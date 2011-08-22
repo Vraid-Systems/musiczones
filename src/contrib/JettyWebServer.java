@@ -17,6 +17,7 @@ import org.mortbay.jetty.webapp.WebAppContext;
 import org.springframework.core.io.ClassPathResource;
 import servlets.ZonePlaylistInterface;
 import servlets.ZoneSelectionPage;
+import servlets.ZoneSettings;
 
 /**
  * @author Mort Bay Consulting / Codehaus / Eclipse
@@ -42,6 +43,7 @@ public class JettyWebServer implements ProgramConstants {
         }
         webAppContext.addServlet(new ServletHolder(new ZoneSelectionPage()), "/servlets/list-zones-html");
         webAppContext.addServlet(new ServletHolder(new ZonePlaylistInterface()), "/servlets/playlist");
+        webAppContext.addServlet(new ServletHolder(new ZoneSettings()), "/servlets/settings");
         jws_serverInstance.addHandler(webAppContext);
     }
 

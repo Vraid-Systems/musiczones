@@ -26,18 +26,28 @@
             $('playListPage').live('pagebeforeshow', function(event, ui){
                 $("#zonePlayList").load("/servlets/playlist");
             });
-            
+
+            function togglePlayListItem(jhash) {
+                var jhasha = jhash.split("_");
+                var playListIndexInt = jhasha[(jhasha.lenth - 1)];
+                $("#zonePlayList").load("/servlets/playlist?opt=toggle&index=" + playListIndexInt);
+            }
+
             function removePlayListItem(jhash) {
                 $(jhash).remove();
                 var jhasha = jhash.split("_");
                 var playListIndexInt = jhasha[(jhasha.lenth - 1)];
                 $("#zonePlayList").load("/servlets/playlist?opt=remove&index=" + playListIndexInt);
             }
-            
+
             function selectZonePage() {
                 $.mobile.changePage("/servlets/list-zones-html");
             }
-            
+
+            function settingsPage() {
+                $.mobile.changePage("/servlets/settings", "pop");
+            }
+
             function shuffleNowPlaying() {
                 $("#zonePlayList").load("/servlets/playlist?opt=shuffle");
             }
