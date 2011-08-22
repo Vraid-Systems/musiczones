@@ -11,7 +11,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import multicastmusiccontroller.ProgramConstants;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.springframework.core.io.ClassPathResource;

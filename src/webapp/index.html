@@ -23,7 +23,7 @@
         </style>
 
         <script type="text/javascript">
-            $('playListPage').live('pagebeforeshow', function(event, ui){
+            $("#playListPage").live('pagebeforeshow', function(event, ui){
                 $("#zonePlayList").load("/servlets/playlist");
             });
 

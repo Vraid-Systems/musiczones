@@ -1,0 +1,8 @@
+Currently this work is licensed under the GPLv3, although work needs to be done to license this work under a BSD-style licensed. This means that a substitute to vlcj needs to be found that can play a variety of media files efficiently.
+
+JCIFS = LGPL v2.1 (library must remain free and available)
+Jetty = Apache License v2.0
+JSch = BSD-style + no used of authors in advertising
+SHA1 = essentially public domain (see class file)
+Spring Framework = Apache License v2.0
+vlcj = GPLv3 (whole work is thus licensed under GPLv3)
