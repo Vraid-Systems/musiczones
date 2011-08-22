@@ -10,7 +10,7 @@
         <title>Zone Controller</title>
         <meta name="robots" content="noindex,nofollow" />
 
-        <link rel="stylesheet"  href="http://code.jquery.com/mobile/1.0a4.1/jquery.mobile-1.0a4.1.min.css" />
+        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0a4.1/jquery.mobile-1.0a4.1.min.css" />
         <script type="text/javascript" src="http://code.jquery.com/jquery-1.5.1.min.js"></script>
         <script type="text/javascript" src="http://code.jquery.com/mobile/1.0a4.1/jquery.mobile-1.0a4.1.min.js"></script>
         <!-- docs = http://jquerymobile.com/demos/1.0a4.1/ -->
@@ -23,27 +23,42 @@
         </style>
 
         <script type="text/javascript">
+            $('playListPage').live('pagebeforeshow', function(event, ui){
+                $("#zonePlayList").load("/servlets/playlist");
+            });
+            
+            function removePlayListItem(jhash) {
+                $(jhash).remove();
+                var jhasha = jhash.split("_");
+                var playListIndexInt = jhasha[(jhasha.lenth - 1)];
+                $("#zonePlayList").load("/servlets/playlist?opt=remove&index=" + playListIndexInt);
+            }
+            
             function selectZonePage() {
-                var pageLoadUrl = "/servlets/list-zones-html";
-                $.mobile.changePage(pageLoadUrl);
+                $.mobile.changePage("/servlets/list-zones-html");
+            }
+            
+            function shuffleNowPlaying() {
+                $("#zonePlayList").load("/servlets/playlist?opt=shuffle");
             }
         </script>
     </head>
     <body>
         <div id="playListPage" data-role="page" data-theme="d">
             <div data-role="header" data-theme="b" data-position="fixed">
-                <a href="javascript:selectZonePage();" data-role="button" data-icon="grid">Select</a>
+                <a href="javascript:shuffleNowPlaying();" data-role="button" data-icon="grid">Shuffle</a>
                 <h1>Now Playing</h1>
                 <a href="javascript:settingsPage();" data-role="button" data-icon="gear">Settings</a>
             </div>
 
             <div data-role="content">
+                <ul id="zonePlayList" data-role="listview" data-split-icon="delete" data-split-theme="d"></ul>
             </div>
 
             <div data-id="mainNavFooter" data-role="footer" data-position="fixed">
                 <div data-role="navbar">
                     <ul>
-                        <li><a href="javascript:shuffleNowPlaying();">Shuffle</a></li>
+                        <li><a href="javascript:selectZonePage();">Zone Selection</a></li>
                         <li><a href="#playListPage" class="ui-btn-active ui-state-persist">Now Playing</a></li>
                         <li><a href="#libraryPage">Library</a></li>
                     </ul>
@@ -53,7 +68,7 @@
 
         <div id="libraryPage" data-role="page" data-theme="d">
             <div data-role="header" data-theme="b" data-position="fixed">
-                <a href="javascript:selectZonePage();" data-role="button" data-icon="grid">Select</a>
+                <a href="javascript:shuffleNowPlaying();" data-role="button" data-icon="grid">Shuffle</a>
                 <h1>Library</h1>
                 <a href="javascript:settingsPage();" data-role="button" data-icon="gear">Settings</a>
             </div>
@@ -64,7 +79,7 @@
             <div data-id="mainNavFooter" data-role="footer" data-position="fixed">
                 <div data-role="navbar">
                     <ul>
-                        <li><a href="javascript:shuffleNowPlaying();">Shuffle</a></li>
+                        <li><a href="javascript:selectZonePage();">Zone Selection</a></li>
                         <li><a href="#playListPage">Now Playing</a></li>
                         <li><a href="#libraryPage" class="ui-btn-active ui-state-persist">Library</a></li>
                     </ul>

@@ -18,7 +18,7 @@ import zoneserver.ZoneServerLogic;
 /**
  * @author Jason Zerbe
  */
-public class ZoneControllerListDialog extends HttpServlet {
+public class ZoneNowPlayingPage extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -30,9 +30,9 @@ public class ZoneControllerListDialog extends HttpServlet {
         PrintWriter out = resp.getWriter();
 
         //build the zone selection page
-        String aPageContentPartTopStr = "<div id='playListPage' data-role='page' data-theme='d'>"
+        String aPageContentPartTopStr = "<div id='selectZonePage' data-role='page' data-theme='d'>"
                 + "<div data-role='header' data-theme='b' data-position='fixed'>"
-                + "<a href='javascript:selectZonePage();' data-role='button' data-icon='grid'>Select</a>"
+                + "<a href='javascript:shuffleNowPlaying();' data-role='button' data-icon='grid'>Shuffle</a>"
                 + "<h1>Zone Selection</h1>"
                 + "<a href='javascript:settingsPage();' data-role='button' data-icon='gear'>Settings</a>"
                 + "</div>"
@@ -49,7 +49,7 @@ public class ZoneControllerListDialog extends HttpServlet {
                 + "<div data-id='mainNavFooter' data-role='footer' data-position='fixed'>"
                 + "<div data-role='navbar'>"
                 + "<ul>"
-                + "<li><a href='javascript:shuffleNowPlaying();'>Shuffle</a></li>"
+                + "<li><a href='javascript:selectZonePage();' class='ui-btn-active ui-state-persist'>Zone Selection</a></li>"
                 + "<li><a href='#playListPage'>Now Playing</a></li>"
                 + "<li><a href='#libraryPage'>Library</a></li>"
                 + "</ul>"

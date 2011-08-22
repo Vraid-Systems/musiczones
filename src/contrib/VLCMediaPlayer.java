@@ -4,6 +4,7 @@
  */
 package contrib;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import uk.co.caprica.vlcj.player.MediaMeta;
@@ -18,6 +19,7 @@ public class VLCMediaPlayer {
     private static VLCMediaPlayer vmp_SingleInstance = null;
     private MediaPlayer vmp_MediaPlayer = null;
     private List<String> vmp_MediaUrlStringArray = null;
+    private int vmp_PlayBackIndexInt = 0;
 
     public VLCMediaPlayer() {
         vmp_MediaPlayer = new MediaPlayerFactory().newHeadlessMediaPlayer();
@@ -31,8 +33,23 @@ public class VLCMediaPlayer {
         return vmp_SingleInstance;
     }
 
-    public void addMediaUrl(String theMediaUrl) {
-        vmp_MediaUrlStringArray.add(theMediaUrl);
+    public void addMediaUrl(String theMediaUrlStr) {
+        vmp_MediaUrlStringArray.add(theMediaUrlStr);
+    }
+
+    public void removeMediaUrl(String theMediaUrlStr) {
+        int aMediaUrlStrIndex = vmp_MediaUrlStringArray.indexOf(theMediaUrlStr);
+        if ((vmp_PlayBackIndexInt > 0) && (aMediaUrlStrIndex <= vmp_PlayBackIndexInt)) {
+            vmp_PlayBackIndexInt--;
+        }
+        vmp_MediaUrlStringArray.remove(aMediaUrlStrIndex);
+    }
+
+    public void removeIndex(int theIndex) {
+        if ((vmp_PlayBackIndexInt > 0) && (theIndex <= vmp_PlayBackIndexInt)) {
+            vmp_PlayBackIndexInt--;
+        }
+        vmp_MediaUrlStringArray.remove(theIndex);
     }
 
     public String getMetaField(String theFieldName) {
@@ -52,6 +69,23 @@ public class VLCMediaPlayer {
         }
 
         return null;
+    }
+
+    public void shufflePlayList() {
+        Collections.shuffle(vmp_MediaUrlStringArray);
+    }
+
+    public List<String> getPlayList() {
+        return vmp_MediaUrlStringArray;
+    }
+
+    public void playMedia(int theListIndex) {
+        vmp_PlayBackIndexInt = theListIndex;
+        vmp_MediaPlayer.playMedia(vmp_MediaUrlStringArray.get(vmp_PlayBackIndexInt));
+    }
+
+    public void playMedia() {
+        playMedia(vmp_PlayBackIndexInt);
     }
 
     public void play() {

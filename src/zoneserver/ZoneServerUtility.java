@@ -59,4 +59,8 @@ public class ZoneServerUtility {
 
         return null;
     }
+
+    public String getFileNameFromUrlStr(String theUrlString) {
+        return theUrlString.substring(theUrlString.lastIndexOf("/"));
+    }
 }
