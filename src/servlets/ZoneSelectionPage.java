@@ -17,6 +17,9 @@ import zoneserver.ZoneServerLogic;
  */
 public class ZoneSelectionPage extends HttpServlet {
 
+    public ZoneSelectionPage() {
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         //get the data necessary

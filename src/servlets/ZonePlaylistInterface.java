@@ -17,6 +17,9 @@ import zoneserver.ZoneServerUtility;
  */
 public class ZonePlaylistInterface extends HttpServlet {
 
+    public ZonePlaylistInterface() {
+    }
+
     /**
      * for updating and reloading the playlist items in the same HTTP GET call
      * @param req HttpServletRequest
@@ -30,7 +33,7 @@ public class ZonePlaylistInterface extends HttpServlet {
         String opt = req.getParameter("opt"); //what are we doing?
 
         int aCurrentPlayListIndex = VLCMediaPlayer.getInstance().getCurrentIndex();
-        
+
         if ((opt == null) || opt.equals("")) { //do nothing to playlist
         } else if (opt.equals("shuffle")) { //shuffle the playlist
             VLCMediaPlayer.getInstance().shufflePlayList();
@@ -53,9 +56,9 @@ public class ZonePlaylistInterface extends HttpServlet {
                 }
             }
         }
-        
+
         aCurrentPlayListIndex = VLCMediaPlayer.getInstance().getCurrentIndex();
-        
+
         if (VLCMediaPlayer.getInstance().getPlayList().size() > 0) {
             int i = 0;
             for (String aMediaUrlStr : VLCMediaPlayer.getInstance().getPlayList()) {

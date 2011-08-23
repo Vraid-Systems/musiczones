@@ -6,6 +6,7 @@ package servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -17,6 +18,9 @@ import zoneserver.ZoneServerUtility;
  * @author Jason Zerbe
  */
 public class ZoneSettings extends HttpServlet implements ProgramConstants {
+
+    public ZoneSettings() {
+    }
 
     /**
      * get request handler for piecemeal retrieval of settings
@@ -31,28 +35,51 @@ public class ZoneSettings extends HttpServlet implements ProgramConstants {
         String opt = req.getParameter("opt"); //what are we doing?
 
         if ((opt == null) || (opt.equals(""))) { //no settings specified
-            out.println("<div id='zoneSettings' data-role='page' data-theme='d'>");
-
-            out.println("<div data-role='header' data-theme='b' data-position='fixed'>");
-            out.println("<a href='#playListPage' data-icon='delete' data-rel='back'>Cancel</a>");
-            out.println("<h1>Zone Settings</h1> ");
-            out.println("<a href='javascript:document.getElementById(&quot;settingsForm&quot;).submit();' data-icon='check'>Save</a>");
-            out.println("</div>");
-
-            out.println("<div data-role='content'>");
-            out.println("<form id='settingsForm' name='settingsForm' action='/servlets/settings' method='post'>"
-                    + "<input type='hidden' name='opt' value='update' />"
-                    + "<div data-role='fieldcontain'>"
-                    + "<p>newline seperated list of media directories</p>"
-                    + "<textarea cols='30' rows='20' name='directoryList' id='directoryList'>");
-            String aMediaDirStr = ZoneServerUtility.getInstance().loadStringPref(prefMediaDirectoryDirKeyStr, "");
-            if (!aMediaDirStr.isEmpty()) {
-                out.print(aMediaDirStr);
-            }
-            out.println("</textarea></div></form></div>");
-
-            out.println("</div>");
         }
+
+        out.println("<div id='zoneSettings' data-role='page' data-theme='d'>");
+
+        out.println("<div data-role='header' data-theme='b' data-position='fixed'>");
+        out.println("<a href='#playListPage' data-icon='delete' data-rel='back'>Cancel</a>");
+        out.println("<h1>Zone Settings</h1> ");
+        out.println("<a href='javascript:addNewMediaRoot();' data-icon='check'>Save</a>");
+        out.println("</div>");
+
+        out.println("<div data-role='content'>");
+
+        //old root media path list/delete
+        out.println("<ul id='zoneRootPathList' data-role='listview' data-split-icon='delete' data-split-theme='d'>");
+        List<String> rootPathStrList = ZoneServerUtility.getInstance().getMediaDirEntries();
+        if (rootPathStrList.size() > 0) {
+            int i = 0;
+            for (String rootPathStr : rootPathStrList) {
+                out.println("<li id='rootpathitem_" + i + "'>");
+                out.println("<a href='javascript:browseDirectory(&quot;" + rootPathStr + "&quot;);'>");
+                out.println(rootPathStr + "</a><a href='javascript:removeMediaRootPath(&quot;#rootpathitem_"
+                        + i + "&quot;);' data-role='button' data-icon='delete'>Remove</a></li>");
+                i++;
+            }
+        }
+        out.println("</ul>");
+
+        //new root media path intput form
+        out.println("<form id='settingsForm' name='settingsForm'>");
+        out.println("<div data-role='fieldcontain'>"
+                + "<label for='newServerType'>Choose Server Type:</label>"
+                + "<select name='newServerType' id='newServerType'>"
+                + "<option value='" + ServerType.smb.toString() + "'>Windows Share</option>"
+                + "</select></div>");
+        out.println("<div data-role='fieldcontain'>"
+                + "<label for='newServerAddress'>Server Address:</label>"
+                + "<input type='text' name='newServerAddress' id='newServerAddress' placeholder='myserver' /></div>");
+        out.println("<div data-role='fieldcontain'>"
+                + "<label for='newFilePath'>Root Path of Media:</label>"
+                + "<input type='text' name='newFilePath' id='newFilePath' placeholder='/path/to/media/' /></div>");
+        out.println("</form>");
+
+        out.println("</div>"); //end page content
+
+        out.println("</div>"); //end page
     }
 
     /**
@@ -67,14 +94,21 @@ public class ZoneSettings extends HttpServlet implements ProgramConstants {
         String opt = req.getParameter("opt"); //what are we doing?
 
         if ((opt == null) || (opt.equals(""))) { //do nothing to settings
-        } else if (opt.equals("update")) {
-            String directoryList = req.getParameter("directoryList");
-            if ((directoryList != null) || (!directoryList.equals(""))) {
-                directoryList = directoryList.replaceAll("\r", "");
-                ZoneServerUtility.getInstance().saveStringPref(prefMediaDirectoryDirKeyStr, directoryList);
+        } else if (opt.equals("add")) {
+            ServerType newServerType = ServerType.valueOf(req.getParameter("newServerType"));
+            String newServerAddress = req.getParameter("newServerAddress");
+            String newFilePath = req.getParameter("newFilePath");
+            if ((newServerType != null) && (newServerAddress != null)
+                    && (!newServerAddress.equals("")) && (newFilePath != null)
+                    && (!newFilePath.equals(""))) { //all variables are set
+                ZoneServerUtility.getInstance().updateMediaDirEntry(newServerType, newServerAddress, newFilePath);
+            }
+        } else if (opt.equals("remove")) {
+            String aRootIndexStr = req.getParameter("index");
+            if ((aRootIndexStr != null) && (!aRootIndexStr.equals(""))) {
+                int aRootIndexInt = Integer.valueOf(aRootIndexStr);
+                ZoneServerUtility.getInstance().removeMediaDirEntry(aRootIndexInt);
             }
         }
-
-        resp.sendRedirect("/");
     }
 }

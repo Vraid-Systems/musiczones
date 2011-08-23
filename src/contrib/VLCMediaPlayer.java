@@ -30,7 +30,7 @@ public class VLCMediaPlayer {
     private List<String> vmp_MediaUrlStringArray = null;
     private int vmp_PlayBackIndexInt = 0;
 
-    public VLCMediaPlayer() {
+    protected VLCMediaPlayer() {
         if (ZoneServerUtility.getInstance().isMac()) {
             vmp_MediaPlayerFactory = new MediaPlayerFactory("--vout=macosx");
         } else {

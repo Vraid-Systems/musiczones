@@ -28,7 +28,21 @@
             });
             
             function addMediaToPlayList(theMediaPath) {
-                $.post("/servlets/playlist", {"opt": "add", path: theMediaPath});
+                $.post("/servlets/playlist", {opt: "add", path: theMediaPath});
+            }
+            
+            function addNewMediaRoot() {
+                var newServerTypeVal = $("#newServerType option:selected").val();
+                var newServerAddressVal = $("#newServerAddress").val();
+                var newFilePathVal = $("#newFilePath").val();
+                $.post("/servlets/settings", {
+                    opt: "add",
+                    newServerType: newServerTypeVal,
+                    newServerAddress: newServerAddressVal,
+                    newFilePath: newFilePathVal
+                }, function(data) {
+                    settingsPage();
+                });
             }
             
             function browseDirectory(theDirectoryPath) {
@@ -44,6 +58,18 @@
             function loadLibrary() {
                 $("#libraryList").load("/servlets/library");
                 $.mobile.changePage("#libraryPage");
+            }
+            
+            function removeMediaRootPath(jhash) {
+                $(jhash).remove();
+                var jhasha = jhash.split("_");
+                var mediaRootIndexInt = jhasha[(jhasha.lenth - 1)];
+                $.post("/servlets/settings", {
+                    opt: "remove",
+                    index: mediaRootIndexInt
+                }, function(data) {
+                    settingsPage();
+                });
             }
 
             function removePlayListItem(jhash) {
@@ -97,7 +123,7 @@
             </div>
 
             <div data-role="content">
-                <ul id="libraryList" data-role="listview" data-split-theme="d"></ul>
+                <ul id="libraryList" data-role="listview" data-theme="d"></ul>
             </div>
 
             <div data-id="mainNavFooter" data-role="footer" data-position="fixed">
