@@ -8,7 +8,7 @@
 package zoneserver;
 
 import contrib.JettyWebServer;
-import contrib.VLCMediaPlayer;
+import contrib.MediaPlayer;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
@@ -102,7 +102,7 @@ public class ZoneServerLogic implements ProgramConstants {
                     if (firstLineArray[1].equals(zsl_ZoneUUID)
                             && secondLineArray[0].equals("mediaurl")
                             && !secondLineArray[1].isEmpty()) { //play an audio URL
-                        VLCMediaPlayer.getInstance().addMediaUrl(secondLineArray[1]);
+                        MediaPlayer.getInstance().addMediaUrl(secondLineArray[1]);
                     }
                 }
             } else if (theNetworkCommandArray.length == 3) {

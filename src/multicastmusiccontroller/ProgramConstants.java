@@ -22,6 +22,7 @@ public interface ProgramConstants {
     public static final String webAppContextPathStr = "/";
     public static final String webAppDirStr = "../webapp"; //root is the directory or the Jetty calling class
     //for saving/loading prefs
+    public static final String prefMediaPlayerPathKeyStr = "media-player-bin-path";
     public static final String prefMediaDirNumberKeyStr = "media-dir-count";
     public static final String prefMediaDirPrefixKeyStr = "media-dir-";
     public static enum ServerType {smb}

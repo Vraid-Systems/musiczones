@@ -47,6 +47,21 @@ public class ZoneSettings extends HttpServlet implements ProgramConstants {
 
         out.println("<div data-role='content'>");
 
+        //new root media path intput form
+        out.println("<form id='settingsForm' name='settingsForm'>");
+        out.println("<div data-role='fieldcontain'>"
+                + "<label for='newServerType'>Choose Server Type:</label>"
+                + "<select name='newServerType' id='newServerType' data-native-menu='false'>"
+                + "<option value='" + ServerType.smb.toString() + "'>Windows Share</option>"
+                + "</select></div>");
+        out.println("<div data-role='fieldcontain'>"
+                + "<label for='newServerAddress'>Server Address:</label>"
+                + "<input type='text' name='newServerAddress' id='newServerAddress' placeholder='myserver' /></div>");
+        out.println("<div data-role='fieldcontain'>"
+                + "<label for='newFilePath'>Root Path of Media:</label>"
+                + "<input type='text' name='newFilePath' id='newFilePath' placeholder='/path/to/media/' /></div>");
+        out.println("</form>");
+        
         //old root media path list/delete
         out.println("<ul id='zoneRootPathList' data-role='listview' data-split-icon='delete' data-split-theme='d'>");
         List<String> rootPathStrList = ZoneServerUtility.getInstance().getMediaDirEntries();
@@ -61,21 +76,6 @@ public class ZoneSettings extends HttpServlet implements ProgramConstants {
             }
         }
         out.println("</ul>");
-
-        //new root media path intput form
-        out.println("<form id='settingsForm' name='settingsForm'>");
-        out.println("<div data-role='fieldcontain'>"
-                + "<label for='newServerType'>Choose Server Type:</label>"
-                + "<select name='newServerType' id='newServerType'>"
-                + "<option value='" + ServerType.smb.toString() + "'>Windows Share</option>"
-                + "</select></div>");
-        out.println("<div data-role='fieldcontain'>"
-                + "<label for='newServerAddress'>Server Address:</label>"
-                + "<input type='text' name='newServerAddress' id='newServerAddress' placeholder='myserver' /></div>");
-        out.println("<div data-role='fieldcontain'>"
-                + "<label for='newFilePath'>Root Path of Media:</label>"
-                + "<input type='text' name='newFilePath' id='newFilePath' placeholder='/path/to/media/' /></div>");
-        out.println("</form>");
 
         out.println("</div>"); //end page content
 
@@ -102,12 +102,17 @@ public class ZoneSettings extends HttpServlet implements ProgramConstants {
                     && (!newServerAddress.equals("")) && (newFilePath != null)
                     && (!newFilePath.equals(""))) { //all variables are set
                 ZoneServerUtility.getInstance().updateMediaDirEntry(newServerType, newServerAddress, newFilePath);
+                resp.getWriter().println("added root media entry: "
+                        + newServerType.toString() + "://" + newServerAddress
+                        + newFilePath);
             }
         } else if (opt.equals("remove")) {
             String aRootIndexStr = req.getParameter("index");
             if ((aRootIndexStr != null) && (!aRootIndexStr.equals(""))) {
                 int aRootIndexInt = Integer.valueOf(aRootIndexStr);
                 ZoneServerUtility.getInstance().removeMediaDirEntry(aRootIndexInt);
+
+                resp.getWriter().println("removed root media entry #" + String.valueOf(aRootIndexInt));
             }
         }
     }

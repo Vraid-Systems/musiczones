@@ -24,7 +24,7 @@
 
         <script type="text/javascript">
             $("#playListPage").live('pagebeforeshow', function(event, ui){
-                $("#zonePlayList").load("/servlets/playlist");
+                $("#playListContent").load("/servlets/playlist");
             });
             
             function addMediaToPlayList(theMediaPath) {
@@ -41,7 +41,7 @@
                     newServerAddress: newServerAddressVal,
                     newFilePath: newFilePathVal
                 }, function(data) {
-                    settingsPage();
+                    $.mobile.changePage("#libraryPage");
                 });
             }
             
@@ -52,7 +52,7 @@
             function togglePlayListItem(jhash) {
                 var jhasha = jhash.split("_");
                 var playListIndexInt = jhasha[(jhasha.lenth - 1)];
-                $("#zonePlayList").load("/servlets/playlist?opt=toggle&index=" + playListIndexInt);
+                $("#playListContent").load("/servlets/playlist?opt=toggle&index=" + playListIndexInt);
             }
             
             function loadLibrary() {
@@ -68,7 +68,7 @@
                     opt: "remove",
                     index: mediaRootIndexInt
                 }, function(data) {
-                    settingsPage();
+                    $.mobile.changePage("#libraryPage");
                 });
             }
 
@@ -76,7 +76,7 @@
                 $(jhash).remove();
                 var jhasha = jhash.split("_");
                 var playListIndexInt = jhasha[(jhasha.lenth - 1)];
-                $("#zonePlayList").load("/servlets/playlist?opt=remove&index=" + playListIndexInt);
+                $("#playListContent").load("/servlets/playlist?opt=remove&index=" + playListIndexInt);
             }
 
             function selectZonePage() {
@@ -88,7 +88,7 @@
             }
 
             function shuffleNowPlaying() {
-                $("#zonePlayList").load("/servlets/playlist?opt=shuffle");
+                $("#playListContent").load("/servlets/playlist?opt=shuffle");
             }
         </script>
     </head>
@@ -100,9 +100,7 @@
                 <a href="javascript:settingsPage();" data-role="button" data-icon="gear">Settings</a>
             </div>
 
-            <div data-role="content">
-                <ul id="zonePlayList" data-role="listview" data-split-icon="delete" data-split-theme="d"></ul>
-            </div>
+            <div id="playListContent" data-role="content"></div>
 
             <div data-id="mainNavFooter" data-role="footer" data-position="fixed">
                 <div data-role="navbar">
@@ -123,7 +121,7 @@
             </div>
 
             <div data-role="content">
-                <ul id="libraryList" data-role="listview" data-theme="d"></ul>
+                <ul id="libraryList" data-role="listview"></ul>
             </div>
 
             <div data-id="mainNavFooter" data-role="footer" data-position="fixed">

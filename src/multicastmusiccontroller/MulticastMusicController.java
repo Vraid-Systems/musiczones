@@ -8,18 +8,21 @@ import zoneserver.ZoneServerLogic;
 import zoneserver.ZoneMulticastServer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import zoneserver.ZoneServerUtility;
 
 /**
  *
  * @author Jason Zerbe
  */
-public class MulticastMusicController {
+public class MulticastMusicController implements ProgramConstants {
 
     protected static String global_ZoneName = null;
     protected static int global_webInterfacePortInt = 80;
+    protected static String global_MPlayerBinPath = "mplayer";
     protected static final String global_usageStr = "usage: java -jar mmc.jar "
             + "--zone-name=[zone controller's name] "
-            + "--web-port=[web interface port number (default=80)]";
+            + "--web-port=[web interface port number (default=80)]"
+            + "--mplayer-bin-path=[path to mplayer (default=mplayer)]";
 
     /**
      * master start of application
@@ -39,8 +42,16 @@ public class MulticastMusicController {
                 if (!currentArgArray[1].isEmpty()) {
                     global_webInterfacePortInt = Integer.valueOf(currentArgArray[1]);
                 }
+            } else if (currentArg.contains("--mplayer-bin-path=")) {
+                String currentArgArray[] = currentArg.split("=");
+                if (!currentArgArray[1].isEmpty()) {
+                    global_MPlayerBinPath = currentArgArray[1];
+                }
             }
         } //done processing arguments
+
+        //save certain arguments to prefs
+        ZoneServerUtility.getInstance().saveStringPref(prefMediaPlayerPathKeyStr, global_MPlayerBinPath);
 
         //first intialize jetty in-case using custom webserver port
         JettyWebServer theWebServer = JettyWebServer.getInstance(global_webInterfacePortInt);

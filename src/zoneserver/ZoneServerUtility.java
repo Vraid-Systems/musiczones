@@ -66,18 +66,24 @@ public class ZoneServerUtility implements ProgramConstants {
         String aNewServerEntryStr = theServerType.toString() + "://" + theServerAddress + theFilePath;
 
         int aNumberOfEntries = ZoneServerUtility.getInstance().loadIntPref(prefMediaDirNumberKeyStr, 0);
-        for (int i = 0; i < aNumberOfEntries; i++) {
-            String aKeyToFetch = prefMediaDirPrefixKeyStr + String.valueOf(i);
-            String aCurrentServerPrefStr = ZoneServerUtility.getInstance().loadStringPref(aKeyToFetch, "");
-            if (aNewServerEntryStr.equals(aCurrentServerPrefStr)) {
-                ZoneServerUtility.getInstance().saveStringPref(aKeyToFetch, aNewServerEntryStr);
-                return;
-            }
-            if ((i + 1) >= aNumberOfEntries) {
-                String aKeyToPut = prefMediaDirPrefixKeyStr + String.valueOf((i + 1));
-                ZoneServerUtility.getInstance().saveIntPref(prefMediaDirNumberKeyStr, (aNumberOfEntries + 1));
-                ZoneServerUtility.getInstance().saveStringPref(aKeyToPut, aNewServerEntryStr);
-                return;
+        if (aNumberOfEntries <= 0) {
+            String aKeyToPut = prefMediaDirPrefixKeyStr + String.valueOf(0);
+            ZoneServerUtility.getInstance().saveIntPref(prefMediaDirNumberKeyStr, 1);
+            ZoneServerUtility.getInstance().saveStringPref(aKeyToPut, aNewServerEntryStr);
+        } else {
+            for (int i = 0; i < aNumberOfEntries; i++) {
+                String aKeyToFetch = prefMediaDirPrefixKeyStr + String.valueOf(i);
+                String aCurrentServerPrefStr = ZoneServerUtility.getInstance().loadStringPref(aKeyToFetch, "");
+                if (aNewServerEntryStr.equals(aCurrentServerPrefStr)) {
+                    ZoneServerUtility.getInstance().saveStringPref(aKeyToFetch, aNewServerEntryStr);
+                    return;
+                }
+                if ((i + 1) >= aNumberOfEntries) {
+                    String aKeyToPut = prefMediaDirPrefixKeyStr + String.valueOf((i + 1));
+                    ZoneServerUtility.getInstance().saveIntPref(prefMediaDirNumberKeyStr, (aNumberOfEntries + 1));
+                    ZoneServerUtility.getInstance().saveStringPref(aKeyToPut, aNewServerEntryStr);
+                    return;
+                }
             }
         }
     }

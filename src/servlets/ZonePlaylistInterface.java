@@ -3,7 +3,7 @@
  */
 package servlets;
 
-import contrib.VLCMediaPlayer;
+import contrib.MediaPlayer;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
@@ -32,36 +32,33 @@ public class ZonePlaylistInterface extends HttpServlet {
         PrintWriter out = resp.getWriter(); //get the response writer for later
         String opt = req.getParameter("opt"); //what are we doing?
 
-        int aCurrentPlayListIndex = VLCMediaPlayer.getInstance().getCurrentIndex();
+        int aCurrentPlayListIndex = MediaPlayer.getInstance().getCurrentIndex();
 
         if ((opt == null) || opt.equals("")) { //do nothing to playlist
         } else if (opt.equals("shuffle")) { //shuffle the playlist
-            VLCMediaPlayer.getInstance().shufflePlayList();
+            MediaPlayer.getInstance().shufflePlayList();
         } else if (opt.equals("remove") || opt.equals("play")) {
             String indexStr = req.getParameter("index");
             if ((indexStr != null) && (!indexStr.equals(""))) {
                 int indexInt = Integer.valueOf(indexStr);
                 if (opt.equals("remove")) {
-                    VLCMediaPlayer.getInstance().removeIndex(indexInt);
+                    MediaPlayer.getInstance().removeIndex(indexInt);
                 } else if (opt.equals("toggle")) {
                     if (aCurrentPlayListIndex == indexInt) {
-                        if (VLCMediaPlayer.getInstance().isPlaying()) {
-                            VLCMediaPlayer.getInstance().pause();
-                        } else {
-                            VLCMediaPlayer.getInstance().play();
-                        }
+                        MediaPlayer.getInstance().togglePlayPause();
                     } else {
-                        VLCMediaPlayer.getInstance().playIndex(indexInt);
+                        MediaPlayer.getInstance().playIndex(indexInt);
                     }
                 }
             }
         }
 
-        aCurrentPlayListIndex = VLCMediaPlayer.getInstance().getCurrentIndex();
+        aCurrentPlayListIndex = MediaPlayer.getInstance().getCurrentIndex();
 
-        if (VLCMediaPlayer.getInstance().getPlayList().size() > 0) {
+        if (MediaPlayer.getInstance().getPlayList().size() > 0) {
+            out.println("<ul id='zonePlayList' data-role='listview' data-split-icon='delete' data-split-theme='d'>");
             int i = 0;
-            for (String aMediaUrlStr : VLCMediaPlayer.getInstance().getPlayList()) {
+            for (String aMediaUrlStr : MediaPlayer.getInstance().getPlayList()) {
                 out.println("<li id='playlistitem_" + i + "'>");
                 out.println("<a href='javascript:togglePlayListItem(&quot;#playlistitem_" + i + "&quot;);'>");
                 if (i == aCurrentPlayListIndex) {
@@ -72,6 +69,7 @@ public class ZonePlaylistInterface extends HttpServlet {
                         + i + "&quot;);' data-role='button' data-icon='delete'>Remove</a></li>");
                 i++;
             }
+            out.println("</ul>");
         }
     }
 
@@ -89,7 +87,7 @@ public class ZonePlaylistInterface extends HttpServlet {
             if (opt.equals("add")) {
                 String path = req.getParameter("path");
                 if ((path != null) && (!path.equals(""))) {
-                    VLCMediaPlayer.getInstance().addMediaUrl(path);
+                    MediaPlayer.getInstance().addMediaUrl(path);
                 }
             }
         }
