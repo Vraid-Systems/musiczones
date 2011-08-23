@@ -17,13 +17,20 @@ import zoneserver.ZoneServerUtility;
  */
 public class ZonePlaylistInterface extends HttpServlet {
 
+    /**
+     * for updating and reloading the playlist items in the same HTTP GET call
+     * @param req HttpServletRequest
+     * @param resp HttpServletResponse
+     * @throws ServletException
+     * @throws IOException 
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter out = resp.getWriter(); //get the response writer for later
         String opt = req.getParameter("opt"); //what are we doing?
 
         int aCurrentPlayListIndex = VLCMediaPlayer.getInstance().getCurrentIndex();
-
+        
         if ((opt == null) || opt.equals("")) { //do nothing to playlist
         } else if (opt.equals("shuffle")) { //shuffle the playlist
             VLCMediaPlayer.getInstance().shufflePlayList();
@@ -46,9 +53,9 @@ public class ZonePlaylistInterface extends HttpServlet {
                 }
             }
         }
-
+        
         aCurrentPlayListIndex = VLCMediaPlayer.getInstance().getCurrentIndex();
-
+        
         if (VLCMediaPlayer.getInstance().getPlayList().size() > 0) {
             int i = 0;
             for (String aMediaUrlStr : VLCMediaPlayer.getInstance().getPlayList()) {
@@ -61,6 +68,26 @@ public class ZonePlaylistInterface extends HttpServlet {
                         + "</a><a href='javascript:removePlayListItem(&quot;#playlistitem_"
                         + i + "&quot;);' data-role='button' data-icon='delete'>Remove</a></li>");
                 i++;
+            }
+        }
+    }
+
+    /**
+     * allow for the posting of data to the playlist storage
+     * @param req HttpServletRequest
+     * @param resp HttpServletResponse
+     * @throws ServletException
+     * @throws IOException 
+     */
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String opt = req.getParameter("opt"); //what are we doing?
+        if ((opt != null) && (!opt.equals(""))) { //non-empty
+            if (opt.equals("add")) {
+                String path = req.getParameter("path");
+                if ((path != null) && (!path.equals(""))) {
+                    VLCMediaPlayer.getInstance().addMediaUrl(path);
+                }
             }
         }
     }

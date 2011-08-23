@@ -48,7 +48,7 @@ public class ZoneSelectionPage extends HttpServlet {
                 + "<ul>"
                 + "<li><a href='javascript:selectZonePage();' class='ui-btn-active ui-state-persist'>Zone Selection</a></li>"
                 + "<li><a href='#playListPage'>Now Playing</a></li>"
-                + "<li><a href='#libraryPage'>Library</a></li>"
+                + "<li><a href='javascript:loadLibrary();'>Library</a></li>"
                 + "</ul>"
                 + "</div>"
                 + "</div>"

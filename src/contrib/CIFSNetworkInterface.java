@@ -4,8 +4,7 @@
 package contrib;
 
 import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jcifs.smb.SmbException;
@@ -32,9 +31,9 @@ public class CIFSNetworkInterface {
      * create a SmbFile from the passed path, and after making sure it is
      * indeed a directory, grab the directory contents
      * @param thePath String
-     * @return List<String>
+     * @return HashMap<String, String>
      */
-    public List<String> getDirectoryList(String thePath) {
+    public HashMap<SmbFile, String> getDirectoryList(String thePath) {
         SmbFile aSmbFile = null;
         try {
             aSmbFile = new SmbFile(thePath);
@@ -63,12 +62,29 @@ public class CIFSNetworkInterface {
                 return null;
             }
 
-            List<String> returnFileList = new ArrayList<String>();
+            HashMap<SmbFile, String> returnFileMap = new HashMap<SmbFile, String>();
             for (SmbFile iSmbFile : aSmbFileArray) {
-                returnFileList.add(iSmbFile.getName());
+                boolean iSmbFileIsDirectory = false;
+                try {
+                    iSmbFileIsDirectory = iSmbFile.isDirectory();
+                } catch (SmbException ex) {
+                    Logger.getLogger(CIFSNetworkInterface.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+                if (iSmbFileIsDirectory) {
+                    returnFileMap.put(iSmbFile, "");
+                } else {
+                    int aIndexOfExtension = iSmbFile.getName().lastIndexOf(".");
+                    if (aIndexOfExtension > 0) {
+                        String aFileExtensionStr = iSmbFile.getName().substring(aIndexOfExtension);
+                        returnFileMap.put(iSmbFile, aFileExtensionStr);
+                    } else {
+                        returnFileMap.put(iSmbFile, "");
+                    }
+                }
             }
 
-            return returnFileList;
+            return returnFileMap;
         } else {
             return null;
         }

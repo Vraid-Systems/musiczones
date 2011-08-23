@@ -26,11 +26,24 @@
             $("#playListPage").live('pagebeforeshow', function(event, ui){
                 $("#zonePlayList").load("/servlets/playlist");
             });
+            
+            function addMediaToPlayList(theMediaPath) {
+                $.post("/servlets/playlist", {"opt": "add", path: theMediaPath});
+            }
+            
+            function browseDirectory(theDirectoryPath) {
+                $("#libraryList").load("/servlets/library?path=" + theDirectoryPath);
+            }
 
             function togglePlayListItem(jhash) {
                 var jhasha = jhash.split("_");
                 var playListIndexInt = jhasha[(jhasha.lenth - 1)];
                 $("#zonePlayList").load("/servlets/playlist?opt=toggle&index=" + playListIndexInt);
+            }
+            
+            function loadLibrary() {
+                $("#libraryList").load("/servlets/library");
+                $.mobile.changePage("#libraryPage");
             }
 
             function removePlayListItem(jhash) {
@@ -70,7 +83,7 @@
                     <ul>
                         <li><a href="javascript:selectZonePage();">Zone Selection</a></li>
                         <li><a href="#playListPage" class="ui-btn-active ui-state-persist">Now Playing</a></li>
-                        <li><a href="#libraryPage">Library</a></li>
+                        <li><a href="javascript:loadLibrary();">Library</a></li>
                     </ul>
                 </div>
             </div>
@@ -84,6 +97,7 @@
             </div>
 
             <div data-role="content">
+                <ul id="libraryList" data-role="listview" data-split-theme="d"></ul>
             </div>
 
             <div data-id="mainNavFooter" data-role="footer" data-position="fixed">
@@ -91,7 +105,7 @@
                     <ul>
                         <li><a href="javascript:selectZonePage();">Zone Selection</a></li>
                         <li><a href="#playListPage">Now Playing</a></li>
-                        <li><a href="#libraryPage" class="ui-btn-active ui-state-persist">Library</a></li>
+                        <li><a href="javascript:loadLibrary();" class="ui-btn-active ui-state-persist">Library</a></li>
                     </ul>
                 </div>
             </div>

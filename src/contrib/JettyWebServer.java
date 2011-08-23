@@ -14,6 +14,7 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.springframework.core.io.ClassPathResource;
+import servlets.ZoneLibrary;
 import servlets.ZonePlaylistInterface;
 import servlets.ZoneSelectionPage;
 import servlets.ZoneSettings;
@@ -43,6 +44,7 @@ public class JettyWebServer implements ProgramConstants {
         webAppContext.addServlet(new ServletHolder(new ZoneSelectionPage()), "/servlets/list-zones-html");
         webAppContext.addServlet(new ServletHolder(new ZonePlaylistInterface()), "/servlets/playlist");
         webAppContext.addServlet(new ServletHolder(new ZoneSettings()), "/servlets/settings");
+        webAppContext.addServlet(new ServletHolder(new ZoneLibrary()), "/servlets/library");
         jws_serverInstance.addHandler(webAppContext);
     }
 
