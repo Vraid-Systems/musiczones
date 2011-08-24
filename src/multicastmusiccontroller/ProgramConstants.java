@@ -14,7 +14,6 @@ public interface ProgramConstants {
     public static final int groupPortInt = 28845;
     public static final int groupTTL = 4; //see http://tldp.org/HOWTO/Multicast-HOWTO-2.html#ss2.3
     public static final int groupMaxByteSize = 65535;
-    public static final String defaultMPlayerBinPath = "/usr/bin/mplayer";
     public static final int defaultWebServerPort = 80;
     //zone controller misc
     public static final int allNodesPingInterval = 25; //number of seconds between existence notify

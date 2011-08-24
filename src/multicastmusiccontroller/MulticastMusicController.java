@@ -19,7 +19,8 @@ public class MulticastMusicController implements ProgramConstants {
 
     protected static String global_ZoneName = null;
     protected static int global_webInterfacePortInt = defaultWebServerPort;
-    protected static String global_MPlayerBinPath = defaultMPlayerBinPath;
+    protected static String global_MPlayerBinPath = null;
+    protected static String global_MPlayerNotFoundStr = "unable to find mplayer executable, please use --mplayer-bin-path=";
     protected static final String global_usageStr = "usage: java -jar mmc.jar "
             + "--zone-name=[zone controller's name] "
             + "--web-port=[web interface port number (default="
@@ -52,21 +53,39 @@ public class MulticastMusicController implements ProgramConstants {
             }
         } //done processing arguments
 
-        //save mplayer path to prefs if it can be found
-        if (ZoneServerUtility.getInstance().isWindows() && (global_MPlayerBinPath.equals(defaultMPlayerBinPath))) {
-            File aExistsFile = new File(global_MPlayerBinPath);
-            if (!aExistsFile.exists()) {
+        //save mplayer path to prefs if it can be found and not already saved
+        String savedMPlayerBinPath = ZoneServerUtility.getInstance().loadStringPref(prefMediaPlayerPathKeyStr, "");
+        File aExistsFile = new File(savedMPlayerBinPath);
+        if (aExistsFile.exists()) {
+            global_MPlayerBinPath = savedMPlayerBinPath;
+        } else if ((!aExistsFile.exists()) && ((global_MPlayerBinPath == null) || (global_MPlayerBinPath.isEmpty()))) {
+            if (ZoneServerUtility.getInstance().isWindows()) {
                 global_MPlayerBinPath = "C:\\Program Files\\SMPlayer\\mplayer\\mplayer.exe";
                 aExistsFile = new File(global_MPlayerBinPath);
                 if (!aExistsFile.exists()) {
                     global_MPlayerBinPath = "C:\\Program Files (x86)\\SMPlayer\\mplayer\\mplayer.exe";
                     aExistsFile = new File(global_MPlayerBinPath);
                     if (!aExistsFile.exists()) {
-                        System.out.println("unable to find mplayer executable, please use --mplayer-bin-path=");
-                        System.out.println(global_usageStr);
-                        System.exit(0);
+                        MPlayerNotFound();
                     }
                 }
+            } else if (ZoneServerUtility.getInstance().isUnix()) {
+                global_MPlayerBinPath = "/usr/bin/mplayer";
+                aExistsFile = new File(global_MPlayerBinPath);
+                if (!aExistsFile.exists()) {
+                    MPlayerNotFound();
+                }
+            } else if (ZoneServerUtility.getInstance().isMac()) {
+                global_MPlayerBinPath = "/Applications/MPlayer\\ OSX.app/Contents/Resources/External_Binaries/mplayer_intel.app/Contents/MacOS/mplayer";
+                aExistsFile = new File(global_MPlayerBinPath);
+                if (!aExistsFile.exists()) {
+                    MPlayerNotFound();
+                }
+            }
+        } else if (!aExistsFile.exists()) {
+            aExistsFile = new File(global_MPlayerBinPath);
+            if (!aExistsFile.exists()) {
+                MPlayerNotFound();
             }
         }
         ZoneServerUtility.getInstance().saveStringPref(prefMediaPlayerPathKeyStr, global_MPlayerBinPath);
@@ -91,5 +110,11 @@ public class MulticastMusicController implements ProgramConstants {
         //after everything else is in place, finally ready to start accepting control packets
         ZoneMulticastServer theZoneServer = new ZoneMulticastServer();
         theZoneServer.startServer();
+    }
+
+    public static void MPlayerNotFound() {
+        System.out.println(global_MPlayerNotFoundStr);
+        System.out.println(global_usageStr);
+        System.exit(1);
     }
 }

@@ -6,6 +6,7 @@ package servlets;
 import contrib.CIFSNetworkInterface;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import javax.servlet.ServletException;
@@ -45,11 +46,11 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
                     out.println("<li id='zoneLibraryListItem_" + i + "'>");
                     if (aCIFSDirMap.get(iSmbFile).equals("")) { //this is a directory
                         out.println("<a href='javascript:mediaLibrary_LoadDirectory(&quot;"
-                                + iSmbFile.getPath() + "&quot;);'>"
+                                + URLEncoder.encode(iSmbFile.getPath()) + "&quot;);'>"
                                 + iSmbFile.getName() + "</a>");
                     } else {
                         out.println("<a href='javascript:playList_addMediaPath_NoRedir(&quot;"
-                                + iSmbFile.getPath() + "&quot;);'>"
+                                + URLEncoder.encode(iSmbFile.getPath()) + "&quot;);'>"
                                 + iSmbFile.getName() + "</a>");
                     }
                     out.println("</li>");
@@ -65,7 +66,7 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
                 for (String rootPathStr : rootPathStrList) {
                     out.println("<li id='zoneLibraryListItem_" + i + "'>");
                     out.println("<a href='javascript:mediaLibrary_LoadDirectory(&quot;"
-                            + rootPathStr + "&quot;);'>" + rootPathStr + "</a>"
+                            + URLEncoder.encode(rootPathStr) + "&quot;);'>" + rootPathStr + "</a>"
                             + "<a href='javascript:mediaLibrary_removeMediaRoot(&quot;zoneLibraryListItem_"
                             + i + "&quot;);' data-role='button' data-icon='delete'>Remove</a>");
                     out.println("</li>");

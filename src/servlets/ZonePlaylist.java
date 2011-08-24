@@ -6,6 +6,7 @@ package servlets;
 import contrib.MediaPlayer;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URLDecoder;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -16,7 +17,7 @@ import zoneserver.ZoneServerUtility;
  * @author Jason Zerbe
  */
 public class ZonePlaylist extends HttpServlet {
-    
+
     public ZonePlaylist() {
     }
 
@@ -33,13 +34,14 @@ public class ZonePlaylist extends HttpServlet {
 
         out.println("<div id='zonePlaylistPage' data-role='page' data-theme='d'>"
                 + "<div data-role='header' data-theme='b' data-position='fixed'>"
-                + "<a href='javascript:playList_Shuffle();' data-role='button' data-icon='grid'>Shuffle</a>"
+                + "<a href='javascript:playList_Stop();' data-role='button' data-icon='delete'>Stop</a>"
                 + "<h1>Now Playing</h1>"
+                + "<a href='javascript:playList_Shuffle();' data-role='button' data-icon='grid'>Shuffle</a>"
                 + "</div>"
                 + "<div data-role='content'>");
-        
+
         int aCurrentPlayListIndex = MediaPlayer.getInstance().getCurrentIndex();
-        
+
         out.println("<ul id='zonePlaylist' data-role='listview' data-split-theme='d'>");
         if (MediaPlayer.getInstance().getPlayList().size() > 0) {
             int i = 0;
@@ -59,7 +61,7 @@ public class ZonePlaylist extends HttpServlet {
                     + "<a href='javascript:mediaLibrary_Load();' data-role='button' data-icon='plus'>Add</a></li>");
         }
         out.println("</ul>");
-        
+
         out.println("</div>" //close content
                 + "<div data-id='mainNavFooter' data-role='footer' data-position='fixed'>"
                 + "<div data-role='navbar'>"
@@ -87,7 +89,7 @@ public class ZonePlaylist extends HttpServlet {
             if (opt.equals("add")) {
                 String path = req.getParameter("path");
                 if ((path != null) && (!path.equals(""))) {
-                    MediaPlayer.getInstance().addMediaUrl(path);
+                    MediaPlayer.getInstance().addMediaUrl(URLDecoder.decode(path));
                     resp.getOutputStream().println("added " + path + "to playlist");
                 }
             } else if (opt.equals("remove") || opt.equals("toggle")) {
@@ -102,7 +104,6 @@ public class ZonePlaylist extends HttpServlet {
                             MediaPlayer.getInstance().togglePlayPause();
                             resp.getOutputStream().println("playlist item #" + indexInt + " toggled");
                         } else {
-                            MediaPlayer.getInstance().setVolume(50);
                             MediaPlayer.getInstance().playIndex(indexInt);
                             resp.getOutputStream().println("playing playlist item #" + indexInt);
                         }
@@ -111,6 +112,9 @@ public class ZonePlaylist extends HttpServlet {
             } else if (opt.equals("shuffle")) { //shuffle the playlist
                 MediaPlayer.getInstance().shufflePlayList();
                 resp.getOutputStream().println("shuffled playlist");
+            } else if (opt.equals("stop")) { //stop now playing
+                MediaPlayer.getInstance().stop();
+                resp.getOutputStream().println("playback stopped");
             }
         }
     }

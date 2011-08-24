@@ -4,13 +4,18 @@
  */
 package contrib;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.InputStreamReader;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.io.PrintStream;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import multicastmusiccontroller.MulticastMusicController;
 import multicastmusiccontroller.ProgramConstants;
 import zoneserver.ZoneServerUtility;
 
@@ -23,19 +28,22 @@ public class MediaPlayer implements ProgramConstants {
     private List<String> vmp_MediaUrlStringArray = null;
     private int vmp_PlayBackIndexInt = -1;
     private Process vmp_MPlayerProcess = null;
+    private PrintStream vmp_MPlayerProcessIn = null;
+    private BufferedReader vmp_MPlayerProcessOutErr = null;
     private String vmp_MPlayerBinPath = null;
 
     protected MediaPlayer() {
         vmp_MediaUrlStringArray = new LinkedList();
-        vmp_MPlayerBinPath = ZoneServerUtility.getInstance().loadStringPref(prefMediaPlayerPathKeyStr,
-                defaultMPlayerBinPath);
+        vmp_MPlayerBinPath = ZoneServerUtility.getInstance().loadStringPref(prefMediaPlayerPathKeyStr, "");
+        if (vmp_MPlayerBinPath.isEmpty()) {
+            MulticastMusicController.MPlayerNotFound();
+        }
     }
 
     @Override
     public void finalize() throws Throwable {
         if (vmp_MPlayerProcess != null) {
             stop();
-            vmp_MPlayerProcess.destroy();
         }
         super.finalize();
     }
@@ -59,7 +67,10 @@ public class MediaPlayer implements ProgramConstants {
         System.out.println("added media url: " + theMediaUrlStr);
     }
 
-    protected void initPlayer() {
+    protected void initPlayer() throws IOException {
+        if (vmp_PlayBackIndexInt < 0) {
+            vmp_PlayBackIndexInt = 0;
+        }
         try {
             String startCmd = vmp_MPlayerBinPath + " -slave -quiet -idle "
                     + '"' + vmp_MediaUrlStringArray.get(vmp_PlayBackIndexInt) + '"';
@@ -68,14 +79,26 @@ public class MediaPlayer implements ProgramConstants {
         } catch (IOException ex) {
             Logger.getLogger(MediaPlayer.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+        // create the piped streams where to redirect the standard output and error of MPlayer
+        // specify a bigger pipesize than the default of 1024
+        PipedInputStream readFrom = new PipedInputStream(256 * 1024);
+        PipedOutputStream writeTo = new PipedOutputStream(readFrom);
+        vmp_MPlayerProcessOutErr = new BufferedReader(new InputStreamReader(readFrom));
+
+        // create the threads to redirect the standard output and error of MPlayer
+        new LineRedirecter(vmp_MPlayerProcess.getInputStream(), writeTo).start();
+        new LineRedirecter(vmp_MPlayerProcess.getErrorStream(), writeTo).start();
+
+        // the standard input of MPlayer
+        vmp_MPlayerProcessIn = new PrintStream(vmp_MPlayerProcess.getOutputStream());
     }
 
     protected void writeSlaveCommand(String theCommand) throws IOException {
-        if (vmp_MPlayerProcess != null) {
-            OutputStream processInputStream = vmp_MPlayerProcess.getOutputStream();
-            processInputStream.write(theCommand.getBytes());
-            processInputStream.write("\n".getBytes());
-            processInputStream.flush();
+        if (vmp_MPlayerProcessIn != null) {
+            vmp_MPlayerProcessIn.print(theCommand);
+            vmp_MPlayerProcessIn.print("\n");
+            vmp_MPlayerProcessIn.flush();
             System.out.println("mplayer process passed command: " + theCommand);
         }
     }
@@ -85,8 +108,13 @@ public class MediaPlayer implements ProgramConstants {
         if (vmp_MPlayerProcess == null) {
             initPlayer();
         } else {
-            String playFileCmdStr = "loadfile " + '"' + vmp_MediaUrlStringArray.get(vmp_PlayBackIndexInt) + '"' + " 0";
-            writeSlaveCommand(playFileCmdStr);
+            stop(theIndex);
+            try { //sleep 1/5 second. just enough for previous mplayer to close up
+                Thread.sleep(200);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(MediaPlayer.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            initPlayer();
         }
     }
 
@@ -95,25 +123,39 @@ public class MediaPlayer implements ProgramConstants {
     }
 
     public void removeIndex(int theIndex) {
-        if ((vmp_PlayBackIndexInt > 0) && (theIndex <= vmp_PlayBackIndexInt)) {
+        try {
+            stop();
+        } catch (IOException ex) {
+            Logger.getLogger(MediaPlayer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if ((vmp_PlayBackIndexInt >= 0) && (theIndex <= vmp_PlayBackIndexInt)) {
             vmp_PlayBackIndexInt--;
         }
         vmp_MediaUrlStringArray.remove(theIndex);
     }
 
     public void shufflePlayList() {
-        if ((vmp_MediaUrlStringArray != null)
+        try {
+            stop(vmp_PlayBackIndexInt);
+        } catch (IOException ex) {
+            Logger.getLogger(MediaPlayer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if ((vmp_MediaUrlStringArray != null) //TODO: something about this does not work
                 && (vmp_MediaUrlStringArray.size() > 0)
                 && (vmp_PlayBackIndexInt < vmp_MediaUrlStringArray.size())) {
-            String aCurrentMediaUrlStr = vmp_MediaUrlStringArray.get(vmp_PlayBackIndexInt);
-            Collections.shuffle(vmp_MediaUrlStringArray);
-            int i = 0;
-            for (String aMediaUrlStr : vmp_MediaUrlStringArray) {
-                if (aMediaUrlStr.equals(aCurrentMediaUrlStr)) {
-                    vmp_PlayBackIndexInt = i;
-                    break;
+            if (vmp_PlayBackIndexInt >= 0) {
+                String aCurrentMediaUrlStr = vmp_MediaUrlStringArray.get(vmp_PlayBackIndexInt);
+                Collections.shuffle(vmp_MediaUrlStringArray);
+                int i = 0;
+                for (String aMediaUrlStr : vmp_MediaUrlStringArray) {
+                    if (aMediaUrlStr.equals(aCurrentMediaUrlStr)) {
+                        vmp_PlayBackIndexInt = i;
+                        break;
+                    }
+                    i++;
                 }
-                i++;
+            } else {
+                Collections.shuffle(vmp_MediaUrlStringArray);
             }
         }
     }
@@ -132,10 +174,17 @@ public class MediaPlayer implements ProgramConstants {
         }
     }
 
-    public void stop() throws IOException {
+    public void stop(int theIndex) throws IOException {
         if (vmp_MPlayerProcess != null) {
-            writeSlaveCommand("stop");
+            writeSlaveCommand("quit 0");
+            vmp_MPlayerProcess.destroy();
+            vmp_MPlayerProcess = null;
+            vmp_PlayBackIndexInt = theIndex;
         }
+    }
+
+    public void stop() throws IOException {
+        stop(-1);
     }
 
     public void next() throws IOException {

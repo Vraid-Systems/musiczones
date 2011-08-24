@@ -65,6 +65,13 @@
                     playList_Load();
                 });
             }
+            function playList_Stop() {
+                $.post(kPlayListPageUrlStr, {
+                    opt: "stop"
+                }, function(data) {
+                    playList_Load();
+                });
+            }
             function playList_ToggleItem(elementId) {
                 var jhasha = elementId.split("_");
                 var playListIndexInt = jhasha[(jhasha.length - 1)];
