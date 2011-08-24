@@ -156,7 +156,7 @@ public class ZoneServerUtility implements ProgramConstants {
     }
 
     public String getFileNameFromUrlStr(String theUrlString) {
-        return theUrlString.substring(theUrlString.lastIndexOf("/"));
+        return theUrlString.substring((theUrlString.lastIndexOf("/") + 1));
     }
 
     public boolean isWindows() {

@@ -10,10 +10,9 @@
         <title>Zone Controller</title>
         <meta name="robots" content="noindex,nofollow" />
 
-        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0a4.1/jquery.mobile-1.0a4.1.min.css" />
-        <script type="text/javascript" src="http://code.jquery.com/jquery-1.5.1.min.js"></script>
-        <script type="text/javascript" src="http://code.jquery.com/mobile/1.0a4.1/jquery.mobile-1.0a4.1.min.js"></script>
-        <!-- docs = http://jquerymobile.com/demos/1.0a4.1/ -->
+        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0b2/jquery.mobile-1.0b2.min.css" />
+        <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.2.min.js"></script>
+        <script type="text/javascript" src="http://code.jquery.com/mobile/1.0b2/jquery.mobile-1.0b2.min.js"></script>
 
         <style type="text/css">
             .ui-content {
@@ -23,113 +22,133 @@
         </style>
 
         <script type="text/javascript">
-            $("#playListPage").live('pagebeforeshow', function(event, ui){
-                $("#playListContent").load("/servlets/playlist");
-            });
+            //servlet url constants
+            var kZoneSelectionPage = "/servlets/list-zones";
+            var kPlayListPageUrlStr = "/servlets/playlist";
+            var kLibraryServlet = "/servlets/library";
+            var kLibraryAddDialog = "/servlets/library-add-dialog";
             
-            function addMediaToPlayList(theMediaPath) {
-                $.post("/servlets/playlist", {opt: "add", path: theMediaPath});
+            //playlist
+            function playList_addMediaPath(theMediaPath) {
+                $.post(kPlayListPageUrlStr, {
+                    opt: "add",
+                    path: theMediaPath
+                }, function(data) {
+                    playList_Load();
+                });
+            }
+            function playList_addMediaPath_NoRedir(theMediaPath) {
+                $.post(kPlayListPageUrlStr, {
+                    opt: "add",
+                    path: theMediaPath
+                });
+            }
+            function playList_Load() {
+                $.mobile.changePage(kPlayListPageUrlStr, {
+                    reloadPage: true
+                });
+            }
+            function playList_RemoveItem(elementId) {
+                var jhasha = elementId.split("_");
+                var playListIndexInt = jhasha[(jhasha.length - 1)];
+                $.post(kPlayListPageUrlStr, {
+                    opt: "remove",
+                    index: playListIndexInt
+                }, function(data) {
+                    playList_Load();
+                });
+            }
+            function playList_Shuffle() {
+                $.post(kPlayListPageUrlStr, {
+                    opt: "shuffle"
+                }, function(data) {
+                    playList_Load();
+                });
+            }
+            function playList_ToggleItem(elementId) {
+                var jhasha = elementId.split("_");
+                var playListIndexInt = jhasha[(jhasha.length - 1)];
+                $.post(kPlayListPageUrlStr, {
+                    opt: "toggle",
+                    index: playListIndexInt
+                }, function(data) {
+                    playList_Load();
+                });
             }
             
-            function addNewMediaRoot() {
+            //media library
+            function mediaLibrary_addMediaRoot() {
                 var newServerTypeVal = $("#newServerType option:selected").val();
                 var newServerAddressVal = $("#newServerAddress").val();
                 var newFilePathVal = $("#newFilePath").val();
-                $.post("/servlets/settings", {
-                    opt: "add",
+                $.post(kLibraryServlet, {
+                    opt: "addMediaRoot",
                     newServerType: newServerTypeVal,
                     newServerAddress: newServerAddressVal,
                     newFilePath: newFilePathVal
                 }, function(data) {
-                    $.mobile.changePage("#libraryPage");
+                    mediaLibrary_Load();
                 });
             }
-            
-            function browseDirectory(theDirectoryPath) {
-                $("#libraryList").load("/servlets/library?path=" + theDirectoryPath);
+            function mediaLibrary_LoadDirectory(theDirectoryPath) {
+                $.mobile.changePage(kLibraryServlet, {
+                    data: {path: theDirectoryPath},
+                    reloadPage: true
+                });
             }
-
-            function togglePlayListItem(jhash) {
-                var jhasha = jhash.split("_");
-                var playListIndexInt = jhasha[(jhasha.lenth - 1)];
-                $("#playListContent").load("/servlets/playlist?opt=toggle&index=" + playListIndexInt);
-            }
-            
-            function loadLibrary() {
-                $("#libraryList").load("/servlets/library");
-                $.mobile.changePage("#libraryPage");
-            }
-            
-            function removeMediaRootPath(jhash) {
-                $(jhash).remove();
-                var jhasha = jhash.split("_");
-                var mediaRootIndexInt = jhasha[(jhasha.lenth - 1)];
-                $.post("/servlets/settings", {
-                    opt: "remove",
+            function mediaLibrary_Load() {
+                $.mobile.changePage(kLibraryServlet, {
+                    reloadPage: true
+                });
+            } 
+            function mediaLibrary_removeMediaRoot(elementId) {
+                var jhasha = elementId.split("_");
+                var mediaRootIndexInt = jhasha[(jhasha.length - 1)];
+                $.post(kLibraryServlet, {
+                    opt: "removeMediaRoot",
                     index: mediaRootIndexInt
                 }, function(data) {
-                    $.mobile.changePage("#libraryPage");
+                    mediaLibrary_Load();
                 });
             }
-
-            function removePlayListItem(jhash) {
-                $(jhash).remove();
-                var jhasha = jhash.split("_");
-                var playListIndexInt = jhasha[(jhasha.lenth - 1)];
-                $("#playListContent").load("/servlets/playlist?opt=remove&index=" + playListIndexInt);
+            
+            //other
+            function libraryAddPage_Load() {
+                $.mobile.changePage(kLibraryAddDialog, {
+                    transition: "pop",
+                    reloadPage: true
+                });
             }
-
-            function selectZonePage() {
-                $.mobile.changePage("/servlets/list-zones-html");
-            }
-
-            function settingsPage() {
-                $.mobile.changePage("/servlets/settings", "pop");
-            }
-
-            function shuffleNowPlaying() {
-                $("#playListContent").load("/servlets/playlist?opt=shuffle");
+            function zoneSelection_Load() {
+                $.mobile.changePage(kZoneSelectionPage, {
+                    reloadPage: true
+                });
             }
         </script>
     </head>
     <body>
-        <div id="playListPage" data-role="page" data-theme="d">
+        <div id="zoneController" data-role="page" data-theme="d">
             <div data-role="header" data-theme="b" data-position="fixed">
-                <a href="javascript:shuffleNowPlaying();" data-role="button" data-icon="grid">Shuffle</a>
-                <h1>Now Playing</h1>
-                <a href="javascript:settingsPage();" data-role="button" data-icon="gear">Settings</a>
+                <h1>Zone Controller</h1>
             </div>
 
-            <div id="playListContent" data-role="content"></div>
-
-            <div data-id="mainNavFooter" data-role="footer" data-position="fixed">
-                <div data-role="navbar">
-                    <ul>
-                        <li><a href="javascript:selectZonePage();">Zone Selection</a></li>
-                        <li><a href="#playListPage" class="ui-btn-active ui-state-persist">Now Playing</a></li>
-                        <li><a href="javascript:loadLibrary();">Library</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div id="libraryPage" data-role="page" data-theme="d">
-            <div data-role="header" data-theme="b" data-position="fixed">
-                <a href="javascript:shuffleNowPlaying();" data-role="button" data-icon="grid">Shuffle</a>
-                <h1>Library</h1>
-                <a href="javascript:settingsPage();" data-role="button" data-icon="gear">Settings</a>
-            </div>
-
-            <div data-role="content">
-                <ul id="libraryList" data-role="listview"></ul>
+            <div id="zoneControllerContent" data-role="content">
+                Welcome! To get started please select from one of the below
+                navigation options.<br />
+                <br />
+                If you would like to go to a different media zone controller on
+                this network, pick <i>Zone Selection</i>. Want to manage the
+                tunes I am playing right now? See <i>Now Playing</i>. How about
+                adding some more tunes from the library or adding more or your
+                favorite media to my library? Check out the <i>Library</i>.
             </div>
 
             <div data-id="mainNavFooter" data-role="footer" data-position="fixed">
                 <div data-role="navbar">
                     <ul>
-                        <li><a href="javascript:selectZonePage();">Zone Selection</a></li>
-                        <li><a href="#playListPage">Now Playing</a></li>
-                        <li><a href="javascript:loadLibrary();" class="ui-btn-active ui-state-persist">Library</a></li>
+                        <li><a href="javascript:zoneSelection_Load();">Zone Selection</a></li>
+                        <li><a href="javascript:playList_Load();">Now Playing</a></li>
+                        <li><a href="javascript:mediaLibrary_Load();">Library</a></li>
                     </ul>
                 </div>
             </div>

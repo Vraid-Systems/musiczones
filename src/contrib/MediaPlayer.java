@@ -1,5 +1,6 @@
 /*
- * singleton class wrapper for controlling media output
+ * singleton class wrapper for controlling mplayer. for slave commands see:
+ * http://www.mplayerhq.hu/DOCS/tech/slave.txt
  */
 package contrib;
 
@@ -20,13 +21,23 @@ public class MediaPlayer implements ProgramConstants {
 
     private static MediaPlayer vmp_SingleInstance = null;
     private List<String> vmp_MediaUrlStringArray = null;
-    private int vmp_PlayBackIndexInt = 0;
+    private int vmp_PlayBackIndexInt = -1;
     private Process vmp_MPlayerProcess = null;
     private String vmp_MPlayerBinPath = null;
 
     protected MediaPlayer() {
         vmp_MediaUrlStringArray = new LinkedList();
-        vmp_MPlayerBinPath = ZoneServerUtility.getInstance().loadStringPref(prefMediaPlayerPathKeyStr, "mplayer");
+        vmp_MPlayerBinPath = ZoneServerUtility.getInstance().loadStringPref(prefMediaPlayerPathKeyStr,
+                defaultMPlayerBinPath);
+    }
+
+    @Override
+    public void finalize() throws Throwable {
+        if (vmp_MPlayerProcess != null) {
+            stop();
+            vmp_MPlayerProcess.destroy();
+        }
+        super.finalize();
     }
 
     public static MediaPlayer getInstance() {
@@ -37,25 +48,45 @@ public class MediaPlayer implements ProgramConstants {
     }
 
     public void addMediaUrl(String theMediaUrlStr) {
+        //format windowsy backslashes if this is on a windows host and samba-ing
+        if (ZoneServerUtility.getInstance().isWindows()
+                && theMediaUrlStr.contains(ServerType.smb.toString().concat(prefixUriStr))) {
+            theMediaUrlStr = theMediaUrlStr.replace(ServerType.smb.toString().concat(prefixUriStr), "\\\\");
+            theMediaUrlStr = theMediaUrlStr.replace("/", "\\");
+        }
+
         vmp_MediaUrlStringArray.add(theMediaUrlStr);
+        System.out.println("added media url: " + theMediaUrlStr);
+    }
+
+    protected void initPlayer() {
+        try {
+            String startCmd = vmp_MPlayerBinPath + " -slave -quiet -idle "
+                    + '"' + vmp_MediaUrlStringArray.get(vmp_PlayBackIndexInt) + '"';
+            vmp_MPlayerProcess = Runtime.getRuntime().exec(startCmd);
+            System.out.println("mplayer process: " + startCmd);
+        } catch (IOException ex) {
+            Logger.getLogger(MediaPlayer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    protected void writeSlaveCommand(String theCommand) throws IOException {
+        if (vmp_MPlayerProcess != null) {
+            OutputStream processInputStream = vmp_MPlayerProcess.getOutputStream();
+            processInputStream.write(theCommand.getBytes());
+            processInputStream.write("\n".getBytes());
+            processInputStream.flush();
+            System.out.println("mplayer process passed command: " + theCommand);
+        }
     }
 
     public void playIndex(int theIndex) throws IOException {
         vmp_PlayBackIndexInt = theIndex;
         if (vmp_MPlayerProcess == null) {
-            try {
-                vmp_MPlayerProcess = Runtime.getRuntime().exec(vmp_MPlayerBinPath
-                        + " -slave -quiet -idle "
-                        + vmp_MediaUrlStringArray.get(vmp_PlayBackIndexInt));
-            } catch (IOException ex) {
-                Logger.getLogger(MediaPlayer.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            initPlayer();
         } else {
-            OutputStream processInputStream = vmp_MPlayerProcess.getOutputStream();
-            String playFileStr = "loadfile \'" + vmp_MediaUrlStringArray.get(vmp_PlayBackIndexInt) + "\' 0";
-            processInputStream.write(playFileStr.getBytes());
-            processInputStream.write("\n".getBytes());
-            processInputStream.flush();
+            String playFileCmdStr = "loadfile " + '"' + vmp_MediaUrlStringArray.get(vmp_PlayBackIndexInt) + '"' + " 0";
+            writeSlaveCommand(playFileCmdStr);
         }
     }
 
@@ -88,19 +119,23 @@ public class MediaPlayer implements ProgramConstants {
     }
 
     public void togglePlayPause() throws IOException {
-        OutputStream processInputStream = vmp_MPlayerProcess.getOutputStream();
-        processInputStream.write("pause".getBytes());
-        processInputStream.write("\n".getBytes());
-        processInputStream.flush();
+        if (vmp_MPlayerProcess == null) {
+            initPlayer();
+        } else {
+            writeSlaveCommand("pause");
+        }
     }
 
-    public void stop() {
-        try {
-            vmp_MPlayerProcess.waitFor();
-        } catch (InterruptedException ex) {
-            Logger.getLogger(MediaPlayer.class.getName()).log(Level.SEVERE, null, ex);
+    public void setVolume(int theVolume) throws IOException {
+        if (vmp_MPlayerProcess != null) {
+            writeSlaveCommand("volume " + String.valueOf(theVolume) + " 0");
         }
-        vmp_MPlayerProcess = null;
+    }
+
+    public void stop() throws IOException {
+        if (vmp_MPlayerProcess != null) {
+            writeSlaveCommand("stop");
+        }
     }
 
     public void next() throws IOException {

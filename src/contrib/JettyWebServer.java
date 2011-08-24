@@ -15,9 +15,9 @@ import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.springframework.core.io.ClassPathResource;
 import servlets.ZoneLibrary;
-import servlets.ZonePlaylistInterface;
-import servlets.ZoneSelectionPage;
-import servlets.ZoneSettings;
+import servlets.ZonePlaylist;
+import servlets.ZoneSelection;
+import servlets.ZoneAddMedia;
 
 /**
  * @author Mort Bay Consulting / Codehaus / Eclipse
@@ -41,10 +41,10 @@ public class JettyWebServer implements ProgramConstants {
         } catch (IOException ex) {
             Logger.getLogger(JettyWebServer.class.getName()).log(Level.SEVERE, null, ex);
         }
-        webAppContext.addServlet(new ServletHolder(new ZoneSelectionPage()), "/servlets/list-zones-html");
-        webAppContext.addServlet(new ServletHolder(new ZonePlaylistInterface()), "/servlets/playlist");
-        webAppContext.addServlet(new ServletHolder(new ZoneSettings()), "/servlets/settings");
+        webAppContext.addServlet(new ServletHolder(new ZoneSelection()), "/servlets/list-zones");
+        webAppContext.addServlet(new ServletHolder(new ZonePlaylist()), "/servlets/playlist");
         webAppContext.addServlet(new ServletHolder(new ZoneLibrary()), "/servlets/library");
+        webAppContext.addServlet(new ServletHolder(new ZoneAddMedia()), "/servlets/library-add-dialog");
         jws_serverInstance.addHandler(webAppContext);
     }
 

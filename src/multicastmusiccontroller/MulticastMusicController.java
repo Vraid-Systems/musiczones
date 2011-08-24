@@ -4,6 +4,7 @@
 package multicastmusiccontroller;
 
 import contrib.JettyWebServer;
+import java.io.File;
 import zoneserver.ZoneServerLogic;
 import zoneserver.ZoneMulticastServer;
 import java.util.logging.Level;
@@ -17,12 +18,13 @@ import zoneserver.ZoneServerUtility;
 public class MulticastMusicController implements ProgramConstants {
 
     protected static String global_ZoneName = null;
-    protected static int global_webInterfacePortInt = 80;
-    protected static String global_MPlayerBinPath = "mplayer";
+    protected static int global_webInterfacePortInt = defaultWebServerPort;
+    protected static String global_MPlayerBinPath = defaultMPlayerBinPath;
     protected static final String global_usageStr = "usage: java -jar mmc.jar "
             + "--zone-name=[zone controller's name] "
-            + "--web-port=[web interface port number (default=80)]"
-            + "--mplayer-bin-path=[path to mplayer (default=mplayer)]";
+            + "--web-port=[web interface port number (default="
+            + String.valueOf(defaultWebServerPort) + ")] "
+            + "--mplayer-bin-path=[path to mplayer]";
 
     /**
      * master start of application
@@ -50,7 +52,23 @@ public class MulticastMusicController implements ProgramConstants {
             }
         } //done processing arguments
 
-        //save certain arguments to prefs
+        //save mplayer path to prefs if it can be found
+        if (ZoneServerUtility.getInstance().isWindows() && (global_MPlayerBinPath.equals(defaultMPlayerBinPath))) {
+            File aExistsFile = new File(global_MPlayerBinPath);
+            if (!aExistsFile.exists()) {
+                global_MPlayerBinPath = "C:\\Program Files\\SMPlayer\\mplayer\\mplayer.exe";
+                aExistsFile = new File(global_MPlayerBinPath);
+                if (!aExistsFile.exists()) {
+                    global_MPlayerBinPath = "C:\\Program Files (x86)\\SMPlayer\\mplayer\\mplayer.exe";
+                    aExistsFile = new File(global_MPlayerBinPath);
+                    if (!aExistsFile.exists()) {
+                        System.out.println("unable to find mplayer executable, please use --mplayer-bin-path=");
+                        System.out.println(global_usageStr);
+                        System.exit(0);
+                    }
+                }
+            }
+        }
         ZoneServerUtility.getInstance().saveStringPref(prefMediaPlayerPathKeyStr, global_MPlayerBinPath);
 
         //first intialize jetty in-case using custom webserver port

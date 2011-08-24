@@ -1,5 +1,5 @@
 /*
- * servlet for displaying library list elements to be added to playlist
+ * servlet for displaying and managing library elements
  */
 package servlets;
 
@@ -27,35 +27,93 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter out = resp.getWriter(); //get the response writer for later
+
+        out.println("<div id='zoneLibraryPage' data-role='page' data-theme='d'>"
+                + "<div data-role='header' data-theme='b' data-position='fixed'>"
+                + "<a href='javascript:libraryAddPage_Load();' data-role='button' data-icon='plus'>Add Media</a>"
+                + "<h1>Media Library</h1>"
+                + "</div>"
+                + "<div data-role='content'>");
+
         String aPathStr = req.getParameter("path");
         if ((aPathStr != null) && (!aPathStr.equals(""))) { //make sure this contains a path
-            if (aPathStr.contains("smb://")) { //CIFS share
+            out.println("<ul id='zoneLibraryList' data-role='listview' data-theme='d'>");
+            if (aPathStr.contains(ServerType.smb.toString().concat(prefixUriStr))) { //CIFS share
                 HashMap<SmbFile, String> aCIFSDirMap = CIFSNetworkInterface.getInstance().getDirectoryList(aPathStr);
                 int i = 0;
                 for (SmbFile iSmbFile : aCIFSDirMap.keySet()) {
-                    out.println("<li id='directorylistitem_" + i + "'>");
+                    out.println("<li id='zoneLibraryListItem_" + i + "'>");
                     if (aCIFSDirMap.get(iSmbFile).equals("")) { //this is a directory
-                        out.println("<a href='javascript:browseDirectory(&quot;"
+                        out.println("<a href='javascript:mediaLibrary_LoadDirectory(&quot;"
                                 + iSmbFile.getPath() + "&quot;);'>"
                                 + iSmbFile.getName() + "</a>");
                     } else {
-                        out.println("<a href='javascript:addMediaToPlayList(&quot;"
-                                + iSmbFile.getPath() + "&quot;);' data-role='button' data-icon='plus'>"
+                        out.println("<a href='javascript:playList_addMediaPath_NoRedir(&quot;"
+                                + iSmbFile.getPath() + "&quot;);'>"
                                 + iSmbFile.getName() + "</a>");
                     }
                     out.println("</li>");
                     i++;
                 }
-            }
+            } //end CIFS share formatting
+            out.println("</ul>");
         } else { //no path set, load various base preference directories
+            out.println("<ul id='zoneLibraryList' data-role='listview' data-split-icon='delete' data-split-theme='d'>");
             List<String> rootPathStrList = ZoneServerUtility.getInstance().getMediaDirEntries();
             if (rootPathStrList.size() > 0) {
                 int i = 0;
                 for (String rootPathStr : rootPathStrList) {
-                    out.println("<li id='directorylistitem_" + i + "'>");
-                    out.println("<a href='javascript:browseDirectory(&quot;" + rootPathStr + "&quot;);'>" + rootPathStr + "</a>");
+                    out.println("<li id='zoneLibraryListItem_" + i + "'>");
+                    out.println("<a href='javascript:mediaLibrary_LoadDirectory(&quot;"
+                            + rootPathStr + "&quot;);'>" + rootPathStr + "</a>"
+                            + "<a href='javascript:mediaLibrary_removeMediaRoot(&quot;zoneLibraryListItem_"
+                            + i + "&quot;);' data-role='button' data-icon='delete'>Remove</a>");
                     out.println("</li>");
                     i++;
+                }
+            }
+            out.println("</ul>");
+        }
+
+        out.println("</div>" //close content
+                + "<div data-id='mainNavFooter' data-role='footer' data-position='fixed'>"
+                + "<div data-role='navbar'>"
+                + "<ul>"
+                + "<li><a href='javascript:zoneSelection_Load();'>Zone Selection</a></li>"
+                + "<li><a href='javascript:playList_Load();'>Now Playing</a></li>"
+                + "<li><a href='javascript:mediaLibrary_Load();' class='ui-btn-active ui-state-persist'>Media Library</a></li>"
+                + "</ul>"
+                + "</div>"
+                + "</div>"
+                + "</div>");
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String opt = req.getParameter("opt"); //what are we doing?
+        if ((opt != null) && (!opt.equals(""))) { //non-empty
+            if (opt.equals("addMediaRoot")) {
+                ServerType newServerType = ServerType.valueOf(req.getParameter("newServerType"));
+                String newServerAddress = req.getParameter("newServerAddress");
+                String newFilePath = req.getParameter("newFilePath");
+                if ((newServerType != null) && (newServerAddress != null)
+                        && (!newServerAddress.equals("")) && (newFilePath != null)
+                        && (!newFilePath.equals(""))) { //all variables are set
+
+                    newFilePath = newFilePath.replaceAll("\\\\+", "/");
+                    //see http://www.java-forums.org/advanced-java/16452-replacing-backslashes-string-object.html#post59396
+
+                    ZoneServerUtility.getInstance().updateMediaDirEntry(newServerType, newServerAddress, newFilePath);
+                    resp.getWriter().println("added root media entry: "
+                            + newServerType.toString() + "://" + newServerAddress
+                            + newFilePath);
+                }
+            } else if (opt.equals("removeMediaRoot")) {
+                String aRootIndexStr = req.getParameter("index");
+                if ((aRootIndexStr != null) && (!aRootIndexStr.equals(""))) {
+                    int aRootIndexInt = Integer.valueOf(aRootIndexStr);
+                    ZoneServerUtility.getInstance().removeMediaDirEntry(aRootIndexInt);
+                    resp.getWriter().println("removed root media entry #" + String.valueOf(aRootIndexInt));
                 }
             }
         }

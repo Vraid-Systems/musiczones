@@ -15,9 +15,9 @@ import zoneserver.ZoneServerLogic;
 /**
  * @author Jason Zerbe
  */
-public class ZoneSelectionPage extends HttpServlet {
+public class ZoneSelection extends HttpServlet {
 
-    public ZoneSelectionPage() {
+    public ZoneSelection() {
     }
 
     @Override
@@ -26,39 +26,36 @@ public class ZoneSelectionPage extends HttpServlet {
         HashMap<String, String> zcld_ZoneInfoMap = ZoneServerLogic.getInstance().getNodeInfoMap();
         HashMap<String, String> zcld_ZoneDashBoardMap = ZoneServerLogic.getInstance().getNodeDashBoardMap();
 
-        //setup the response
+        //setup the response writer
         PrintWriter out = resp.getWriter();
 
         //build the zone selection page
-        String aPageContentPartTopStr = "<div id='selectZonePage' data-role='page' data-theme='d'>"
+        out.println("<div id='zoneSelectionPage' data-role='page' data-theme='d'>"
                 + "<div data-role='header' data-theme='b' data-position='fixed'>"
-                + "<a href='javascript:shuffleNowPlaying();' data-role='button' data-icon='grid'>Shuffle</a>"
                 + "<h1>Zone Selection</h1>"
-                + "<a href='javascript:settingsPage();' data-role='button' data-icon='gear'>Settings</a>"
                 + "</div>"
                 + "<div data-role='content'>"
-                + "<ul data-role='listview'>\n";
+                + "<ul data-role='listview'>");
+
         String aPageContentPartListStr = "";
         for (String aNodeUUIDStr : zcld_ZoneInfoMap.keySet()) {
             String aNodeDashBoardUrlStr = zcld_ZoneDashBoardMap.get(aNodeUUIDStr);
             String aNodeName = zcld_ZoneInfoMap.get(aNodeUUIDStr);
             aPageContentPartListStr += "<li><a href='" + aNodeDashBoardUrlStr + "'>" + aNodeName + "</a></li>\n";
         }
-        String aPageContentPartBottomStr = "</ul>\n"
-                + "</div>"
+        out.print(aPageContentPartListStr);
+
+        out.println("</ul>" //close list
+                + "</div>" //close content
                 + "<div data-id='mainNavFooter' data-role='footer' data-position='fixed'>"
                 + "<div data-role='navbar'>"
                 + "<ul>"
-                + "<li><a href='javascript:selectZonePage();' class='ui-btn-active ui-state-persist'>Zone Selection</a></li>"
-                + "<li><a href='#playListPage'>Now Playing</a></li>"
-                + "<li><a href='javascript:loadLibrary();'>Library</a></li>"
+                + "<li><a href='javascript:zoneSelection_Load();' class='ui-btn-active ui-state-persist'>Zone Selection</a></li>"
+                + "<li><a href='javascript:playList_Load();'>Now Playing</a></li>"
+                + "<li><a href='javascript:mediaLibrary_Load();'>Media Library</a></li>"
                 + "</ul>"
                 + "</div>"
                 + "</div>"
-                + "</div>";
-        String aPageContentStr = aPageContentPartTopStr + aPageContentPartListStr + aPageContentPartBottomStr;
-
-        //and output it
-        out.write(aPageContentStr);
+                + "</div>");
     }
 }
