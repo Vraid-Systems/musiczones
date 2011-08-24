@@ -31,6 +31,7 @@ public class MediaPlayer implements ProgramConstants {
     private PrintStream vmp_MPlayerProcessIn = null;
     private BufferedReader vmp_MPlayerProcessOutErr = null;
     private String vmp_MPlayerBinPath = null;
+    private String vmp_MPlayerOptions = "-slave -idle";
 
     protected MediaPlayer() {
         vmp_MediaUrlStringArray = new LinkedList();
@@ -72,7 +73,7 @@ public class MediaPlayer implements ProgramConstants {
             vmp_PlayBackIndexInt = 0;
         }
         try {
-            String startCmd = vmp_MPlayerBinPath + " -slave -quiet -idle "
+            String startCmd = vmp_MPlayerBinPath + " " + vmp_MPlayerOptions + " "
                     + '"' + vmp_MediaUrlStringArray.get(vmp_PlayBackIndexInt) + '"';
             vmp_MPlayerProcess = Runtime.getRuntime().exec(startCmd);
             System.out.println("mplayer process: " + startCmd);

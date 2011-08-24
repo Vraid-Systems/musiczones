@@ -31,7 +31,7 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
 
         out.println("<div id='zoneLibraryPage' data-role='page' data-theme='d'>"
                 + "<div data-role='header' data-theme='b' data-position='fixed'>"
-                + "<a href='javascript:libraryAddPage_Load();' data-role='button' data-icon='plus'>Add Media</a>"
+                + "<a href='javascript:libraryAddPage_Load();' data-role='button' data-icon='plus'>Add</a>"
                 + "<h1>Media Library</h1>"
                 + "</div>"
                 + "<div data-role='content'>");
