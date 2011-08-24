@@ -8,6 +8,7 @@ Redistribution and use in source and binary forms, with or without modification,
 3rd Party Code/Library License NOTES
 JCIFS = LGPL v2.1 (library must remain free and available)
 Jetty = Apache License v2.0
+JMPlayer (Java interface class for MPlayer) = non-licensed? almost entirely by Adrian BER
 SHA1 = almost public domain (see class file)
 Spring Framework = Apache License v2.0
 
