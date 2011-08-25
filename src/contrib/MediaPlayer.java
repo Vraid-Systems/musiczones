@@ -59,13 +59,21 @@ public class MediaPlayer implements ProgramConstants {
             theMediaUrlStr = theMediaUrlStr.replace(ServerType.smb.toString().concat(prefixUriStr), "\\\\");
             theMediaUrlStr = theMediaUrlStr.replace("/", "\\");
         }
+
+        //replace spaces with %20 if not windows
+        if (!ZoneServerUtility.getInstance().isWindows()) {
+            theMediaUrlStr = theMediaUrlStr.replace(" ", "%20");
+        }
+
         return theMediaUrlStr;
     }
 
     public void playIndex(int theIndex) {
         vmp_PlayBackIndexInt = theIndex;
         try {
-            vmp_JMPlayer.open(formatMediaUrl(vmp_MediaUrlStringArray.get(vmp_PlayBackIndexInt)));
+            String theMediaStr = formatMediaUrl(vmp_MediaUrlStringArray.get(vmp_PlayBackIndexInt));
+            System.out.println("will now play: " + theMediaStr);
+            vmp_JMPlayer.open(theMediaStr);
         } catch (IOException ex) {
             Logger.getLogger(MediaPlayer.class.getName()).log(Level.SEVERE, null, ex);
         }

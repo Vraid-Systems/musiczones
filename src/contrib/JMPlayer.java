@@ -14,6 +14,7 @@ import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import zoneserver.ZoneServerUtility;
 
 /**
  * @author Adrian BER
@@ -88,15 +89,20 @@ public class JMPlayer {
         this.mplayerPath = mplayerPath;
     }
 
-    public void open(String path) throws IOException {
+    public void open(String theMediaPath) throws IOException {
         if (mplayerProcess != null) {
             close(); //close up the old player if one is already open
         }
 
         // start MPlayer as an external process
-        String command = mplayerPath + " " + mplayerOptions + " \"" + path + "\"";
-        logger.log(Level.INFO, "Starting MPlayer process: {0}", command);
-        mplayerProcess = Runtime.getRuntime().exec(command);
+        String mediaCmd = null;
+        if (ZoneServerUtility.getInstance().isWindows()) {
+            mediaCmd = mplayerPath + " " + mplayerOptions + " \"" + theMediaPath + "\"";
+        } else {
+            mediaCmd = mplayerPath + " " + mplayerOptions + " " + theMediaPath;
+        }
+        logger.log(Level.INFO, "Starting MPlayer process: {0}", mediaCmd);
+        mplayerProcess = Runtime.getRuntime().exec(mediaCmd);
 
         // create the piped streams where to redirect the standard output and error of MPlayer
         // specify a bigger pipesize
@@ -113,7 +119,7 @@ public class JMPlayer {
 
         // wait to start playing
         waitForAnswer("Starting playback...");
-        logger.log(Level.INFO, "Started playing file {0}", path);
+        logger.log(Level.INFO, "Started playing file {0}", theMediaPath);
     }
 
     public void close() {

@@ -89,7 +89,7 @@ public class ZonePlaylist extends HttpServlet {
             if (opt.equals("add")) {
                 String path = req.getParameter("path");
                 if ((path != null) && (!path.equals(""))) {
-                    MediaPlayer.getInstance().addMediaUrl(URLDecoder.decode(path));
+                    MediaPlayer.getInstance().addMediaUrl(URLDecoder.decode(path, "UTF-8"));
                     resp.getOutputStream().println("added " + path + "to playlist");
                 }
             } else if (opt.equals("remove") || opt.equals("toggle")) {
