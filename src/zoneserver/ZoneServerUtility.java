@@ -59,9 +59,19 @@ public class ZoneServerUtility implements ProgramConstants {
      * @param theServerAddress String
      * @param theFilePath String
      */
-    public void updateMediaDirEntry(ServerType theServerType, String theServerAddress, String theFilePath) {
+    public String updateMediaDirEntry(ServerType theServerType, String theServerAddress, String theFilePath) {
+        if (theServerAddress.contains("/")) {
+            theServerAddress = theServerAddress.replace("/", "");
+        }
+        if (!theFilePath.startsWith("/")) {
+            theFilePath = "/" + theFilePath;
+        }
         if (!theFilePath.endsWith("/")) {
             theFilePath = theFilePath.concat("/");
+        }
+        if (theFilePath.contains("\\")) {
+            theFilePath = theFilePath.replaceAll("\\\\+", "/");
+            //see http://www.java-forums.org/advanced-java/16452-replacing-backslashes-string-object.html#post59396
         }
         String aNewServerEntryStr = theServerType.toString() + "://" + theServerAddress + theFilePath;
 
@@ -76,16 +86,18 @@ public class ZoneServerUtility implements ProgramConstants {
                 String aCurrentServerPrefStr = ZoneServerUtility.getInstance().loadStringPref(aKeyToFetch, "");
                 if (aNewServerEntryStr.equals(aCurrentServerPrefStr)) {
                     ZoneServerUtility.getInstance().saveStringPref(aKeyToFetch, aNewServerEntryStr);
-                    return;
+                    break;
                 }
                 if ((i + 1) >= aNumberOfEntries) {
                     String aKeyToPut = prefMediaDirPrefixKeyStr + String.valueOf((i + 1));
                     ZoneServerUtility.getInstance().saveIntPref(prefMediaDirNumberKeyStr, (aNumberOfEntries + 1));
                     ZoneServerUtility.getInstance().saveStringPref(aKeyToPut, aNewServerEntryStr);
-                    return;
+                    break;
                 }
             }
         }
+
+        return aNewServerEntryStr;
     }
 
     /**

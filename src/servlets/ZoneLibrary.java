@@ -100,10 +100,6 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
                 if ((newServerType != null) && (newServerAddress != null)
                         && (!newServerAddress.equals("")) && (newFilePath != null)
                         && (!newFilePath.equals(""))) { //all variables are set
-
-                    newFilePath = newFilePath.replaceAll("\\\\+", "/");
-                    //see http://www.java-forums.org/advanced-java/16452-replacing-backslashes-string-object.html#post59396
-
                     ZoneServerUtility.getInstance().updateMediaDirEntry(newServerType, newServerAddress, newFilePath);
                     resp.getWriter().println("added root media entry: "
                             + newServerType.toString() + "://" + newServerAddress
