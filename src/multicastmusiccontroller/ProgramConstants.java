@@ -28,5 +28,5 @@ public interface ProgramConstants {
     public static final String prefMediaDirPrefixKeyStr = "media-dir-";
     //for network media
     public static final String prefixUriStr = "://";
-    public static enum ServerType {smb}
+    public static enum FileSystemType {file, smb}
 }

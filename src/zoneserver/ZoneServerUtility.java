@@ -55,15 +55,17 @@ public class ZoneServerUtility implements ProgramConstants {
     /**
      * helper method for automatically determining where to store and/or overwrite
      * previously stored root media path
-     * @param theServerType ServerType
+     * @param theServerType FileSystemType
      * @param theServerAddress String
      * @param theFilePath String
      */
-    public String updateMediaDirEntry(ServerType theServerType, String theServerAddress, String theFilePath) {
+    public String updateMediaDirEntry(FileSystemType theServerType, String theServerAddress, String theFilePath) {
         if (theServerAddress.contains("/")) {
             theServerAddress = theServerAddress.replace("/", "");
         }
-        if (!theFilePath.startsWith("/")) {
+        if (!theFilePath.startsWith("/")
+                && (!ZoneServerUtility.getInstance().isWindows())
+                && (theServerType == FileSystemType.file)) {
             theFilePath = "/" + theFilePath;
         }
         if (!theFilePath.endsWith("/")) {
@@ -73,7 +75,13 @@ public class ZoneServerUtility implements ProgramConstants {
             theFilePath = theFilePath.replaceAll("\\\\+", "/");
             //see http://www.java-forums.org/advanced-java/16452-replacing-backslashes-string-object.html#post59396
         }
-        String aNewServerEntryStr = theServerType.toString() + "://" + theServerAddress + theFilePath;
+
+        String aNewServerEntryStr = null;
+        if (theServerType == FileSystemType.file) {
+            aNewServerEntryStr = theFilePath;
+        } else {
+            aNewServerEntryStr = theServerType.toString() + "://" + theServerAddress + theFilePath;
+        }
 
         int aNumberOfEntries = ZoneServerUtility.getInstance().loadIntPref(prefMediaDirNumberKeyStr, 0);
         if (aNumberOfEntries <= 0) {

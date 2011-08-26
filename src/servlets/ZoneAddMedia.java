@@ -41,15 +41,17 @@ public class ZoneAddMedia extends HttpServlet implements ProgramConstants {
         out.println("<div data-role='content'>");
 
         out.println("<form id='zoneAddMediaPageForm' name='zoneAddMediaPageForm'>");
-        out.println("<div data-role='fieldcontain'>"
+        out.println("<div data-role='fieldcontain' id='newServerTypeContain'>"
                 + "<label for='newServerType'>Choose Server Type:</label>"
-                + "<select name='newServerType' id='newServerType' data-native-menu='false'>"
-                + "<option value='" + ServerType.smb.toString() + "'>Windows Share</option>"
+                + "<select name='newServerType' id='newServerType'"
+                + "data-native-menu='false' onchange='libraryAddPage_changeSelectHandler(this.id);'>"
+                + "<option value='" + FileSystemType.smb.toString() + "'>Windows Share</option>"
+                + "<option value='" + FileSystemType.file.toString() + "'>Local Filesytem</option>"
                 + "</select></div>");
-        out.println("<div data-role='fieldcontain'>"
+        out.println("<div data-role='fieldcontain' id='newServerAddressContain'>"
                 + "<label for='newServerAddress'>Server Address:</label>"
                 + "<input type='text' name='newServerAddress' id='newServerAddress' placeholder='myserver' /></div>");
-        out.println("<div data-role='fieldcontain'>"
+        out.println("<div data-role='fieldcontain' id='newFilePathContain'>"
                 + "<label for='newFilePath'>Root Path of Media:</label>"
                 + "<input type='text' name='newFilePath' id='newFilePath' placeholder='/path/to/media/' /></div>");
         out.println("</form>");

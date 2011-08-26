@@ -55,8 +55,8 @@ public class MediaPlayer implements ProgramConstants {
     protected String formatMediaUrl(String theMediaUrlStr) {
         //format windowsy backslashes if this is on a windows host and samba-ing
         if (ZoneServerUtility.getInstance().isWindows()
-                && theMediaUrlStr.contains(ServerType.smb.toString().concat(prefixUriStr))) {
-            theMediaUrlStr = theMediaUrlStr.replace(ServerType.smb.toString().concat(prefixUriStr), "\\\\");
+                && theMediaUrlStr.contains(FileSystemType.smb.toString().concat(prefixUriStr))) {
+            theMediaUrlStr = theMediaUrlStr.replace(FileSystemType.smb.toString().concat(prefixUriStr), "\\\\");
             theMediaUrlStr = theMediaUrlStr.replace("/", "\\");
         }
 

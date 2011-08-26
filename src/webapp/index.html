@@ -22,11 +22,12 @@
         </style>
 
         <script type="text/javascript">
-            //servlet url constants
+            //servlet constants that should be loaded dynamically. eventually?
             var kZoneSelectionPage = "/servlets/list-zones";
             var kPlayListPageUrlStr = "/servlets/playlist";
             var kLibraryServlet = "/servlets/library";
             var kLibraryAddDialog = "/servlets/library-add-dialog";
+            var kLocalFileSystem = "file";
             
             //playlist
             function playList_addMediaPath(theMediaPath) {
@@ -119,13 +120,26 @@
                 });
             }
             
-            //other
+            //media library add page
             function libraryAddPage_Load() {
                 $.mobile.changePage(kLibraryAddDialog, {
                     transition: "pop",
                     reloadPage: true
                 });
             }
+            function libraryAddPage_changeSelectHandler(elementId) {
+                var jQElementId = "#"+elementId;
+                var selectedValue = $(jQElementId + " option:selected").val();
+                if (selectedValue === kLocalFileSystem) {
+                    document.getElementById("newServerAddressContain").style.display = "none";
+                    document.getElementById("newServerAddress").value = "localhost";
+                } else {
+                    document.getElementById("newServerAddressContain").style.display = "";
+                    document.getElementById("newServerAddress").value = "";
+                }
+            }
+            
+            //other
             function zoneSelection_Load() {
                 $.mobile.changePage(kZoneSelectionPage, {
                     reloadPage: true

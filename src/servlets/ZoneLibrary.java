@@ -4,11 +4,17 @@
 package servlets;
 
 import contrib.CIFSNetworkInterface;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -38,8 +44,10 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
 
         String aPathStr = req.getParameter("path");
         if ((aPathStr != null) && (!aPathStr.equals(""))) { //make sure this contains a path
+            aPathStr = URLDecoder.decode(aPathStr, "UTF-8");
             out.println("<ul id='zoneLibraryList' data-role='listview' data-theme='d'>");
-            if (aPathStr.contains(ServerType.smb.toString().concat(prefixUriStr))) { //CIFS share
+            if (aPathStr.contains(FileSystemType.smb.toString().concat(prefixUriStr))) { //CIFS share
+                System.out.println("viewing samba dir: " + aPathStr);
                 HashMap<SmbFile, String> aCIFSDirMap = CIFSNetworkInterface.getInstance().getDirectoryList(aPathStr);
                 int i = 0;
                 for (SmbFile iSmbFile : aCIFSDirMap.keySet()) {
@@ -56,7 +64,33 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
                     out.println("</li>");
                     i++;
                 }
-            } //end CIFS share formatting
+            } else { //local filesytem
+                System.out.println("viewing local dir: " + aPathStr);
+                File dir = new File(aPathStr);
+                File[] files = dir.listFiles();
+                if (files != null) {
+                    for (int i = 0; i < files.length; i++) {
+                        out.println("<li id='zoneLibraryListItem_" + i + "'>");
+                        String tempFilePathStr = files[i].getAbsolutePath();
+                        if (tempFilePathStr.contains("\\")) {
+                            tempFilePathStr = tempFilePathStr.replaceAll("\\\\+", "/");
+                            //see http://www.java-forums.org/advanced-java/16452-replacing-backslashes-string-object.html#post59396
+                        }
+                        String tempFileNameStr = files[i].getName();
+                        System.out.println(tempFileNameStr + " - " + tempFilePathStr);
+                        if (files[i].isDirectory()) {
+                            out.println("<a href='javascript:mediaLibrary_LoadDirectory(&quot;"
+                                    + URLEncoder.encode(tempFilePathStr, "UTF-8") + "&quot;);'>"
+                                    + tempFileNameStr + "</a>");
+                        } else {
+                            out.println("<a href='javascript:playList_addMediaPath_NoRedir(&quot;"
+                                    + URLEncoder.encode(tempFilePathStr, "UTF-8") + "&quot;);'>"
+                                    + tempFileNameStr + "</a>");
+                        }
+                        out.println("</li>");
+                    }
+                }
+            }
             out.println("</ul>");
         } else { //no path set, load various base preference directories
             out.println("<ul id='zoneLibraryList' data-role='listview' data-split-icon='delete' data-split-theme='d'>");
@@ -94,16 +128,14 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
         String opt = req.getParameter("opt"); //what are we doing?
         if ((opt != null) && (!opt.equals(""))) { //non-empty
             if (opt.equals("addMediaRoot")) {
-                ServerType newServerType = ServerType.valueOf(req.getParameter("newServerType"));
+                FileSystemType newServerType = FileSystemType.valueOf(req.getParameter("newServerType"));
                 String newServerAddress = req.getParameter("newServerAddress");
                 String newFilePath = req.getParameter("newFilePath");
                 if ((newServerType != null) && (newServerAddress != null)
                         && (!newServerAddress.equals("")) && (newFilePath != null)
                         && (!newFilePath.equals(""))) { //all variables are set
-                    ZoneServerUtility.getInstance().updateMediaDirEntry(newServerType, newServerAddress, newFilePath);
-                    resp.getWriter().println("added root media entry: "
-                            + newServerType.toString() + "://" + newServerAddress
-                            + newFilePath);
+                    String newRootMediaEntryStr = ZoneServerUtility.getInstance().updateMediaDirEntry(newServerType, newServerAddress, newFilePath);
+                    resp.getWriter().println("added root media entry: " + newRootMediaEntryStr);
                 }
             } else if (opt.equals("removeMediaRoot")) {
                 String aRootIndexStr = req.getParameter("index");
