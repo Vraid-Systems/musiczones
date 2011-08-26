@@ -29,4 +29,5 @@ public interface ProgramConstants {
     //for network media
     public static final String prefixUriStr = "://";
     public static enum FileSystemType {file, smb}
+    public static int mediaPerPage = 40;
 }

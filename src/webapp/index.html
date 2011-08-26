@@ -28,7 +28,7 @@
             var kLibraryServlet = "/servlets/library";
             var kLibraryAddDialog = "/servlets/library-add-dialog";
             var kLocalFileSystem = "file";
-            
+
             //playlist
             function playList_addMediaPath(theMediaPath) {
                 $.post(kPlayListPageUrlStr, {
@@ -83,7 +83,7 @@
                     playList_Load();
                 });
             }
-            
+
             //media library
             function mediaLibrary_addMediaRoot() {
                 var newServerTypeVal = $("#newServerType option:selected").val();
@@ -104,11 +104,20 @@
                     reloadPage: true
                 });
             }
+            function mediaLibrary_LoadDirectoryPage(theDirectoryPath, thePageInt) {
+                $.mobile.changePage(kLibraryServlet, {
+                    data: {
+                        page: thePageInt,
+                        path: theDirectoryPath
+                    },
+                    reloadPage: true
+                });
+            }
             function mediaLibrary_Load() {
                 $.mobile.changePage(kLibraryServlet, {
                     reloadPage: true
                 });
-            } 
+            }
             function mediaLibrary_removeMediaRoot(elementId) {
                 var jhasha = elementId.split("_");
                 var mediaRootIndexInt = jhasha[(jhasha.length - 1)];
@@ -119,7 +128,7 @@
                     mediaLibrary_Load();
                 });
             }
-            
+
             //media library add page
             function libraryAddPage_Load() {
                 $.mobile.changePage(kLibraryAddDialog, {
@@ -138,7 +147,7 @@
                     document.getElementById("newServerAddress").value = "";
                 }
             }
-            
+
             //other
             function zoneSelection_Load() {
                 $.mobile.changePage(kZoneSelectionPage, {
