@@ -84,16 +84,12 @@ public class MediaPlayer implements ProgramConstants {
     }
 
     public void removeIndex(int theIndex) {
-        stop(vmp_PlayBackIndexInt);
-        if ((vmp_PlayBackIndexInt >= 0) && (theIndex <= vmp_PlayBackIndexInt)) {
-            vmp_PlayBackIndexInt--;
-        }
+        stop(-1);
         vmp_MediaUrlStringArray.remove(theIndex);
     }
 
     public void shufflePlayList() {
-        stop(vmp_PlayBackIndexInt);
-        if ((vmp_MediaUrlStringArray != null) //TODO: something about this does not work
+        if ((vmp_MediaUrlStringArray != null)
                 && (vmp_MediaUrlStringArray.size() > 0)
                 && (vmp_PlayBackIndexInt < vmp_MediaUrlStringArray.size())) {
             if (vmp_PlayBackIndexInt >= 0) {

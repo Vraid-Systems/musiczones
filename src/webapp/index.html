@@ -27,6 +27,7 @@
             var kPlayListPageUrlStr = "/servlets/playlist";
             var kLibraryServlet = "/servlets/library";
             var kLibraryAddDialog = "/servlets/library-add-dialog";
+            var kLibrarySearchDialog = "/servlets/library-search-dialog";
             var kLocalFileSystem = "file";
 
             //playlist
@@ -146,6 +147,35 @@
                     document.getElementById("newServerAddressContain").style.display = "";
                     document.getElementById("newServerAddress").value = "";
                 }
+            }
+            
+            //media library search page
+            function librarySearchPage_Load() {
+                $.mobile.changePage(kLibrarySearchDialog, {
+                    transition: "pop",
+                    reloadPage: true
+                });
+            }
+            function librarySearchPage_Search() {
+                var searchTypeValue = $("#searchType option:selected").val();
+                var searchKeywords = $("#searchKeywords").val();
+                $.mobile.changePage(kLibraryServlet, {
+                    data: {
+                        type: searchTypeValue,
+                        keywords: searchKeywords
+                    },
+                    reloadPage: true
+                });
+            }
+            function librarySearchPage_SearchMore(searchTypeStr, searchKeywordsStr, nextPageInt) {
+                $.mobile.changePage(kLibraryServlet, {
+                    data: {
+                        type: searchTypeStr,
+                        keywords: searchKeywordsStr,
+                        page: nextPageInt
+                    },
+                    reloadPage: true
+                });
             }
 
             //other

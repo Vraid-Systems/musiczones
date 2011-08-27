@@ -18,6 +18,7 @@ import servlets.ZoneLibrary;
 import servlets.ZonePlaylist;
 import servlets.ZoneSelection;
 import servlets.ZoneAddMedia;
+import servlets.ZoneSearchMedia;
 
 /**
  * @author Mort Bay Consulting / Codehaus / Eclipse
@@ -45,6 +46,7 @@ public class JettyWebServer implements ProgramConstants {
         webAppContext.addServlet(new ServletHolder(new ZonePlaylist()), "/servlets/playlist");
         webAppContext.addServlet(new ServletHolder(new ZoneLibrary()), "/servlets/library");
         webAppContext.addServlet(new ServletHolder(new ZoneAddMedia()), "/servlets/library-add-dialog");
+        webAppContext.addServlet(new ServletHolder(new ZoneSearchMedia()), "/servlets/library-search-dialog");
         jws_serverInstance.addHandler(webAppContext);
     }
 

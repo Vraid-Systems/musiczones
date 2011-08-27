@@ -30,4 +30,6 @@ public interface ProgramConstants {
     public static final String prefixUriStr = "://";
     public static enum FileSystemType {file, smb}
     public static int mediaPerPage = 40;
+    //for searching media
+    public static enum MediaSearchType {all, any}
 }
