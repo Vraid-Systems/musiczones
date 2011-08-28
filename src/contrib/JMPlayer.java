@@ -95,14 +95,7 @@ public class JMPlayer {
         }
 
         // start MPlayer as an external process
-        String mediaCmd = null;
-        if (ZoneServerUtility.getInstance().isWindows()) {
-            mediaCmd = mplayerPath + " " + mplayerOptions + " \"" + theMediaPath + "\"";
-        } else {
-            mediaCmd = mplayerPath + " " + mplayerOptions + " " + theMediaPath;
-        }
-        logger.log(Level.INFO, "Starting MPlayer process: {0}", mediaCmd);
-        mplayerProcess = Runtime.getRuntime().exec(mediaCmd);
+        mplayerProcess = new ProcessBuilder(mplayerPath, mplayerOptions, theMediaPath).start();
 
         // create the piped streams where to redirect the standard output and error of MPlayer
         // specify a bigger pipesize

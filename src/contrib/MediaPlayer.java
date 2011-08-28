@@ -62,10 +62,16 @@ public class MediaPlayer implements ProgramConstants {
             theMediaUrlStr = theMediaUrlStr.replace("/", "\\");
         }
 
-        //replace spaces with backslash then space (to escape) if not windows
-        if (!ZoneServerUtility.getInstance().isWindows()) {
-            theMediaUrlStr = theMediaUrlStr.replace(" ", "\\ ");
-            theMediaUrlStr = "\"" + theMediaUrlStr + "\"";
+        //replace spaces with escaper chars if not windows
+        if ((!ZoneServerUtility.getInstance().isWindows())) {
+            //%20 if this is an external URL
+            if (theMediaUrlStr.contains(FileSystemType.smb.toString().concat(prefixUriStr))) {
+                theMediaUrlStr = theMediaUrlStr.replace(" ", "%20");
+            } else {
+                //theMediaUrlStr = theMediaUrlStr.replace("-", "\\-");
+                //theMediaUrlStr = theMediaUrlStr.replace(" ", "\\ ");
+                //theMediaUrlStr = "\"" + theMediaUrlStr + "\"";
+            }
         }
 
         return theMediaUrlStr;
@@ -94,6 +100,8 @@ public class MediaPlayer implements ProgramConstants {
                                 Logger.getLogger(MulticastMusicController.class.getName()).log(Level.SEVERE, null, ex);
                             }
 
+                            System.out.println("earlier: " + earlierPlayBackIndexInt);
+                            System.out.println("later: " + laterPlayBackIndexInt);
                             if (earlierPlayBackIndexInt == laterPlayBackIndexInt) {
                                 next(); //auto-advance to the next playlist item
                             }
