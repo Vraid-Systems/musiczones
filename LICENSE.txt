@@ -1,3 +1,6 @@
+This software is licensed under a BSD-Type License
+See: http://www.opensource.org/licenses/bsd-license.php
+
 Copyright (c) 2011, Jason Zerbe
 All rights reserved.
 
@@ -8,8 +11,8 @@ Redistribution and use in source and binary forms, with or without modification,
 3rd Party Code/Library License NOTES
 JCIFS = LGPL v2.1 (library must remain free and available)
 Jetty = Apache License v2.0
-JMPlayer (Java interface class for MPlayer) = non-licensed? almost entirely by Adrian BER
-SHA1 = almost public domain (see class file)
+JMPlayer & ProcessExit (Java interface class for MPlayer) = non-licensed? almost entirely by Adrian BER
+SHA1 = almost public domain (see class file src/contrib/AeSimpleSHA1.java)
 Spring Framework = Apache License v2.0
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

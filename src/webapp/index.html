@@ -29,6 +29,7 @@
             var kLibraryAddDialog = "/servlets/library-add-dialog";
             var kLibrarySearchDialog = "/servlets/library-search-dialog";
             var kLocalFileSystem = "file";
+            var kInternetRadio = "radio";
 
             //playlist
             function playList_addMediaPath(theMediaPath) {
@@ -88,11 +89,13 @@
             //media library
             function mediaLibrary_addMediaRoot() {
                 var newServerTypeVal = $("#newServerType option:selected").val();
+                var newMediaNameVal = $("#newMediaName").val();
                 var newServerAddressVal = $("#newServerAddress").val();
                 var newFilePathVal = $("#newFilePath").val();
                 $.post(kLibraryServlet, {
                     opt: "addMediaRoot",
                     newServerType: newServerTypeVal,
+                    newMediaName: newMediaNameVal,
                     newServerAddress: newServerAddressVal,
                     newFilePath: newFilePathVal
                 }, function(data) {
@@ -140,9 +143,11 @@
             function libraryAddPage_changeSelectHandler(elementId) {
                 var jQElementId = "#"+elementId;
                 var selectedValue = $(jQElementId + " option:selected").val();
-                if (selectedValue === kLocalFileSystem) {
+                
+                //kLocalFileSystem OR kInternetRadio
+                if ((selectedValue === kLocalFileSystem) || (selectedValue === kInternetRadio)) {
                     document.getElementById("newServerAddressContain").style.display = "none";
-                    document.getElementById("newServerAddress").value = "localhost";
+                    document.getElementById("newServerAddress").value = "empty";
                 } else {
                     document.getElementById("newServerAddressContain").style.display = "";
                     document.getElementById("newServerAddress").value = "";

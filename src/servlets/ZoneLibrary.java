@@ -208,9 +208,11 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
             List<String> rootPathStrList = ZoneServerUtility.getInstance().getMediaDirEntries();
             if (rootPathStrList.size() > 0) {
                 for (String aRootPathStr : rootPathStrList) {
-                    mediaFileElementsOutput(aRootPathStr, searchKeywordArray,
-                            (searchTypeStr.equals(MediaSearchType.all.toString())),
-                            startIndexInt, endIndexInt, out);
+                    if (!aRootPathStr.contains(FileSystemType.radio.toString().concat(prefixUriStr))) { //should not be a radio link
+                        mediaFileElementsOutput(aRootPathStr, searchKeywordArray,
+                                (searchTypeStr.equals(MediaSearchType.all.toString())),
+                                startIndexInt, endIndexInt, out);
+                    }
                 }
             }
             out.println("</ul>");
@@ -226,12 +228,35 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
             if (rootPathStrList.size() > 0) {
                 int i = 0;
                 for (String rootPathStr : rootPathStrList) {
-                    out.println("<li id='zoneLibraryListItem_" + i + "'>");
-                    out.println("<a href='javascript:mediaLibrary_LoadDirectory(&quot;"
-                            + URLEncoder.encode(rootPathStr, "UTF-8") + "&quot;);'>" + rootPathStr + "</a>"
-                            + "<a href='javascript:mediaLibrary_removeMediaRoot(&quot;zoneLibraryListItem_"
-                            + i + "&quot;);' data-role='button' data-icon='delete'>Remove</a>");
-                    out.println("</li>");
+                    //pre-process strings from db
+                    System.out.println("from db: " + rootPathStr);
+                    String rootMediaNameStr = rootPathStr;
+                    if (rootPathStr.contains(mediaNameSplitStr)) {
+                        String[] rootPathStrArray = rootPathStr.split(mediaNameSplitStr);
+                        rootMediaNameStr = rootPathStrArray[0];
+                        System.out.println("rootMediaNameStr=" + rootMediaNameStr);
+                        if (!rootPathStr.contains(FileSystemType.radio.toString().concat(prefixUriStr))) {
+                            rootPathStr = rootPathStrArray[1];
+                        }
+                        System.out.println("rootPathStr=" + rootPathStr);
+                    }
+
+                    //output root list elements
+                    if (rootPathStr.contains(FileSystemType.radio.toString().concat(prefixUriStr))) {
+                        out.println("<li id='zoneLibraryListItem_" + i + "'>");
+                        out.println("<a href='javascript:playList_addMediaPath_NoRedir(&quot;"
+                                + URLEncoder.encode(rootPathStr, "UTF-8") + "&quot;);'>" + rootMediaNameStr + "</a>"
+                                + "<a href='javascript:mediaLibrary_removeMediaRoot(&quot;zoneLibraryListItem_"
+                                + i + "&quot;);' data-role='button' data-icon='delete'>Remove</a>");
+                        out.println("</li>");
+                    } else {
+                        out.println("<li id='zoneLibraryListItem_" + i + "'>");
+                        out.println("<a href='javascript:mediaLibrary_LoadDirectory(&quot;"
+                                + URLEncoder.encode(rootPathStr, "UTF-8") + "&quot;);'>" + rootMediaNameStr + "</a>"
+                                + "<a href='javascript:mediaLibrary_removeMediaRoot(&quot;zoneLibraryListItem_"
+                                + i + "&quot;);' data-role='button' data-icon='delete'>Remove</a>");
+                        out.println("</li>");
+                    }
                     i++;
                 }
             }
@@ -264,12 +289,13 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
         if ((opt != null) && (!opt.equals(""))) { //non-empty
             if (opt.equals("addMediaRoot")) {
                 FileSystemType newServerType = FileSystemType.valueOf(req.getParameter("newServerType"));
+                String newMediaName = req.getParameter("newMediaName");
                 String newServerAddress = req.getParameter("newServerAddress");
                 String newFilePath = req.getParameter("newFilePath");
-                if ((newServerType != null) && (newServerAddress != null)
-                        && (!newServerAddress.equals("")) && (newFilePath != null)
-                        && (!newFilePath.equals(""))) { //all variables are set
-                    String newRootMediaEntryStr = ZoneServerUtility.getInstance().updateMediaDirEntry(newServerType, newServerAddress, newFilePath);
+                if ((newServerType != null) && (newMediaName != null) && (!newMediaName.equals(""))
+                        && (newServerAddress != null) && (!newServerAddress.equals(""))
+                        && (newFilePath != null) && (!newFilePath.equals(""))) { //all variables are set
+                    String newRootMediaEntryStr = ZoneServerUtility.getInstance().updateMediaDirEntry(newServerType, newMediaName, newServerAddress, newFilePath);
                     resp.getWriter().println("added root media entry: " + newRootMediaEntryStr);
                 }
             } else if (opt.equals("removeMediaRoot")) {

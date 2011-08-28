@@ -28,8 +28,9 @@ public interface ProgramConstants {
     public static final String prefMediaDirPrefixKeyStr = "media-dir-";
     //for network media
     public static final String prefixUriStr = "://";
-    public static enum FileSystemType {file, smb}
+    public static enum FileSystemType {file, smb, radio}
     public static int mediaPerPage = 40;
+    public static final String mediaNameSplitStr = ":&&:";
     //for searching media
     public static enum MediaSearchType {all, any}
     //playback related stuffs

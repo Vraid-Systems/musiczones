@@ -33,8 +33,6 @@ public class ZoneSearchMedia extends HttpServlet implements ProgramConstants {
 
         out.println("<div data-role='content'>");
 
-        out.println("<form id='zoneSearchMediaForm' name='zoneSearchMediaForm'>");
-
         out.println("<div data-role='fieldcontain' id='searchKeywordsContain'>"
                 + "<label for='searchKeywords'>Search Keywords:</label>"
                 + "<input type='text' name='searchKeywords' id='searchKeywords' placeholder='Filename Keyword' /></div>");
@@ -45,8 +43,6 @@ public class ZoneSearchMedia extends HttpServlet implements ProgramConstants {
                 + "<option value='" + MediaSearchType.all.toString() + "'>All Keywords</option>"
                 + "<option value='" + MediaSearchType.any.toString() + "'>Any Keywords</option>"
                 + "</select></div>");
-
-        out.println("</form>");
 
         out.println("</div>"); //end page content
 

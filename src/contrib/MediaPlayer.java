@@ -55,6 +55,12 @@ public class MediaPlayer implements ProgramConstants {
     }
 
     protected String formatMediaUrl(String theMediaUrlStr) {
+        //remove media name if exists
+        if (theMediaUrlStr.contains(mediaNameSplitStr)) {
+            String[] theMediaUrlStrArray = theMediaUrlStr.split(mediaNameSplitStr);
+            theMediaUrlStr = theMediaUrlStrArray[1];
+        }
+
         //format windowsy backslashes if this is on a windows host and samba-ing
         if (ZoneServerUtility.getInstance().isWindows()
                 && theMediaUrlStr.contains(FileSystemType.smb.toString().concat(prefixUriStr))) {
@@ -62,15 +68,16 @@ public class MediaPlayer implements ProgramConstants {
             theMediaUrlStr = theMediaUrlStr.replace("/", "\\");
         }
 
-        //replace spaces with escaper chars if not windows
+        //remove radio prefix if it exists in media string
+        if (theMediaUrlStr.contains(FileSystemType.radio.toString().concat(prefixUriStr))) {
+            theMediaUrlStr = theMediaUrlStr.replace(FileSystemType.radio.toString().concat(prefixUriStr), "");
+        }
+
+        //replace spaces with escape chars if not windows
         if ((!ZoneServerUtility.getInstance().isWindows())) {
             //%20 if this is an external URL
             if (theMediaUrlStr.contains(FileSystemType.smb.toString().concat(prefixUriStr))) {
                 theMediaUrlStr = theMediaUrlStr.replace(" ", "%20");
-            } else {
-                //theMediaUrlStr = theMediaUrlStr.replace("-", "\\-");
-                //theMediaUrlStr = theMediaUrlStr.replace(" ", "\\ ");
-                //theMediaUrlStr = "\"" + theMediaUrlStr + "\"";
             }
         }
 

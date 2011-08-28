@@ -59,7 +59,7 @@ public class ZoneServerUtility implements ProgramConstants {
      * @param theServerAddress String
      * @param theFilePath String
      */
-    public String updateMediaDirEntry(FileSystemType theServerType, String theServerAddress, String theFilePath) {
+    public String updateMediaDirEntry(FileSystemType theServerType, String theMediaName, String theServerAddress, String theFilePath) {
         if (theServerAddress.contains("/")) {
             theServerAddress = theServerAddress.replace("/", "");
         }
@@ -68,7 +68,8 @@ public class ZoneServerUtility implements ProgramConstants {
                 && (theServerType == FileSystemType.file)) {
             theFilePath = "/" + theFilePath;
         }
-        if (!theFilePath.endsWith("/")) {
+        if ((!theFilePath.endsWith("/"))
+                && (theServerType != FileSystemType.radio)) {
             theFilePath = theFilePath.concat("/");
         }
         if (theFilePath.contains("\\")) {
@@ -79,9 +80,14 @@ public class ZoneServerUtility implements ProgramConstants {
         String aNewServerEntryStr = null;
         if (theServerType == FileSystemType.file) {
             aNewServerEntryStr = theFilePath;
+        } else if (theServerType == FileSystemType.radio) {
+            aNewServerEntryStr = FileSystemType.radio.toString().concat(prefixUriStr) + theFilePath;
         } else {
             aNewServerEntryStr = theServerType.toString() + "://" + theServerAddress + theFilePath;
         }
+
+        aNewServerEntryStr = theMediaName + mediaNameSplitStr + aNewServerEntryStr;
+        System.out.println("new media string to add: " + aNewServerEntryStr);
 
         int aNumberOfEntries = ZoneServerUtility.getInstance().loadIntPref(prefMediaDirNumberKeyStr, 0);
         if (aNumberOfEntries <= 0) {
@@ -176,8 +182,19 @@ public class ZoneServerUtility implements ProgramConstants {
     }
 
     public String getFileNameFromUrlStr(String theUrlString) {
-        String fileStr = theUrlString.substring((theUrlString.lastIndexOf("/") + 1));
-        return fileStr;
+        System.out.println("url to format: " + theUrlString);
+        String returnStr = null;
+        if (theUrlString.contains(FileSystemType.radio.toString().concat(prefixUriStr))) {
+            if (theUrlString.contains(mediaNameSplitStr)) {
+                String[] theUrlStringArray = theUrlString.split(mediaNameSplitStr);
+                returnStr = theUrlStringArray[0];
+            } else {
+                returnStr = theUrlString;
+            }
+        } else {
+            returnStr = theUrlString.substring((theUrlString.lastIndexOf("/") + 1));
+        }
+        return returnStr;
     }
 
     public boolean isWindows() {
