@@ -167,7 +167,7 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
             aPathStr = URLDecoder.decode(aPathStr, "UTF-8");
 
             out.println("<a href='javascript:mediaLibrary_LoadDirectoryPage(&quot;"
-                    + aPathStr + "&quot;, " + aNextPageInt + ");' data-role='button' data-icon='grid'>Load More</a>");
+                    + aPathStr + "&quot;, " + aNextPageInt + ");' data-role='button' data-icon='grid'>More</a>");
 
             out.println("</div>" //end header
                     + "<div data-role='content'>"); //and start content
@@ -198,7 +198,7 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
             //output end of header and start of content
             out.println("<a href='javascript:librarySearchPage_SearchMore(&quot;"
                     + searchTypeStr + "&quot;, &quot;" + rawSearchKeywordsStr
-                    + "&quot;, " + aNextPageInt + ");' data-role='button' data-icon='grid'>Load More</a>");
+                    + "&quot;, " + aNextPageInt + ");' data-role='button' data-icon='grid'>More</a>");
 
             out.println("</div>" //end header
                     + "<div data-role='content'>"); //and start content

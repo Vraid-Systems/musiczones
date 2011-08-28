@@ -27,7 +27,7 @@ public class ZoneSearchMedia extends HttpServlet implements ProgramConstants {
 
         out.println("<div data-role='header' data-theme='b' data-position='fixed'>");
         out.println("<a href='javascript:mediaLibrary_Load();' data-icon='delete'>Cancel</a>");
-        out.println("<h1>Search Media Files</h1> ");
+        out.println("<h1>Search Media</h1> ");
         out.println("<a href='javascript:librarySearchPage_Search();' data-icon='search'>Search</a>");
         out.println("</div>");
 

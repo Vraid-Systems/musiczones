@@ -4,6 +4,8 @@
  */
 package contrib;
 
+import contrib.ProcessExit.ProcessExitDetector;
+import contrib.ProcessExit.ProcessListener;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -60,9 +62,10 @@ public class MediaPlayer implements ProgramConstants {
             theMediaUrlStr = theMediaUrlStr.replace("/", "\\");
         }
 
-        //replace spaces with %20 if not windows
+        //replace spaces with backslash then space (to escape) if not windows
         if (!ZoneServerUtility.getInstance().isWindows()) {
-            theMediaUrlStr = theMediaUrlStr.replace(" ", "%20");
+            theMediaUrlStr = theMediaUrlStr.replace(" ", "\\ ");
+            theMediaUrlStr = "\"" + theMediaUrlStr + "\"";
         }
 
         return theMediaUrlStr;
@@ -73,7 +76,32 @@ public class MediaPlayer implements ProgramConstants {
         try {
             String theMediaStr = formatMediaUrl(vmp_MediaUrlStringArray.get(vmp_PlayBackIndexInt));
             System.out.println("will now play: " + theMediaStr);
-            vmp_JMPlayer.open(theMediaStr);
+            Process aMPlayerProcess = vmp_JMPlayer.open(theMediaStr);
+
+            if (aMPlayerProcess != null) { //attach a process exit handler, if process started correctly
+                final int earlierPlayBackIndexInt = vmp_PlayBackIndexInt;
+
+                ProcessExitDetector processExitDetector = new ProcessExitDetector(aMPlayerProcess);
+                processExitDetector.addProcessListener(new ProcessListener() {
+
+                    public void processFinished(Process process) {
+                        if (vmp_PlayBackIndexInt > -1) { //if not manually stopped ...
+                            final int laterPlayBackIndexInt = vmp_PlayBackIndexInt;
+
+                            try {
+                                Thread.sleep(lengthOfPauseBetweenMediaInSeconds * 1000);
+                            } catch (InterruptedException ex) {
+                                Logger.getLogger(MulticastMusicController.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+
+                            if (earlierPlayBackIndexInt == laterPlayBackIndexInt) {
+                                next(); //auto-advance to the next playlist item
+                            }
+                        }
+                    }
+                });
+                processExitDetector.start();
+            }
         } catch (IOException ex) {
             Logger.getLogger(MediaPlayer.class.getName()).log(Level.SEVERE, null, ex);
         }

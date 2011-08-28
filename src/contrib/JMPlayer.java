@@ -65,7 +65,7 @@ public class JMPlayer {
     /** The path to the MPlayer executable. */
     private String mplayerPath = "mplayer";
     /** Options passed to MPlayer. */
-    private String mplayerOptions = "-slave -idle";
+    private String mplayerOptions = "-slave";//"-slave -idle";
     /** The process corresponding to MPlayer. */
     private Process mplayerProcess;
     /** The standard input for MPlayer where you can send commands. */
@@ -89,7 +89,7 @@ public class JMPlayer {
         this.mplayerPath = mplayerPath;
     }
 
-    public void open(String theMediaPath) throws IOException {
+    public Process open(String theMediaPath) throws IOException {
         if (mplayerProcess != null) {
             close(); //close up the old player if one is already open
         }
@@ -120,6 +120,9 @@ public class JMPlayer {
         // wait to start playing
         waitForAnswer("Starting playback...");
         logger.log(Level.INFO, "Started playing file {0}", theMediaPath);
+
+        //for use in attaching an exit handler in the calling class
+        return mplayerProcess;
     }
 
     public void close() {
@@ -140,10 +143,6 @@ public class JMPlayer {
 
     public void togglePlay() {
         execute("pause");
-    }
-
-    public boolean isPlaying() {
-        return mplayerProcess != null;
     }
 
     public long getTimePosition() {

@@ -32,4 +32,6 @@ public interface ProgramConstants {
     public static int mediaPerPage = 40;
     //for searching media
     public static enum MediaSearchType {all, any}
+    //playback related stuffs
+    public static int lengthOfPauseBetweenMediaInSeconds = 2;
 }
