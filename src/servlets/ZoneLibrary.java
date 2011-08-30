@@ -67,16 +67,22 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
      * @param theOutput PrintWriter
      * @throws UnsupportedEncodingException
      */
-    private void mediaFileElementsOutput(String thePathStr, String[] theKeywordStrArray,
-            boolean matchAllKeywords, int theStartIndexInt, int theEndIndexInt, PrintWriter theOutput) throws UnsupportedEncodingException {
+    private int mediaFileElementsOutput(String thePathStr, String[] theKeywordStrArray,
+            boolean matchAllKeywords, int theStartIndexInt, int theEndIndexInt,
+            int theStartOffsetIndexInt, PrintWriter theOutput) throws UnsupportedEncodingException {
         if (thePathStr.contains(FileSystemType.smb.toString().concat(prefixUriStr))) { //CIFS share
             System.out.println("viewing samba dir: " + thePathStr);
             HashMap<SmbFile, String> aCIFSDirMap = CIFSNetworkInterface.getInstance().getDirectoryList(thePathStr);
-            if (aCIFSDirMap != null) {
-                int i = 0;
+            if (aCIFSDirMap == null) {
+                return theStartOffsetIndexInt;
+            } else {
+                int i = theStartOffsetIndexInt;
                 for (SmbFile iSmbFile : aCIFSDirMap.keySet()) {
-                    if (stringMatchesKeywords(iSmbFile.getName(), theKeywordStrArray, matchAllKeywords)) {
-                        if ((i >= theStartIndexInt) && (i <= theEndIndexInt)) {
+                    if ((i >= theStartIndexInt) && (i <= theEndIndexInt)) {
+                        if ((theKeywordStrArray != null) && (aCIFSDirMap.get(iSmbFile).equals(""))) { //recurse into directory during search
+                            i = mediaFileElementsOutput(iSmbFile.getPath(), theKeywordStrArray,
+                                    matchAllKeywords, theStartIndexInt, theEndIndexInt, i, theOutput);
+                        } else if (stringMatchesKeywords(iSmbFile.getName(), theKeywordStrArray, matchAllKeywords)) {
                             theOutput.println("<li class='zoneLibraryListItem_" + i + "'>");
                             if (aCIFSDirMap.get(iSmbFile).equals("")) { //this is a directory
                                 theOutput.println("<a href='javascript:mediaLibrary_LoadDirectory(&quot;"
@@ -91,29 +97,34 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
                             i++;
                         } else {
                             i++;
-                            continue;
                         }
                     } else {
-                        continue;
+                        i++;
                     }
                 }
+                return i;
             }
         } else { //local filesytem
             System.out.println("viewing local dir: " + thePathStr);
             File dir = new File(thePathStr);
             File[] files = dir.listFiles();
-            if (files != null) {
-                int i = 0;
+            if (files == null) {
+                return theStartOffsetIndexInt;
+            } else {
+                int i = theStartOffsetIndexInt;
                 for (File aFile : files) {
-                    String tempFileNameStr = aFile.getName();
-                    if (stringMatchesKeywords(tempFileNameStr, theKeywordStrArray, matchAllKeywords)) {
-                        if ((i >= theStartIndexInt) && (i <= theEndIndexInt)) {
+                    if ((i >= theStartIndexInt) && (i <= theEndIndexInt)) {
+                        String tempFilePathStr = aFile.getAbsolutePath();
+                        if (tempFilePathStr.contains("\\")) {
+                            tempFilePathStr = tempFilePathStr.replaceAll("\\\\+", "/");
+                            //see http://www.java-forums.org/advanced-java/16452-replacing-backslashes-string-object.html#post59396
+                        }
+                        String tempFileNameStr = aFile.getName();
+                        if ((theKeywordStrArray != null) && aFile.isDirectory()) { //recurse into directory during search
+                            i = mediaFileElementsOutput(tempFilePathStr, theKeywordStrArray,
+                                    matchAllKeywords, theStartIndexInt, theEndIndexInt, i, theOutput);
+                        } else if (stringMatchesKeywords(tempFileNameStr, theKeywordStrArray, matchAllKeywords)) {
                             theOutput.println("<li class='zoneLibraryListItem_" + i + "'>");
-                            String tempFilePathStr = aFile.getAbsolutePath();
-                            if (tempFilePathStr.contains("\\")) {
-                                tempFilePathStr = tempFilePathStr.replaceAll("\\\\+", "/");
-                                //see http://www.java-forums.org/advanced-java/16452-replacing-backslashes-string-object.html#post59396
-                            }
                             if (aFile.isDirectory()) {
                                 theOutput.println("<a href='javascript:mediaLibrary_LoadDirectory(&quot;"
                                         + URLEncoder.encode(tempFilePathStr, "UTF-8") + "&quot;);'>"
@@ -127,12 +138,12 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
                             i++;
                         } else {
                             i++;
-                            continue;
                         }
                     } else {
-                        continue;
+                        i++;
                     }
                 }
+                return i;
             }
         }
     }
@@ -173,7 +184,7 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
                     + "<div data-role='content'>"); //and start content
 
             out.println("<ul id='zoneLibraryList' data-role='listview' data-theme='d'>");
-            mediaFileElementsOutput(aPathStr, null, false, startIndexInt, endIndexInt, out);
+            mediaFileElementsOutput(aPathStr, null, false, startIndexInt, endIndexInt, 0, out);
             out.println("</ul>");
         } else if ((req.getParameter("type") != null)
                 && (!req.getParameter("type").equals(""))) { //keywords search
@@ -208,10 +219,23 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
             List<String> rootPathStrList = ZoneServerUtility.getInstance().getMediaDirEntries();
             if (rootPathStrList.size() > 0) {
                 for (String aRootPathStr : rootPathStrList) {
+                    //pre-process strings from db
+                    System.out.println("from db: " + aRootPathStr);
+                    String rootMediaNameStr = aRootPathStr;
+                    if (aRootPathStr.contains(mediaNameSplitStr)) {
+                        String[] rootPathStrArray = aRootPathStr.split(mediaNameSplitStr);
+                        rootMediaNameStr = rootPathStrArray[0];
+                        System.out.println("rootMediaNameStr=" + rootMediaNameStr);
+                        if (!aRootPathStr.contains(FileSystemType.radio.toString().concat(prefixUriStr))) {
+                            aRootPathStr = rootPathStrArray[1];
+                        }
+                        System.out.println("rootPathStr=" + aRootPathStr);
+                    }
+
                     if (!aRootPathStr.contains(FileSystemType.radio.toString().concat(prefixUriStr))) { //should not be a radio link
                         mediaFileElementsOutput(aRootPathStr, searchKeywordArray,
                                 (searchTypeStr.equals(MediaSearchType.all.toString())),
-                                startIndexInt, endIndexInt, out);
+                                startIndexInt, endIndexInt, 0, out);
                     }
                 }
             }
