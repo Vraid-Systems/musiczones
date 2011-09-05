@@ -232,20 +232,28 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
                     File iFile = aFileLinkedList.pop();
                     if ((!iFile.isDirectory()) && stringMatchesKeywords(iFile.getName(), theKeywordStrArray, matchAllKeywords)) {
                         if ((i >= theStartIndexInt) && (i <= theEndIndexInt)) {
+                            String tempFilePathStr = iFile.getAbsolutePath();
+                            if (tempFilePathStr.contains("\\")) {
+                                tempFilePathStr = tempFilePathStr.replaceAll("\\\\+", "/");
+                                //see http://www.java-forums.org/advanced-java/16452-replacing-backslashes-string-object.html#post59396
+                            }
+
+                            String tempFileNameStr = iFile.getName();
+
                             theOutput.println("<li class='zoneLibraryListItem_" + i + "'>");
                             if (iFile.isDirectory()) { //have directory handling in case something goes wrong
                                 try {
                                     theOutput.println("<a href='javascript:mediaLibrary_LoadDirectory(&quot;"
-                                            + URLEncoder.encode(iFile.getPath(), "UTF-8") + "&quot;);'>"
-                                            + iFile.getName() + "</a>");
+                                            + URLEncoder.encode(tempFilePathStr, "UTF-8") + "&quot;);'>"
+                                            + tempFileNameStr + "</a>");
                                 } catch (UnsupportedEncodingException ex) {
                                     Logger.getLogger(ZoneLibrary.class.getName()).log(Level.WARNING, null, ex);
                                 }
                             } else {
                                 try {
                                     theOutput.println("<a href='javascript:playList_addMediaPath_NoRedir(&quot;"
-                                            + URLEncoder.encode(iFile.getPath(), "UTF-8") + "&quot;);'>"
-                                            + iFile.getName() + "</a>");
+                                            + URLEncoder.encode(tempFilePathStr, "UTF-8") + "&quot;);'>"
+                                            + tempFileNameStr + "</a>");
                                 } catch (UnsupportedEncodingException ex) {
                                     Logger.getLogger(ZoneLibrary.class.getName()).log(Level.WARNING, null, ex);
                                 }
