@@ -4,7 +4,8 @@
 package contrib;
 
 import java.net.MalformedURLException;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jcifs.smb.SmbException;
@@ -31,9 +32,9 @@ public class CIFSNetworkInterface {
      * create a SmbFile from the passed path, and after making sure it is
      * indeed a directory, grab the directory contents
      * @param thePath String
-     * @return HashMap<String, String>
+     * @return ArrayList<SmbFile>
      */
-    public HashMap<SmbFile, String> getDirectoryList(String thePath) {
+    public ArrayList<SmbFile> getDirectoryList(String thePath) {
         SmbFile aSmbFile = null;
         try {
             aSmbFile = new SmbFile(thePath);
@@ -62,29 +63,9 @@ public class CIFSNetworkInterface {
                 return null;
             }
 
-            HashMap<SmbFile, String> returnFileMap = new HashMap<SmbFile, String>();
-            for (SmbFile iSmbFile : aSmbFileArray) {
-                boolean iSmbFileIsDirectory = false;
-                try {
-                    iSmbFileIsDirectory = iSmbFile.isDirectory();
-                } catch (SmbException ex) {
-                    Logger.getLogger(CIFSNetworkInterface.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-                if (iSmbFileIsDirectory) {
-                    returnFileMap.put(iSmbFile, "");
-                } else {
-                    int aIndexOfExtension = iSmbFile.getName().lastIndexOf(".");
-                    if (aIndexOfExtension > 0) {
-                        String aFileExtensionStr = iSmbFile.getName().substring(aIndexOfExtension);
-                        returnFileMap.put(iSmbFile, aFileExtensionStr);
-                    } else {
-                        returnFileMap.put(iSmbFile, "");
-                    }
-                }
-            }
-
-            return returnFileMap;
+            ArrayList<SmbFile> returnFileList = new ArrayList<SmbFile>();
+            returnFileList.addAll(Arrays.asList(aSmbFileArray));
+            return returnFileList;
         } else {
             return null;
         }

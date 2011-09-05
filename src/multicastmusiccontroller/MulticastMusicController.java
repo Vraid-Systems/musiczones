@@ -12,7 +12,6 @@ import java.util.logging.Logger;
 import zoneserver.ZoneServerUtility;
 
 /**
- *
  * @author Jason Zerbe
  */
 public class MulticastMusicController implements ProgramConstants {
@@ -29,7 +28,7 @@ public class MulticastMusicController implements ProgramConstants {
 
     /**
      * master start of application
-     * 
+     *
      * @param args the command line arguments
      */
     public static void main(String[] args) {
@@ -94,7 +93,7 @@ public class MulticastMusicController implements ProgramConstants {
         JettyWebServer theWebServer = JettyWebServer.getInstance(global_webInterfacePortInt);
         theWebServer.startServer();
 
-        //then get bring up the zone controller logic
+        //then bring up the zone controller logic
         ZoneServerLogic mainServerLogic = ZoneServerLogic.getInstance();
         if ((global_ZoneName != null) && (!global_ZoneName.isEmpty())) {
             mainServerLogic.setZoneName(global_ZoneName);
@@ -112,6 +111,9 @@ public class MulticastMusicController implements ProgramConstants {
         theZoneServer.startServer();
     }
 
+    /**
+     * dump error and exit when unable to find MPlayer
+     */
     public static void MPlayerNotFound() {
         System.out.println(global_MPlayerNotFoundStr);
         System.out.println(global_usageStr);
