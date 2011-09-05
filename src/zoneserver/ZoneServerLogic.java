@@ -33,9 +33,9 @@ public class ZoneServerLogic implements ProgramConstants {
     protected String zsl_ZoneUUID = null;
     protected String zsl_ZoneName = null;
     protected MulticastClient zsl_MulticastClient = null;
-    protected HashMap<String, String> zsl_ZoneInfoMap = null;
-    protected HashMap<String, Calendar> zsl_ZoneExpireMap = null;
-    protected HashMap<String, String> zsl_ZoneDashBoardMap = null;
+    protected HashMap<String, String> zsl_ZoneInfoMap = null; //<UUID, Zone Name>
+    protected HashMap<String, Calendar> zsl_ZoneExpireMap = null; //<UUID, expire Calendar>
+    protected HashMap<String, String> zsl_ZoneDashBoardMap = null; //<UUID, dashboard url>
     protected Timer zsl_Timer = null;
 
     protected ZoneServerLogic() {
@@ -119,6 +119,11 @@ public class ZoneServerLogic implements ProgramConstants {
                     if ((!zsl_ZoneDashBoardMap.containsKey(firstLineArray[1]))
                             || isExpiredZone(firstLineArray[1], allNodesExpireInterval)) {
                         zsl_ZoneDashBoardMap.put(firstLineArray[1], thirdLineArray[1]);
+                    }
+                    if ((!zsl_ZoneExpireMap.containsKey(firstLineArray[1]))
+                            || isExpiredZone(firstLineArray[1], allNodesExpireInterval)) {
+                        Calendar theCurrentCalendar = new GregorianCalendar();
+                        zsl_ZoneExpireMap.put(firstLineArray[1], theCurrentCalendar);
                     }
                 }
             }
