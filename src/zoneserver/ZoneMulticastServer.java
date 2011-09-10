@@ -83,10 +83,22 @@ public class ZoneMulticastServer implements ProgramConstants {
                 Logger.getLogger(ZoneMulticastServer.class.getName()).log(Level.SEVERE, null, ex);
             }
 
-            try {
-                serverSocket.joinGroup(groupAddress);
-            } catch (IOException ex) {
-                Logger.getLogger(ZoneMulticastServer.class.getName()).log(Level.SEVERE, null, ex);
+            boolean serverHasJoinedGroup = false;
+            while (!serverHasJoinedGroup) {
+                try {
+                    serverSocket.joinGroup(groupAddress);
+                } catch (IOException ex) { //unable to join multicast group
+                    Logger.getLogger(ZoneMulticastServer.class.getName()).log(Level.SEVERE, null, ex);
+
+                    try { //pause for 2 seconds to give NIC a chance to connect
+                        Thread.sleep(2000);
+                    } catch (InterruptedException ex1) {
+                        Logger.getLogger(ZoneMulticastServer.class.getName()).log(Level.SEVERE, null, ex1);
+                    }
+
+                    continue; //try again
+                }
+                serverHasJoinedGroup = true; //finally connected to the group
             }
 
             System.out.println("ZMS started and listening to group");
