@@ -1,0 +1,30 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:		mmc
+# Required-Start:	$all
+# Required-Stop:	$all
+# Default-Start:	2 3 4 5
+# Default-Stop:		0 1 6
+# Short-Description:	MulticastMediaController
+### END INIT INFO
+
+# This script requires screen and openjdk-jre installed
+# If running this headless I would suggest openjdk-6-jre-headless instead
+# apt-get install screen openjdk-6-jre-headless
+# To install this startup script: sudo insserv mmc
+
+case "$1" in
+  start)
+	screen -dmS mmc java -jar /srv/mmc.jar --zone-name=hp-brk
+	;;
+  stop)
+	kill `pidof SCREEN`
+	;;
+
+  *)
+	echo "Usage: /etc/init.d/mmc {start|stop}" >&2
+	exit 1
+esac
+
+exit 0
