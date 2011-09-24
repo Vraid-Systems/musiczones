@@ -10,14 +10,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import zoneserver.ZoneServerLogic;
+import zonecontrol.ZoneServerLogic;
 
 /**
  * @author Jason Zerbe
  */
-public class ZoneSelection extends HttpServlet {
+public class ZoneSelection_Page extends HttpServlet {
 
-    public ZoneSelection() {
+    public ZoneSelection_Page() {
     }
 
     @Override

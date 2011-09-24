@@ -1,7 +1,7 @@
 /*
  * multicast client used for sending control datagrams to LAN group
  */
-package multicastmusiccontroller;
+package zonecontrol;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -11,42 +11,44 @@ import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import multicastmusiccontroller.ProgramConstants;
 
 /**
  *
  * @author Jason Zerbe
  */
-public class MulticastClient implements ProgramConstants {
+public class ZoneMulticastClient implements ProgramConstants {
 
     private MulticastSocket clientSocket = null;
 
-    public MulticastClient() {
+    public ZoneMulticastClient() {
         try {
             clientSocket = new MulticastSocket();
         } catch (IOException ex) {
-            Logger.getLogger(MulticastClient.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ZoneMulticastClient.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         try {
             clientSocket.setTimeToLive(groupTTL);
         } catch (IOException ex) {
-            Logger.getLogger(MulticastClient.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ZoneMulticastClient.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        System.out.println("MulticastClient socket ready");
+        System.out.println("ZMC socket ready");
     }
 
     /**
      * send a network command (string) to the currently connected multicast group
      * @param theNetworkCommand String
+     * @param printNetworkCommandToTerminal boolean
      * @return boolean - was the command sent?
      */
-    public boolean sendNetworkCommand(final String theNetworkCommand) {
+    public boolean sendNetworkCommand(final String theNetworkCommand, boolean printNetworkCommandToTerminal) {
         final InetAddress groupAddress;
         try {
             groupAddress = InetAddress.getByName(groupAddressStr);
         } catch (UnknownHostException ex) {
-            Logger.getLogger(MulticastClient.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ZoneMulticastClient.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
 
@@ -55,11 +57,13 @@ public class MulticastClient implements ProgramConstants {
         try {
             clientSocket.send(pack);
         } catch (IOException ex) {
-            Logger.getLogger(MulticastClient.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ZoneMulticastClient.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
 
-        System.out.println(new Date().toString() + " - sent:\n" + theNetworkCommand);
+        if (printNetworkCommandToTerminal) {
+            System.out.println(new Date().toString() + " - sent:\n" + theNetworkCommand);
+        }
 
         return true;
     }

@@ -14,9 +14,9 @@ import multicastmusiccontroller.ProgramConstants;
 /**
  * @author Jason Zerbe
  */
-public class ZoneSearchMedia extends HttpServlet implements ProgramConstants {
+public class ZoneSearchMedia_DialogPage extends HttpServlet implements ProgramConstants {
 
-    public ZoneSearchMedia() {
+    public ZoneSearchMedia_DialogPage() {
     }
 
     @Override

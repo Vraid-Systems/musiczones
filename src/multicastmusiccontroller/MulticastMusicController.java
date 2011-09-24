@@ -5,11 +5,11 @@ package multicastmusiccontroller;
 
 import contrib.JettyWebServer;
 import java.io.File;
-import zoneserver.ZoneServerLogic;
-import zoneserver.ZoneMulticastServer;
+import zonecontrol.ZoneServerLogic;
+import zonecontrol.ZoneMulticastServer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import zoneserver.ZoneServerUtility;
+import zonecontrol.ZoneServerUtility;
 
 /**
  * @author Jason Zerbe
@@ -106,9 +106,12 @@ public class MulticastMusicController implements ProgramConstants {
             Logger.getLogger(MulticastMusicController.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        //after everything else is in place, finally ready to start accepting control packets
-        ZoneMulticastServer theZoneServer = new ZoneMulticastServer();
+        //after networking is in place, finally ready to start accepting control packets
+        ZoneMulticastServer theZoneServer = new ZoneMulticastServer(false); //debug off
         theZoneServer.startServer();
+
+        //start up the library indexing service
+        ZoneLibraryIndex.getInstance();
     }
 
     /**

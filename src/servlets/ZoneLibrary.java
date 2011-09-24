@@ -12,6 +12,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -24,7 +25,8 @@ import javax.servlet.http.HttpServletResponse;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import multicastmusiccontroller.ProgramConstants;
-import zoneserver.ZoneServerUtility;
+import multicastmusiccontroller.ZoneLibraryIndex;
+import zonecontrol.ZoneServerUtility;
 
 /**
  * @author Jason Zerbe
@@ -32,36 +34,6 @@ import zoneserver.ZoneServerUtility;
 public class ZoneLibrary extends HttpServlet implements ProgramConstants {
 
     public ZoneLibrary() {
-    }
-
-    /**
-     * function to see if the given string matches (all or any) of the keyword array strings
-     * returns true if no keywords are given
-     * 
-     * @param theString String
-     * @param theKeywords String[]
-     * @param matchAllKeywords boolean
-     * @return boolean - did theString match the keywords appropriately?
-     */
-    private boolean stringMatchesKeywords(String theString, String[] theKeywords, boolean matchAllKeywords) {
-        if ((theString == null) || (theKeywords == null)) {
-            return true;
-        } else {
-            theString = theString.toLowerCase(Locale.ENGLISH);
-            boolean matchOneKeywordBoolean = false;
-            for (String aKeyword : theKeywords) {
-                aKeyword = aKeyword.toLowerCase(Locale.ENGLISH);
-                if ((matchAllKeywords) && (!theString.contains(aKeyword))) {
-                    return false;
-                } else if (theString.contains(aKeyword)) {
-                    matchOneKeywordBoolean = true;
-                }
-            }
-            if ((!matchAllKeywords) && (!matchOneKeywordBoolean)) {
-                return false;
-            }
-            return true;
-        }
     }
 
     /**
@@ -74,7 +46,7 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
      */
     private int mediaElementsBrowseOutput(String thePathStr, int theStartIndexInt, int theEndIndexInt, PrintWriter theOutput) {
         if (thePathStr.contains(FileSystemType.smb.toString().concat(prefixUriStr))) { //CIFS share
-            System.out.println("viewing samba dir: " + thePathStr);
+            System.out.println("viewing samba dir [" + theStartIndexInt + " - " + theEndIndexInt + "]: " + thePathStr);
             ArrayList<SmbFile> aCIFSDirList = CIFSNetworkInterface.getInstance().getDirectoryList(thePathStr);
             if (aCIFSDirList == null) {
                 return 0;
@@ -115,7 +87,7 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
                 return (i + 1);
             }
         } else { //local filesytem
-            System.out.println("viewing local dir: " + thePathStr);
+            System.out.println("viewing local dir [" + theStartIndexInt + " - " + theEndIndexInt + "]: " + thePathStr);
             File dir = new File(thePathStr);
             File[] files = dir.listFiles();
             LinkedList<File> aFileLinkedList = new LinkedList<File>();
@@ -165,117 +137,6 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
     }
 
     /**
-     * output elements to theOutput when browsing directory
-     * @param thePathStr String - the directory to browse (should never have backslashes, and be terminated with a trailing forward slash)
-     * @param theKeywordStrArray String[] - an array of keywords to search for
-     * @param matchAllKeywords boolean - should all the keywords match?
-     * @param theStartIndexInt Integer
-     * @param theEndIndexInt Integer
-     * @param theOutput PrintWriter - the servlet response output object
-     * @return Integer - how many search results are there?
-     * @throws SmbException
-     */
-    private int mediaFileElementsSearchOutput(String thePathStr, String[] theKeywordStrArray,
-            boolean matchAllKeywords, int theStartIndexInt, int theEndIndexInt, PrintWriter theOutput) throws SmbException {
-        if (thePathStr.contains(FileSystemType.smb.toString().concat(prefixUriStr))) { //CIFS share
-            System.out.println("viewing samba dir: " + thePathStr);
-            ArrayList<SmbFile> aCIFSDirList = CIFSNetworkInterface.getInstance().getDirectoryList(thePathStr);
-            int i = theStartIndexInt; //search result count
-            if (aCIFSDirList == null) {
-                return i;
-            } else {
-                LinkedList<SmbFile> aSmbFileLinkedList = new LinkedList<SmbFile>(aCIFSDirList);
-                while (aSmbFileLinkedList.peek() != null) {
-                    SmbFile iSmbFile = aSmbFileLinkedList.pop();
-                    if ((!iSmbFile.isDirectory()) && stringMatchesKeywords(iSmbFile.getName(), theKeywordStrArray, matchAllKeywords)) {
-                        if ((i >= theStartIndexInt) && (i <= theEndIndexInt)) {
-                            theOutput.println("<li class='zoneLibraryListItem_" + i + "'>");
-                            if (iSmbFile.isDirectory()) { //have directory handling in case something goes wrong
-                                try {
-                                    theOutput.println("<a href='javascript:mediaLibrary_LoadDirectory(&quot;"
-                                            + URLEncoder.encode(iSmbFile.getPath(), "UTF-8") + "&quot;);'>"
-                                            + iSmbFile.getName() + "</a>");
-                                } catch (UnsupportedEncodingException ex) {
-                                    Logger.getLogger(ZoneLibrary.class.getName()).log(Level.WARNING, null, ex);
-                                }
-                            } else {
-                                try {
-                                    theOutput.println("<a href='javascript:playList_addMediaPath_NoRedir(&quot;"
-                                            + URLEncoder.encode(iSmbFile.getPath(), "UTF-8") + "&quot;);'>"
-                                            + iSmbFile.getName() + "</a>");
-                                } catch (UnsupportedEncodingException ex) {
-                                    Logger.getLogger(ZoneLibrary.class.getName()).log(Level.WARNING, null, ex);
-                                }
-                            }
-                            theOutput.println("</li>");
-                        }
-                        i++;
-                    } else if (iSmbFile.isDirectory()) { //recurse into directory during search
-                        for (SmbFile tempSmbFile : CIFSNetworkInterface.getInstance().getDirectoryList(iSmbFile.getPath())) {
-                            aSmbFileLinkedList.push(tempSmbFile);
-                        }
-                    }
-                }
-                return (i + 1);
-            }
-        } else { //local filesytem
-            System.out.println("viewing local dir: " + thePathStr);
-            File dir = new File(thePathStr);
-            File[] files = dir.listFiles();
-            LinkedList<File> aFileLinkedList = new LinkedList<File>();
-            aFileLinkedList.addAll(Arrays.asList(files));
-            int i = 0; //search result count
-            if (aFileLinkedList.size() <= 0) {
-                return i;
-            } else {
-                while (aFileLinkedList.peek() != null) {
-                    File iFile = aFileLinkedList.pop();
-                    if ((!iFile.isDirectory()) && stringMatchesKeywords(iFile.getName(), theKeywordStrArray, matchAllKeywords)) {
-                        if ((i >= theStartIndexInt) && (i <= theEndIndexInt)) {
-                            String tempFilePathStr = iFile.getAbsolutePath();
-                            if (tempFilePathStr.contains("\\")) {
-                                tempFilePathStr = tempFilePathStr.replaceAll("\\\\+", "/");
-                                //see http://www.java-forums.org/advanced-java/16452-replacing-backslashes-string-object.html#post59396
-                            }
-
-                            String tempFileNameStr = iFile.getName();
-
-                            theOutput.println("<li class='zoneLibraryListItem_" + i + "'>");
-                            if (iFile.isDirectory()) { //have directory handling in case something goes wrong
-                                try {
-                                    theOutput.println("<a href='javascript:mediaLibrary_LoadDirectory(&quot;"
-                                            + URLEncoder.encode(tempFilePathStr, "UTF-8") + "&quot;);'>"
-                                            + tempFileNameStr + "</a>");
-                                } catch (UnsupportedEncodingException ex) {
-                                    Logger.getLogger(ZoneLibrary.class.getName()).log(Level.WARNING, null, ex);
-                                }
-                            } else {
-                                try {
-                                    theOutput.println("<a href='javascript:playList_addMediaPath_NoRedir(&quot;"
-                                            + URLEncoder.encode(tempFilePathStr, "UTF-8") + "&quot;);'>"
-                                            + tempFileNameStr + "</a>");
-                                } catch (UnsupportedEncodingException ex) {
-                                    Logger.getLogger(ZoneLibrary.class.getName()).log(Level.WARNING, null, ex);
-                                }
-                            }
-                            theOutput.println("</li>");
-                        }
-                        i++;
-                    } else if (iFile.isDirectory()) { //recurse into directory during search
-                        File[] tempFileArray = iFile.listFiles();
-                        if (tempFileArray != null) {
-                            for (File tempFile : tempFileArray) {
-                                aFileLinkedList.push(tempFile);
-                            }
-                        }
-                    }
-                }
-                return (i + 1);
-            }
-        }
-    }
-
-    /**
      * GET request handler for the ZoneLibrary
      * @param req HttpServletRequest
      * @param resp HttpServletResponse
@@ -316,6 +177,7 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
         } else if ((req.getParameter("type") != null)
                 && (!req.getParameter("type").equals(""))) { //keywords search
             //get search parameters
+            boolean searchMatchAllKeywords = false; //default to any keyword matching (OR)
             String searchTypeStr = MediaSearchType.any.toString(); //default to any keyword matching (OR)
             if (req.getParameter("type").equals(MediaSearchType.all.toString())) {
                 searchTypeStr = MediaSearchType.all.toString();
@@ -341,38 +203,23 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
             out.println("</div>" //end header
                     + "<div data-role='content'>"); //and start content
 
-            //get all root media dirs and search for keywords, combine results and list out
+            //get search results from library index
             out.println("<ul id='zoneLibraryList' data-role='listview' data-theme='d'>");
-            List<String> rootPathStrList = ZoneServerUtility.getInstance().getMediaDirEntries();
-            if (rootPathStrList.size() > 0) {
-                int fileListCountOffset = 0;
-                for (String aRootPathStr : rootPathStrList) {
-                    //pre-process strings from db
-                    System.out.println("from db: " + aRootPathStr);
-                    String rootMediaNameStr = aRootPathStr;
-                    if (aRootPathStr.contains(mediaNameSplitStr)) {
-                        String[] rootPathStrArray = aRootPathStr.split(mediaNameSplitStr);
-                        rootMediaNameStr = rootPathStrArray[0];
-                        System.out.println("rootMediaNameStr=" + rootMediaNameStr);
-                        if (!aRootPathStr.contains(FileSystemType.radio.toString().concat(prefixUriStr))) {
-                            aRootPathStr = rootPathStrArray[1];
-                        }
-                        System.out.println("rootPathStr=" + aRootPathStr);
-                    }
-
-                    if (!aRootPathStr.contains(FileSystemType.radio.toString().concat(prefixUriStr))) { //should not be a radio link
-                        try {
-                            fileListCountOffset = mediaFileElementsSearchOutput(aRootPathStr, searchKeywordArray,
-                                    (searchTypeStr.equals(MediaSearchType.all.toString())),
-                                    (startIndexInt + fileListCountOffset), (endIndexInt + fileListCountOffset), out);
-                        } catch (SmbException ex) {
-                            Logger.getLogger(ZoneLibrary.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
+            HashMap<String, String> outputFilesMap = ZoneLibraryIndex.getInstance().getFiles(
+                    searchKeywordArray, searchMatchAllKeywords, startIndexInt, endIndexInt); //<full file path, filename>
+            if (outputFilesMap.size() > 0) {
+                int i = 0;
+                for (String aTempFullFilePath : outputFilesMap.keySet()) {
+                    out.println("<li class='zoneLibraryListItem_" + i + "'>");
+                    out.println("<a href='javascript:playList_addMediaPath_NoRedir(&quot;"
+                            + aTempFullFilePath + "&quot;);'>"
+                            + outputFilesMap.get(aTempFullFilePath) + "</a>");
+                    out.println("</li>");
+                    i++;
                 }
             }
             out.println("</ul>");
-        } else { //no path set, load various base preference directories
+        } else { //no path or type set, load various base directories from saved preferences
             out.println("<a href='javascript:librarySearchPage_Load();'"
                     + "data-role='button' data-icon='search'>Search</a>");
 

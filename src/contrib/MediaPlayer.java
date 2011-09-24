@@ -14,7 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import multicastmusiccontroller.MulticastMusicController;
 import multicastmusiccontroller.ProgramConstants;
-import zoneserver.ZoneServerUtility;
+import zonecontrol.ZoneServerUtility;
 
 /**
  * @author Jason Zerbe

@@ -5,7 +5,7 @@
  * THIS IS A SINGLETON IMPLEMENTATION see:
  * http://www.javaworld.com/javaworld/jw-04-2003/jw-0425-designpatterns.html
  */
-package zoneserver;
+package zonecontrol;
 
 import contrib.JettyWebServer;
 import contrib.MediaPlayer;
@@ -20,7 +20,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import multicastmusiccontroller.MulticastClient;
 import multicastmusiccontroller.ProgramConstants;
 
 /**
@@ -32,11 +31,12 @@ public class ZoneServerLogic implements ProgramConstants {
     private static ZoneServerLogic zsl_SingleInstance = null;
     protected String zsl_ZoneUUID = null;
     protected String zsl_ZoneName = null;
-    protected MulticastClient zsl_MulticastClient = null;
+    protected ZoneMulticastClient zsl_MulticastClient = null;
     protected HashMap<String, String> zsl_ZoneInfoMap = null; //<UUID, Zone Name>
     protected HashMap<String, Calendar> zsl_ZoneExpireMap = null; //<UUID, expire Calendar>
     protected HashMap<String, String> zsl_ZoneDashBoardMap = null; //<UUID, dashboard url>
     protected Timer zsl_Timer = null;
+    protected boolean printNetworkCommandToTerminal = false;
 
     protected ZoneServerLogic() {
         zsl_ZoneName = "zone controller ";
@@ -49,7 +49,7 @@ public class ZoneServerLogic implements ProgramConstants {
         zsl_ZoneInfoMap = new HashMap<String, String>();
         zsl_ZoneExpireMap = new HashMap<String, Calendar>();
         zsl_ZoneDashBoardMap = new HashMap<String, String>();
-        zsl_MulticastClient = new MulticastClient();
+        zsl_MulticastClient = new ZoneMulticastClient();
         System.out.println("ZSL started");
 
         zsl_Timer = new Timer();
@@ -138,7 +138,7 @@ public class ZoneServerLogic implements ProgramConstants {
     public void sendAddMediaUrlStr(String theMediaUrlStr) {
         String theMediaUrlPacketStr = "zone=" + zsl_ZoneUUID + "\n"
                 + "mediaurl=" + theMediaUrlStr + "\n";
-        zsl_MulticastClient.sendNetworkCommand(theMediaUrlPacketStr);
+        zsl_MulticastClient.sendNetworkCommand(theMediaUrlPacketStr, printNetworkCommandToTerminal);
     }
 
     /**
@@ -177,7 +177,7 @@ public class ZoneServerLogic implements ProgramConstants {
         String theResponseStr = "zone=" + zsl_ZoneUUID + "\n"
                 + "name=" + zsl_ZoneName + "\n"
                 + "dashboard=" + aZoneDashBoardStr + "\n";
-        zsl_MulticastClient.sendNetworkCommand(theResponseStr);
+        zsl_MulticastClient.sendNetworkCommand(theResponseStr, printNetworkCommandToTerminal);
     }
 
     /**

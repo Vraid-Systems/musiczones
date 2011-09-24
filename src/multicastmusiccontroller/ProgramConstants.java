@@ -32,6 +32,7 @@ public interface ProgramConstants {
     public static int mediaPerPage = 30;
     public static final String mediaNameSplitStr = ":&&:";
     //for searching media
+    public static final int searchIndexRefreshInterval = 60;
     public static enum MediaSearchType {all, any}
     //playback related stuffs
     public static int lengthOfPauseBetweenMediaInSeconds = 2;

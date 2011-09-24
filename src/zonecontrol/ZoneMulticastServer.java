@@ -8,7 +8,7 @@
  * this class is largely based off of
  * http://www.roseindia.net/java/example/java/net/udp/UDPMulticastServer.shtml
  */
-package zoneserver;
+package zonecontrol;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -28,8 +28,10 @@ public class ZoneMulticastServer implements ProgramConstants {
 
     protected Thread serverThread = null;
     protected MulticastSocket serverSocket = null;
+    protected boolean printNetworkCommandToTerminal = false;
 
-    public ZoneMulticastServer() {
+    public ZoneMulticastServer(boolean printNetworkCommandToTerminal) {
+        this.printNetworkCommandToTerminal = printNetworkCommandToTerminal;
     }
 
     public void startServer() {
@@ -115,7 +117,9 @@ public class ZoneMulticastServer implements ProgramConstants {
                 final String theNetworkCommand = new String(buffer).trim().toLowerCase();
 
                 //notify via the console of datagram
-                System.out.println(new Date().toString() + " - recieved:\n" + theNetworkCommand);
+                if (printNetworkCommandToTerminal) {
+                    System.out.println(new Date().toString() + " - recieved:\n" + theNetworkCommand);
+                }
 
                 // process said request
                 ZoneServerLogic.getInstance().processNetworkCommand(theNetworkCommand);

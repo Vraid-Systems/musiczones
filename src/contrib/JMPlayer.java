@@ -14,7 +14,7 @@ import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import zoneserver.ZoneServerUtility;
+import zonecontrol.ZoneServerUtility;
 
 /**
  * @author Adrian BER
