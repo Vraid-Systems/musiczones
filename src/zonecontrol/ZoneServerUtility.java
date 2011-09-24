@@ -21,14 +21,15 @@ import multicastmusiccontroller.ZoneLibraryIndex;
  * @author Jason Zerbe
  */
 public class ZoneServerUtility implements ProgramConstants {
-    
+
     private static ZoneServerUtility zsu_SingleInstance = null;
     private Preferences zsu_Preferences = null;
-    
+    private boolean debugMessagesOn = false;
+
     protected ZoneServerUtility() {
         zsu_Preferences = Preferences.userNodeForPackage(getClass());
     }
-    
+
     public static ZoneServerUtility getInstance() {
         if (zsu_SingleInstance == null) {
             zsu_SingleInstance = new ZoneServerUtility();
@@ -77,7 +78,7 @@ public class ZoneServerUtility implements ProgramConstants {
             theFilePath = theFilePath.replaceAll("\\\\+", "/");
             //see http://www.java-forums.org/advanced-java/16452-replacing-backslashes-string-object.html#post59396
         }
-        
+
         String aNewServerEntryStr = null;
         if (theServerType == FileSystemType.file) {
             aNewServerEntryStr = theFilePath;
@@ -86,10 +87,12 @@ public class ZoneServerUtility implements ProgramConstants {
         } else {
             aNewServerEntryStr = theServerType.toString() + "://" + theServerAddress + theFilePath;
         }
-        
+
         aNewServerEntryStr = theMediaName + mediaNameSplitStr + aNewServerEntryStr;
-        System.out.println("new media string to add: " + aNewServerEntryStr);
-        
+        if (debugMessagesOn) {
+            System.out.println("new media string to add: " + aNewServerEntryStr);
+        }
+
         int aNumberOfEntries = ZoneServerUtility.getInstance().loadIntPref(prefMediaDirNumberKeyStr, 0);
         if (aNumberOfEntries <= 0) {
             String aKeyToPut = prefMediaDirPrefixKeyStr + String.valueOf(0);
@@ -111,7 +114,7 @@ public class ZoneServerUtility implements ProgramConstants {
                 }
             }
         }
-        
+
         return aNewServerEntryStr;
     }
 
@@ -132,7 +135,7 @@ public class ZoneServerUtility implements ProgramConstants {
                 }
             }
             ZoneLibraryIndex.getInstance().removePath(aRootPathStr);
-            
+
             for (int i = theIndexToRemove; i < (aNumberOfEntries - 1); i++) {
                 ZoneServerUtility.getInstance().saveStringPref(prefMediaDirPrefixKeyStr + String.valueOf(i),
                         ZoneServerUtility.getInstance().loadStringPref(prefMediaDirPrefixKeyStr + String.valueOf((i + 1)), ""));
@@ -161,39 +164,41 @@ public class ZoneServerUtility implements ProgramConstants {
             } catch (SocketException ex) {
                 Logger.getLogger(ZoneServerUtility.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
+
             for (InterfaceAddress currentNetworkInterfaceAddress : currentNetworkInterface.getInterfaceAddresses()) {
                 InetAddress currentNetworkInterfaceInetAddress = currentNetworkInterfaceAddress.getAddress();
-                
+
                 if (!(currentNetworkInterfaceInetAddress instanceof Inet4Address)) {
                     continue;
                 }
-                
+
                 return currentNetworkInterfaceInetAddress.getHostAddress();
             }
         }
-        
+
         return null;
     }
-    
+
     public void saveIntPref(String theIntPrefKey, int theIntPrefValue) {
         zsu_Preferences.putInt(theIntPrefKey, theIntPrefValue);
     }
-    
+
     public void saveStringPref(String theStrPrefKey, String theStrPrefValue) {
         zsu_Preferences.put(theStrPrefKey, theStrPrefValue);
     }
-    
+
     public int loadIntPref(String theIntPrefKey, int theIntPrefDefaultValue) {
         return zsu_Preferences.getInt(theIntPrefKey, theIntPrefDefaultValue);
     }
-    
+
     public String loadStringPref(String theStrPrefKey, String theStrPrefDefaultValue) {
         return zsu_Preferences.get(theStrPrefKey, theStrPrefDefaultValue);
     }
-    
+
     public String getFileNameFromUrlStr(String theUrlString) {
-        System.out.println("url to format: " + theUrlString);
+        if (debugMessagesOn) {
+            System.out.println("url to format: " + theUrlString);
+        }
         String returnStr = null;
         if (theUrlString.contains(FileSystemType.radio.toString().concat(prefixUriStr))) {
             if (theUrlString.contains(mediaNameSplitStr)) {
@@ -207,17 +212,17 @@ public class ZoneServerUtility implements ProgramConstants {
         }
         return returnStr;
     }
-    
+
     public boolean isWindows() {
         String os = System.getProperty("os.name").toLowerCase();
         return (os.indexOf("win") >= 0);
     }
-    
+
     public boolean isMac() {
         String os = System.getProperty("os.name").toLowerCase();
         return (os.indexOf("mac") >= 0);
     }
-    
+
     public boolean isUnix() {
         String os = System.getProperty("os.name").toLowerCase();
         return (os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0);

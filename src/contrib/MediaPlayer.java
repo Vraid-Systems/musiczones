@@ -25,6 +25,7 @@ public class MediaPlayer implements ProgramConstants {
     private List<String> vmp_MediaUrlStringArray = null;
     private int vmp_PlayBackIndexInt = -1;
     private JMPlayer vmp_JMPlayer = null;
+    private boolean debugMessagesOn = false;
 
     protected MediaPlayer() {
         vmp_MediaUrlStringArray = new LinkedList();
@@ -51,7 +52,9 @@ public class MediaPlayer implements ProgramConstants {
 
     public void addMediaUrl(String theMediaUrlStr) {
         vmp_MediaUrlStringArray.add(theMediaUrlStr);
-        System.out.println("added media url: " + theMediaUrlStr);
+        if (debugMessagesOn) {
+            System.out.println("added media url: " + theMediaUrlStr);
+        }
     }
 
     protected String formatMediaUrl(String theMediaUrlStr) {
@@ -88,7 +91,9 @@ public class MediaPlayer implements ProgramConstants {
         vmp_PlayBackIndexInt = theIndex;
         try {
             String theMediaStr = formatMediaUrl(vmp_MediaUrlStringArray.get(vmp_PlayBackIndexInt));
-            System.out.println("will now play: " + theMediaStr);
+            if (debugMessagesOn) {
+                System.out.println("will now play: " + theMediaStr);
+            }
             Process aMPlayerProcess = vmp_JMPlayer.open(theMediaStr);
 
             if (aMPlayerProcess != null) { //attach a process exit handler, if process started correctly
@@ -107,8 +112,12 @@ public class MediaPlayer implements ProgramConstants {
                                 Logger.getLogger(MulticastMusicController.class.getName()).log(Level.SEVERE, null, ex);
                             }
 
-                            System.out.println("earlier: " + earlierPlayBackIndexInt);
-                            System.out.println("later: " + laterPlayBackIndexInt);
+                            if (debugMessagesOn) {
+                                System.out.println("earlier: " + earlierPlayBackIndexInt);
+                            }
+                            if (debugMessagesOn) {
+                                System.out.println("later: " + laterPlayBackIndexInt);
+                            }
                             if (earlierPlayBackIndexInt == laterPlayBackIndexInt) {
                                 next(); //auto-advance to the next playlist item
                             }

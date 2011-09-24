@@ -32,6 +32,8 @@ import zonecontrol.ZoneServerUtility;
  * @author Jason Zerbe
  */
 public class ZoneLibrary extends HttpServlet implements ProgramConstants {
+    
+    private boolean debugMessagesOn = false;
 
     public ZoneLibrary() {
     }
@@ -46,7 +48,7 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
      */
     private int mediaElementsBrowseOutput(String thePathStr, int theStartIndexInt, int theEndIndexInt, PrintWriter theOutput) {
         if (thePathStr.contains(FileSystemType.smb.toString().concat(prefixUriStr))) { //CIFS share
-            System.out.println("viewing samba dir [" + theStartIndexInt + " - " + theEndIndexInt + "]: " + thePathStr);
+            if (debugMessagesOn) System.out.println("viewing samba dir [" + theStartIndexInt + " - " + theEndIndexInt + "]: " + thePathStr);
             ArrayList<SmbFile> aCIFSDirList = CIFSNetworkInterface.getInstance().getDirectoryList(thePathStr);
             if (aCIFSDirList == null) {
                 return 0;
@@ -87,7 +89,7 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
                 return (i + 1);
             }
         } else { //local filesytem
-            System.out.println("viewing local dir [" + theStartIndexInt + " - " + theEndIndexInt + "]: " + thePathStr);
+            if (debugMessagesOn) System.out.println("viewing local dir [" + theStartIndexInt + " - " + theEndIndexInt + "]: " + thePathStr);
             File dir = new File(thePathStr);
             File[] files = dir.listFiles();
             LinkedList<File> aFileLinkedList = new LinkedList<File>();
@@ -181,6 +183,7 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
             String searchTypeStr = MediaSearchType.any.toString(); //default to any keyword matching (OR)
             if (req.getParameter("type").equals(MediaSearchType.all.toString())) {
                 searchTypeStr = MediaSearchType.all.toString();
+                searchMatchAllKeywords = true;
             }
             String rawSearchKeywordsStr = req.getParameter("keywords");
             if (rawSearchKeywordsStr == null) {
@@ -232,16 +235,16 @@ public class ZoneLibrary extends HttpServlet implements ProgramConstants {
                 int i = 0;
                 for (String rootPathStr : rootPathStrList) {
                     //pre-process strings from db
-                    System.out.println("from db: " + rootPathStr);
+                    if (debugMessagesOn) System.out.println("from db: " + rootPathStr);
                     String rootMediaNameStr = rootPathStr;
                     if (rootPathStr.contains(mediaNameSplitStr)) {
                         String[] rootPathStrArray = rootPathStr.split(mediaNameSplitStr);
                         rootMediaNameStr = rootPathStrArray[0];
-                        System.out.println("rootMediaNameStr=" + rootMediaNameStr);
+                        if (debugMessagesOn) System.out.println("rootMediaNameStr=" + rootMediaNameStr);
                         if (!rootPathStr.contains(FileSystemType.radio.toString().concat(prefixUriStr))) {
                             rootPathStr = rootPathStrArray[1];
                         }
-                        System.out.println("rootPathStr=" + rootPathStr);
+                        if (debugMessagesOn) System.out.println("rootPathStr=" + rootPathStr);
                     }
 
                     //output root list elements
