@@ -1,9 +1,13 @@
 /*
  * a singleton class for manging and allowing acces to the zone library search index
+ * only indexes one copy of media with a certain filename
+ *
+ * NOTE: recursive symlinks does this puppy in
  */
 package multicastmusiccontroller;
 
 import contrib.CIFSNetworkInterface;
+import contrib.MediaPlayer;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -11,6 +15,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -25,25 +30,61 @@ import zonecontrol.ZoneServerUtility;
 /**
  * @author Jason Zerbe
  */
-public class ZoneLibraryIndex implements ProgramConstants {
+public class ZoneLibraryIndex {
 
     private static ZoneLibraryIndex zli_SingleInstance = null;
     protected HashMap<String, String> zli_FileMap = null; //<full file path, filename>
     protected Timer zli_Timer = null;
-    protected boolean debugTimedEventsOn = false;
+    protected boolean debugEventsOn = false;
+    protected int zli_RefreshIndexSeconds = 180;
+    protected String[] zli_PathBlackListArray = {"$", "tftp", "install"};
 
-    protected ZoneLibraryIndex() {
+    protected ZoneLibraryIndex(boolean theDebugIsOn) {
+        debugEventsOn = theDebugIsOn;
         zli_FileMap = new HashMap<String, String>();
         zli_Timer = new Timer();
-        zli_Timer.schedule(new RefreshSearchIndexTask(), 0, searchIndexRefreshInterval * 1000);
+        zli_Timer.schedule(new RefreshSearchIndexTask(), 0,
+                zli_RefreshIndexSeconds * 1000);
         System.out.println("ZLI RefreshSearchIndexTask added");
     }
 
     public static ZoneLibraryIndex getInstance() {
         if (zli_SingleInstance == null) {
-            zli_SingleInstance = new ZoneLibraryIndex();
+            zli_SingleInstance = new ZoneLibraryIndex(false);
         }
         return zli_SingleInstance;
+    }
+
+    public static ZoneLibraryIndex getInstance(boolean theDebugIsOn) {
+        if (zli_SingleInstance == null) {
+            zli_SingleInstance = new ZoneLibraryIndex(theDebugIsOn);
+        }
+        return zli_SingleInstance;
+    }
+
+    /**
+     * return all files within a certain range of those currently indexed
+     * @param theStartIndexInt Integer
+     * @param theEndIndexInt Integer
+     * @return HashMap<String, String>
+     */
+    public HashMap<String, String> getFiles(int theStartIndexInt, int theEndIndexInt) {
+        HashMap<String, String> returnFileMap = new HashMap<String, String>();
+        if (zli_FileMap.size() > 0) {
+            int i = 0;
+            List<String> aFullFilePathArray = Arrays.asList(zli_FileMap.keySet().toArray(new String[0]));
+            for (String aTempFileName : zli_FileMap.values()) {
+                if ((i >= theStartIndexInt) && (i <= theEndIndexInt)) {
+                    returnFileMap.put(aFullFilePathArray.get(i), aTempFileName);
+                }
+                i++;
+            }
+
+            if (debugEventsOn) {
+                System.out.println("ZLI getFiles - output " + String.valueOf(i) + " files");
+            }
+        }
+        return returnFileMap;
     }
 
     /**
@@ -71,6 +112,10 @@ public class ZoneLibraryIndex implements ProgramConstants {
                 }
                 i++;
             }
+
+            if (debugEventsOn) {
+                System.out.println("ZLI getFiles - output " + String.valueOf(i) + " files");
+            }
         }
         return returnFileMap;
     }
@@ -79,8 +124,12 @@ public class ZoneLibraryIndex implements ProgramConstants {
      * add the contents of a certain path to the library index
      * @param thePathStr String
      */
-    public void indexPath(String thePathStr) {
-        if (thePathStr.contains(FileSystemType.smb.toString().concat(prefixUriStr))) { //CIFS share
+    protected void indexPath(String thePathStr) {
+        if (debugEventsOn) {
+            System.out.println("ZLI indexPath - will now index " + thePathStr);
+        }
+
+        if (thePathStr.contains(FileSystemType.smb.toString().concat(ZoneServerUtility.prefixUriStr))) { //CIFS share
             ArrayList<SmbFile> aCIFSDirList = CIFSNetworkInterface.getInstance().getDirectoryList(thePathStr);
             LinkedList<SmbFile> aSmbFileLinkedList = new LinkedList<SmbFile>(aCIFSDirList);
 
@@ -89,9 +138,13 @@ public class ZoneLibraryIndex implements ProgramConstants {
 
                 if (iSmbFile.getPath().endsWith("/")) { //recurse into directory during search
                     ArrayList<SmbFile> tempSmbFiles = CIFSNetworkInterface.getInstance().getDirectoryList(iSmbFile.getPath());
-                    if (tempSmbFiles.size() > 0) {
+                    if ((tempSmbFiles != null) && (tempSmbFiles.size() > 0)) {
                         for (SmbFile tempSmbFile : tempSmbFiles) {
                             aSmbFileLinkedList.push(tempSmbFile);
+
+                            if (debugEventsOn) {
+                                System.out.println("ZLI indexPath - will follow " + tempSmbFile.toString());
+                            }
                         }
                     }
                 } else { //have a file, add it to the file index map
@@ -102,9 +155,21 @@ public class ZoneLibraryIndex implements ProgramConstants {
                         Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     if (aFullFilePathStr != null) {
-                        zli_FileMap.put(aFullFilePathStr, iSmbFile.getName());
+                        if (theContainerIsSupported(aFullFilePathStr)) {
+                            if (!zli_FileMap.containsValue(iSmbFile.getName())) {
+                                zli_FileMap.put(aFullFilePathStr, iSmbFile.getName());
+
+                                if (debugEventsOn) {
+                                    System.out.println("ZLI indexPath - added " + aFullFilePathStr);
+                                }
+                            }
+                        }
                     }
                 }
+            }
+
+            if (debugEventsOn) {
+                System.out.println("ZLI indexPath - done indexing " + thePathStr);
             }
         } else { //local filesytem
             File dir = new File(thePathStr);
@@ -136,9 +201,21 @@ public class ZoneLibraryIndex implements ProgramConstants {
                         Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     if (aFullFilePathStr != null) {
-                        zli_FileMap.put(aFullFilePathStr, iFile.getName());
+                        if (theContainerIsSupported(aFullFilePathStr)) {
+                            if (!zli_FileMap.containsValue(iFile.getName())) {
+                                zli_FileMap.put(aFullFilePathStr, iFile.getName());
+
+                                if (debugEventsOn) {
+                                    System.out.println("ZLI indexPath - added " + aFullFilePathStr);
+                                }
+                            }
+                        }
                     }
                 }
+            }
+
+            if (debugEventsOn) {
+                System.out.println("ZLI indexPath - done indexing " + thePathStr);
             }
         }
     }
@@ -147,10 +224,14 @@ public class ZoneLibraryIndex implements ProgramConstants {
      * remove all files from the library index that contain the path string
      * @param thePathStr String
      */
-    public void removePath(String thePathStr) {
+    protected void removePath(String thePathStr) {
         for (String aTempFullFilePath : zli_FileMap.keySet()) {
             if (aTempFullFilePath.contains(thePathStr)) {
                 zli_FileMap.remove(aTempFullFilePath);
+
+                if (debugEventsOn) {
+                    System.out.println("ZLI removePath - removed " + thePathStr);
+                }
             }
         }
     }
@@ -158,7 +239,7 @@ public class ZoneLibraryIndex implements ProgramConstants {
     /**
      * function to see if the given string matches (all or any) of the keyword array strings
      * returns true if no keywords are given
-     * 
+     *
      * @param theString String
      * @param theKeywords String[]
      * @param matchAllKeywords boolean
@@ -186,63 +267,123 @@ public class ZoneLibraryIndex implements ProgramConstants {
     }
 
     /**
-     * private time task that goes through root paths and updates library index
+     * exact string matching of filename extension to see if file is in
+     * one of the supported container formats
+     * @param theFileName String
+     * @return boolean - is it supported?
+     */
+    public boolean theContainerIsSupported(String theFileName) {
+        if (theFileName.contains(".")) {
+            for (String aSupportedContainer : MediaPlayer.theSupportedContainers) {
+                if (theFileName.contains("." + aSupportedContainer)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * check if the passed path string is a blacklisted one
+     * @param thePathStr String
+     * @return boolean - is it blacklisted?
+     */
+    protected boolean thePathIsBlackListed(String thePathStr) {
+        for (String aPathStr : zli_PathBlackListArray) {
+            if (thePathStr.contains(aPathStr)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * private time task that adds all supported media from CIFS shares
      */
     private class RefreshSearchIndexTask extends TimerTask {
 
-        public void run() {
-            List<String> rootPathStrList = ZoneServerUtility.getInstance().getMediaDirEntries();
-            if (rootPathStrList.size() > 0) {
-                for (String aRootPathStr : rootPathStrList) {
-                    //pre-process strings from db
-                    if (debugTimedEventsOn) {
-                        System.out.println("from db: " + aRootPathStr);
-                    }
-                    String rootMediaNameStr = aRootPathStr;
-                    if (aRootPathStr.contains(mediaNameSplitStr)) {
-                        String[] rootPathStrArray = aRootPathStr.split(mediaNameSplitStr);
-                        rootMediaNameStr = rootPathStrArray[0];
-                        if (debugTimedEventsOn) {
-                            System.out.println("rootMediaNameStr=" + rootMediaNameStr);
-                        }
-                        if (!aRootPathStr.contains(FileSystemType.radio.toString().concat(prefixUriStr))) {
-                            aRootPathStr = rootPathStrArray[1];
-                        }
-                        if (debugTimedEventsOn) {
-                            System.out.println("rootPathStr=" + aRootPathStr);
-                        }
-                    }
+        private String aSmbPrefix = "smb://";
 
-                    if (!aRootPathStr.contains(FileSystemType.radio.toString().concat(prefixUriStr))) { //should not be a radio link
-                        if (debugTimedEventsOn) {
-                            System.out.println("indexing: " + aRootPathStr);
+        public void run() {
+            LinkedList<SmbFile> aHostList = new LinkedList<SmbFile>();
+            String[] aWorkGroupArray = null;
+            try {
+                SmbFile aRootSmbFile = new SmbFile(aSmbPrefix);
+                try {
+                    aWorkGroupArray = aRootSmbFile.list();
+                    if (aWorkGroupArray == null) {
+                        return;
+                    }
+                } catch (SmbException ex) {
+                    Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
+                    return;
+                }
+            } catch (MalformedURLException ex) {
+                Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
+                return;
+            }
+            for (String aWorkGroup : aWorkGroupArray) {
+                SmbFile aWorkGroupSmbFile;
+                try {
+                    aWorkGroupSmbFile = new SmbFile(aSmbPrefix + aWorkGroup);
+                } catch (MalformedURLException ex) {
+                    Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.WARNING, null, ex);
+                    continue;
+                }
+                String[] aServerArray;
+                try {
+                    aServerArray = aWorkGroupSmbFile.list();
+                } catch (SmbException ex) {
+                    Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.WARNING, null, ex);
+                    continue;
+                }
+                if (aServerArray != null) {
+                    for (String aServer : aServerArray) {
+                        SmbFile aServerSmbFile;
+                        try {
+                            aServerSmbFile = new SmbFile(aSmbPrefix + aServer);
+                        } catch (MalformedURLException ex) {
+                            Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.WARNING, null, ex);
+                            continue;
                         }
-                        if (aRootPathStr.contains(FileSystemType.smb.toString().concat(prefixUriStr))) { //CIFS share
-                            SmbFile aSmbFile = null;
-                            try {
-                                aSmbFile = new SmbFile(aRootPathStr);
-                            } catch (MalformedURLException ex) {
-                                Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                            if (aSmbFile == null) {
-                                removePath(aRootPathStr);
-                            } else {
-                                SmbFile[] aSmbFileArray = null;
+                        if (!aHostList.contains(aServerSmbFile)) {
+                            if (!aServerSmbFile.toString().endsWith("/")) {
+                                String aServerStr = aServerSmbFile.toString() + "/";
                                 try {
-                                    aSmbFileArray = aSmbFile.listFiles();
-                                } catch (SmbException ex) {
+                                    aServerSmbFile = new SmbFile(aServerStr);
+                                } catch (MalformedURLException ex) {
                                     Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
-                                }
-                                if (aSmbFileArray == null) {
-                                    removePath(aRootPathStr);
-                                } else {
-                                    indexPath(aRootPathStr);
+                                    continue;
                                 }
                             }
-                        } else { //local filesytem
-                            indexPath(aRootPathStr);
+
+                            aHostList.add(aServerSmbFile);
+
+                            if (debugEventsOn) {
+                                System.out.println("ZLI RefreshSearchIndexTask - added "
+                                        + aServerSmbFile.toString() + " to host cache");
+                            }
                         }
                     }
+                }
+            }
+
+            Iterator<SmbFile> aServerSmbFileIter = aHostList.iterator();
+            while (aServerSmbFileIter.hasNext()) {
+                SmbFile aServerSmbFile = aServerSmbFileIter.next();
+                try {
+                    String[] aSharePathArray = aServerSmbFile.list();
+                    for (String aSharePath : aSharePathArray) {
+                        if (!thePathIsBlackListed(aSharePath)) {
+                            if (!aSharePath.endsWith("/")) {
+                                aSharePath = aSharePath + "/";
+                            }
+                            indexPath(aServerSmbFile.toString() + aSharePath);
+                        }
+                    }
+                } catch (SmbException ex) {
+                    Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.WARNING, null, ex);
+                    continue;
                 }
             }
         }

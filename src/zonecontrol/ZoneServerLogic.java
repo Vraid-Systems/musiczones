@@ -1,7 +1,7 @@
 /*
  * logic for processing the commands send over the network that the
  * server recieves
- * 
+ *
  * THIS IS A SINGLETON IMPLEMENTATION see:
  * http://www.javaworld.com/javaworld/jw-04-2003/jw-0425-designpatterns.html
  */
@@ -20,13 +20,12 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import multicastmusiccontroller.ProgramConstants;
 
 /**
  *
  * @author Jason Zerbe
  */
-public class ZoneServerLogic implements ProgramConstants {
+public class ZoneServerLogic {
 
     private static ZoneServerLogic zsl_SingleInstance = null;
     protected String zsl_ZoneUUID = null;
@@ -36,6 +35,9 @@ public class ZoneServerLogic implements ProgramConstants {
     protected HashMap<String, Calendar> zsl_ZoneExpireMap = null; //<UUID, expire Calendar>
     protected HashMap<String, String> zsl_ZoneDashBoardMap = null; //<UUID, dashboard url>
     protected Timer zsl_Timer = null;
+    protected final int allNodesPingInterval = 25; //number of seconds between existence notify
+    protected final int allNodesExpireInterval = 15; //seconds before node record allowed to be overwritten
+    protected final int allNodesHardExpire = 40; //seconds before node is considered offline
     protected boolean printNetworkCommandToTerminal = false;
 
     protected ZoneServerLogic() {
@@ -145,9 +147,9 @@ public class ZoneServerLogic implements ProgramConstants {
      * returns HashMap<String, String> that contains the current Zone Controller
      * information of said Zone Controllers that are connected to the multicast
      * group
-     * 
+     *
      * TODO: perform a deep copy so that unsuspecting people won't screw up internal references
-     * 
+     *
      * @return HashMap<String, String>
      */
     public HashMap<String, String> getNodeInfoMap() {
@@ -157,9 +159,9 @@ public class ZoneServerLogic implements ProgramConstants {
     /**
      * returns HashMap<String, String> that contains the web DashBoard LAN
      * addresses for the various Zone Controllers
-     * 
+     *
      * TODO: perform a deep copy so that unsuspecting people won't screw up internal references
-     * 
+     *
      * @return HashMap<String, String>
      */
     public HashMap<String, String> getNodeDashBoardMap() {

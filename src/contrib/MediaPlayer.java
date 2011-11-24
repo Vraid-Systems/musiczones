@@ -1,6 +1,6 @@
 /*
- * singleton class wrapper for controlling mplayer. for slave commands see:
- * http://www.mplayerhq.hu/DOCS/tech/slave.txt
+ * singleton class wrapper for controlling a mediaplayer implementation
+ * an abstraction away from JMPlayer
  */
 package contrib;
 
@@ -12,23 +12,28 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import multicastmusiccontroller.FileSystemType;
 import multicastmusiccontroller.MulticastMusicController;
-import multicastmusiccontroller.ProgramConstants;
 import zonecontrol.ZoneServerUtility;
 
 /**
  * @author Jason Zerbe
  */
-public class MediaPlayer implements ProgramConstants {
+public class MediaPlayer {
 
     private static MediaPlayer vmp_SingleInstance = null;
     private List<String> vmp_MediaUrlStringArray = null;
     private int vmp_PlayBackIndexInt = -1;
-    private JMPlayer vmp_JMPlayer = null;
     private boolean debugMessagesOn = false;
+    protected int lengthOfPauseBetweenMediaInSeconds = 2;
+    private JMPlayer vmp_JMPlayer = null;
+    public static final String prefMediaPlayerPathKeyStr = "media-player-bin-path";
+    public static final String[] theSupportedContainers = {"mpg", "mpeg", "avi",
+        "wmv", "wma", "mov", "mp3", "mp4", "ogg", "ogv", "mkv", "aac", "wav"};
 
-    protected MediaPlayer() {
-        vmp_MediaUrlStringArray = new LinkedList();
+    protected MediaPlayer(boolean theDebugIsOn) {
+        debugMessagesOn = theDebugIsOn;
+        vmp_MediaUrlStringArray = new LinkedList<String>();
         String aMPlayerBinPath = ZoneServerUtility.getInstance().loadStringPref(prefMediaPlayerPathKeyStr, "");
         if (aMPlayerBinPath.isEmpty()) {
             MulticastMusicController.MPlayerNotFound();
@@ -45,7 +50,14 @@ public class MediaPlayer implements ProgramConstants {
 
     public static MediaPlayer getInstance() {
         if (vmp_SingleInstance == null) {
-            vmp_SingleInstance = new MediaPlayer();
+            vmp_SingleInstance = new MediaPlayer(false);
+        }
+        return vmp_SingleInstance;
+    }
+
+    public static MediaPlayer getInstance(boolean theDebugIsOn) {
+        if (vmp_SingleInstance == null) {
+            vmp_SingleInstance = new MediaPlayer(theDebugIsOn);
         }
         return vmp_SingleInstance;
     }
@@ -58,28 +70,22 @@ public class MediaPlayer implements ProgramConstants {
     }
 
     protected String formatMediaUrl(String theMediaUrlStr) {
-        //remove media name if exists
-        if (theMediaUrlStr.contains(mediaNameSplitStr)) {
-            String[] theMediaUrlStrArray = theMediaUrlStr.split(mediaNameSplitStr);
-            theMediaUrlStr = theMediaUrlStrArray[1];
-        }
-
         //format windowsy backslashes if this is on a windows host and samba-ing
         if (ZoneServerUtility.getInstance().isWindows()
-                && theMediaUrlStr.contains(FileSystemType.smb.toString().concat(prefixUriStr))) {
-            theMediaUrlStr = theMediaUrlStr.replace(FileSystemType.smb.toString().concat(prefixUriStr), "\\\\");
+                && theMediaUrlStr.contains(FileSystemType.smb.toString().concat(ZoneServerUtility.prefixUriStr))) {
+            theMediaUrlStr = theMediaUrlStr.replace(FileSystemType.smb.toString().concat(ZoneServerUtility.prefixUriStr), "\\\\");
             theMediaUrlStr = theMediaUrlStr.replace("/", "\\");
         }
 
         //remove radio prefix if it exists in media string
-        if (theMediaUrlStr.contains(FileSystemType.radio.toString().concat(prefixUriStr))) {
-            theMediaUrlStr = theMediaUrlStr.replace(FileSystemType.radio.toString().concat(prefixUriStr), "");
+        if (theMediaUrlStr.contains(FileSystemType.radio.toString().concat(ZoneServerUtility.prefixUriStr))) {
+            theMediaUrlStr = theMediaUrlStr.replace(FileSystemType.radio.toString().concat(ZoneServerUtility.prefixUriStr), "");
         }
 
         //replace spaces with escape chars if not windows
         if ((!ZoneServerUtility.getInstance().isWindows())) {
             //%20 if this is an external URL
-            if (theMediaUrlStr.contains(FileSystemType.smb.toString().concat(prefixUriStr))) {
+            if (theMediaUrlStr.contains(FileSystemType.smb.toString().concat(ZoneServerUtility.prefixUriStr))) {
                 theMediaUrlStr = theMediaUrlStr.replace(" ", "%20");
             }
         }

@@ -17,6 +17,8 @@ import zonecontrol.ZoneServerLogic;
  */
 public class ZoneSelection_Page extends HttpServlet {
 
+    private static final long serialVersionUID = 42L;
+
     public ZoneSelection_Page() {
     }
 

@@ -18,6 +18,8 @@ import zonecontrol.ZoneServerUtility;
  */
 public class ZonePlaylist extends HttpServlet {
 
+    private static final long serialVersionUID = 42L;
+
     public ZonePlaylist() {
     }
 

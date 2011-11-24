@@ -4,6 +4,7 @@
 package multicastmusiccontroller;
 
 import contrib.JettyWebServer;
+import contrib.MediaPlayer;
 import java.io.File;
 import zonecontrol.ZoneServerLogic;
 import zonecontrol.ZoneMulticastServer;
@@ -14,16 +15,15 @@ import zonecontrol.ZoneServerUtility;
 /**
  * @author Jason Zerbe
  */
-public class MulticastMusicController implements ProgramConstants {
+public class MulticastMusicController {
 
     protected static String global_ZoneName = null;
-    protected static int global_webInterfacePortInt = defaultWebServerPort;
+    protected static int global_webInterfacePortInt = 80;
     protected static String global_MPlayerBinPath = null;
     protected static String global_MPlayerNotFoundStr = "unable to find mplayer executable, please use --mplayer-bin-path=";
     protected static final String global_usageStr = "usage: java -jar mmc.jar "
             + "--zone-name=[zone controller's name] "
-            + "--web-port=[web interface port number (default="
-            + String.valueOf(defaultWebServerPort) + ")] "
+            + "--web-port=[web interface port number (default=80)] "
             + "--mplayer-bin-path=[path to mplayer]";
 
     /**
@@ -53,7 +53,7 @@ public class MulticastMusicController implements ProgramConstants {
         } //done processing arguments
 
         //save mplayer path to prefs if it can be found and not already saved
-        String savedMPlayerBinPath = ZoneServerUtility.getInstance().loadStringPref(prefMediaPlayerPathKeyStr, "");
+        String savedMPlayerBinPath = ZoneServerUtility.getInstance().loadStringPref(MediaPlayer.prefMediaPlayerPathKeyStr, "");
         File aExistsFile = new File(savedMPlayerBinPath);
         if (aExistsFile.exists()) {
             global_MPlayerBinPath = savedMPlayerBinPath;
@@ -87,11 +87,14 @@ public class MulticastMusicController implements ProgramConstants {
                 MPlayerNotFound();
             }
         }
-        ZoneServerUtility.getInstance().saveStringPref(prefMediaPlayerPathKeyStr, global_MPlayerBinPath);
+        ZoneServerUtility.getInstance().saveStringPref(MediaPlayer.prefMediaPlayerPathKeyStr, global_MPlayerBinPath);
 
         //first intialize jetty in-case using custom webserver port
         JettyWebServer theWebServer = JettyWebServer.getInstance(global_webInterfacePortInt);
         theWebServer.startServer();
+
+        //create system-wide MediaPlayer instance with debug off
+        MediaPlayer.getInstance(false);
 
         //then bring up the zone controller logic
         ZoneServerLogic mainServerLogic = ZoneServerLogic.getInstance();
@@ -99,7 +102,7 @@ public class MulticastMusicController implements ProgramConstants {
             mainServerLogic.setZoneName(global_ZoneName);
         }
 
-        //pause just enough (1/10 second) so that we don't get any own init messages from group
+        //pause just enough (1/10 second) to prevent receiving own init messages from group
         try {
             Thread.sleep(100);
         } catch (InterruptedException ex) {
@@ -111,7 +114,7 @@ public class MulticastMusicController implements ProgramConstants {
         theZoneServer.startServer();
 
         //start up the library indexing service
-        ZoneLibraryIndex.getInstance();
+        ZoneLibraryIndex.getInstance(false);
     }
 
     /**

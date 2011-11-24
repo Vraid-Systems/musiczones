@@ -37,7 +37,9 @@ public class LineRedirecter extends Thread {
                 printStream.println(line);
             }
         } catch (IOException ex) {
-            Logger.getLogger(LineRedirecter.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(
+                    LineRedirecter.class.getName()).log(
+                    Level.SEVERE, null, ex);
         }
     }
 }

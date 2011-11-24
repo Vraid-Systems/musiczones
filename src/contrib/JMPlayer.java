@@ -1,6 +1,7 @@
 /*
- * class for managing direct interface to MPlayer executable
+ * class for managing direct slave interface to MPlayer executable
  * slight modifications from original
+ * for slave commands: http://www.mplayerhq.hu/DOCS/tech/slave.txt
  */
 package contrib;
 
@@ -14,7 +15,6 @@ import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import zonecontrol.ZoneServerUtility;
 
 /**
  * @author Adrian BER

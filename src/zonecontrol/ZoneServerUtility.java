@@ -8,145 +8,45 @@ import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
-import multicastmusiccontroller.ProgramConstants;
-import multicastmusiccontroller.ZoneLibraryIndex;
+import multicastmusiccontroller.FileSystemType;
 
 /**
  * @author Jason Zerbe
  */
-public class ZoneServerUtility implements ProgramConstants {
+public class ZoneServerUtility {
 
     private static ZoneServerUtility zsu_SingleInstance = null;
     private Preferences zsu_Preferences = null;
     private boolean debugMessagesOn = false;
+    public static final String mediaNameSplitStr = ":&&:";
+    public static final String prefixUriStr = "://";
 
-    protected ZoneServerUtility() {
+    protected ZoneServerUtility(boolean theDebugIsOn) {
+        debugMessagesOn = theDebugIsOn;
         zsu_Preferences = Preferences.userNodeForPackage(getClass());
     }
 
     public static ZoneServerUtility getInstance() {
         if (zsu_SingleInstance == null) {
-            zsu_SingleInstance = new ZoneServerUtility();
+            zsu_SingleInstance = new ZoneServerUtility(false);
+        }
+        return zsu_SingleInstance;
+    }
+
+    public static ZoneServerUtility getInstance(boolean theDebugIsOn) {
+        if (zsu_SingleInstance == null) {
+            zsu_SingleInstance = new ZoneServerUtility(theDebugIsOn);
         }
         return zsu_SingleInstance;
     }
 
     /**
-     * get a list of all the media root paths that are stored
-     * @return List<String>
-     */
-    public List<String> getMediaDirEntries() {
-        List<String> returnList = new ArrayList<String>();
-        int aNumberOfEntries = ZoneServerUtility.getInstance().loadIntPref(prefMediaDirNumberKeyStr, 0);
-        for (int i = 0; i < aNumberOfEntries; i++) {
-            String aKeyToFetch = prefMediaDirPrefixKeyStr + String.valueOf(i);
-            String aCurrentServerPrefStr = ZoneServerUtility.getInstance().loadStringPref(aKeyToFetch, "");
-            if ((aCurrentServerPrefStr != null) && (!aCurrentServerPrefStr.isEmpty())) {
-                returnList.add(aCurrentServerPrefStr);
-            }
-        }
-        return returnList;
-    }
-
-    /**
-     * helper method for automatically determining where to store and/or overwrite
-     * previously stored root media path
-     * @param theServerType FileSystemType
-     * @param theServerAddress String
-     * @param theFilePath String
-     */
-    public String updateMediaDirEntry(FileSystemType theServerType, String theMediaName, String theServerAddress, String theFilePath) {
-        if (theServerAddress.contains("/")) {
-            theServerAddress = theServerAddress.replace("/", "");
-        }
-        if (!theFilePath.startsWith("/")
-                && (!ZoneServerUtility.getInstance().isWindows())
-                && (theServerType == FileSystemType.file)) {
-            theFilePath = "/" + theFilePath;
-        }
-        if ((!theFilePath.endsWith("/"))
-                && (theServerType != FileSystemType.radio)) {
-            theFilePath = theFilePath.concat("/");
-        }
-        if (theFilePath.contains("\\")) {
-            theFilePath = theFilePath.replaceAll("\\\\+", "/");
-            //see http://www.java-forums.org/advanced-java/16452-replacing-backslashes-string-object.html#post59396
-        }
-
-        String aNewServerEntryStr = null;
-        if (theServerType == FileSystemType.file) {
-            aNewServerEntryStr = theFilePath;
-        } else if (theServerType == FileSystemType.radio) {
-            aNewServerEntryStr = FileSystemType.radio.toString().concat(prefixUriStr) + theFilePath;
-        } else {
-            aNewServerEntryStr = theServerType.toString() + "://" + theServerAddress + theFilePath;
-        }
-
-        aNewServerEntryStr = theMediaName + mediaNameSplitStr + aNewServerEntryStr;
-        if (debugMessagesOn) {
-            System.out.println("new media string to add: " + aNewServerEntryStr);
-        }
-
-        int aNumberOfEntries = ZoneServerUtility.getInstance().loadIntPref(prefMediaDirNumberKeyStr, 0);
-        if (aNumberOfEntries <= 0) {
-            String aKeyToPut = prefMediaDirPrefixKeyStr + String.valueOf(0);
-            ZoneServerUtility.getInstance().saveIntPref(prefMediaDirNumberKeyStr, 1);
-            ZoneServerUtility.getInstance().saveStringPref(aKeyToPut, aNewServerEntryStr);
-        } else {
-            for (int i = 0; i < aNumberOfEntries; i++) {
-                String aKeyToFetch = prefMediaDirPrefixKeyStr + String.valueOf(i);
-                String aCurrentServerPrefStr = ZoneServerUtility.getInstance().loadStringPref(aKeyToFetch, "");
-                if (aNewServerEntryStr.equals(aCurrentServerPrefStr)) {
-                    ZoneServerUtility.getInstance().saveStringPref(aKeyToFetch, aNewServerEntryStr);
-                    break;
-                }
-                if ((i + 1) >= aNumberOfEntries) {
-                    String aKeyToPut = prefMediaDirPrefixKeyStr + String.valueOf((i + 1));
-                    ZoneServerUtility.getInstance().saveIntPref(prefMediaDirNumberKeyStr, (aNumberOfEntries + 1));
-                    ZoneServerUtility.getInstance().saveStringPref(aKeyToPut, aNewServerEntryStr);
-                    break;
-                }
-            }
-        }
-
-        return aNewServerEntryStr;
-    }
-
-    /**
-     * removes a certain root media path from the configuration and automatically
-     * reorganizes the preferences so they are matched with the proper indices again
-     * @param theIndexToRemove Integer
-     */
-    public void removeMediaDirEntry(int theIndexToRemove) {
-        int aNumberOfEntries = ZoneServerUtility.getInstance().loadIntPref(prefMediaDirNumberKeyStr, 0);
-        if (theIndexToRemove < aNumberOfEntries) {
-            String aRootPathStr = ZoneServerUtility.getInstance().loadStringPref(
-                    prefMediaDirPrefixKeyStr + String.valueOf(theIndexToRemove), "");
-            if (aRootPathStr.contains(mediaNameSplitStr)) {
-                String[] rootPathStrArray = aRootPathStr.split(mediaNameSplitStr);
-                if (!aRootPathStr.contains(FileSystemType.radio.toString().concat(prefixUriStr))) {
-                    aRootPathStr = rootPathStrArray[1];
-                }
-            }
-            ZoneLibraryIndex.getInstance().removePath(aRootPathStr);
-
-            for (int i = theIndexToRemove; i < (aNumberOfEntries - 1); i++) {
-                ZoneServerUtility.getInstance().saveStringPref(prefMediaDirPrefixKeyStr + String.valueOf(i),
-                        ZoneServerUtility.getInstance().loadStringPref(prefMediaDirPrefixKeyStr + String.valueOf((i + 1)), ""));
-            }
-            ZoneServerUtility.getInstance().saveIntPref(prefMediaDirNumberKeyStr, (aNumberOfEntries - 1));
-        }
-    }
-
-    /**
      * gets the correct LAN IPv4 address of the local machine
-     * @return String
+     * @return String, null on error
      */
     public String getIPv4LanAddress() {
         Enumeration<NetworkInterface> aNetworkInterfaceEnumeration = null;
@@ -154,6 +54,7 @@ public class ZoneServerUtility implements ProgramConstants {
             aNetworkInterfaceEnumeration = NetworkInterface.getNetworkInterfaces();
         } catch (SocketException ex) {
             Logger.getLogger(ZoneServerUtility.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
         }
         while (aNetworkInterfaceEnumeration.hasMoreElements()) {
             NetworkInterface currentNetworkInterface = aNetworkInterfaceEnumeration.nextElement();
@@ -163,6 +64,7 @@ public class ZoneServerUtility implements ProgramConstants {
                 }
             } catch (SocketException ex) {
                 Logger.getLogger(ZoneServerUtility.class.getName()).log(Level.SEVERE, null, ex);
+                return null;
             }
 
             for (InterfaceAddress currentNetworkInterfaceAddress : currentNetworkInterface.getInterfaceAddresses()) {

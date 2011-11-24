@@ -11,13 +11,12 @@ import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import multicastmusiccontroller.ProgramConstants;
 
 /**
  *
  * @author Jason Zerbe
  */
-public class ZoneMulticastClient implements ProgramConstants {
+public class ZoneMulticastClient {
 
     private MulticastSocket clientSocket = null;
 
@@ -25,13 +24,18 @@ public class ZoneMulticastClient implements ProgramConstants {
         try {
             clientSocket = new MulticastSocket();
         } catch (IOException ex) {
-            Logger.getLogger(ZoneMulticastClient.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(
+                    ZoneMulticastClient.class.getName()).log(
+                    Level.SEVERE, null, ex);
         }
 
         try {
-            clientSocket.setTimeToLive(groupTTL);
+            clientSocket.setTimeToLive(
+                    ZoneConstants.getInstance().getGroupTTLInt());
         } catch (IOException ex) {
-            Logger.getLogger(ZoneMulticastClient.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(
+                    ZoneMulticastClient.class.getName()).log(
+                    Level.SEVERE, null, ex);
         }
 
         System.out.println("ZMC socket ready");
@@ -43,26 +47,35 @@ public class ZoneMulticastClient implements ProgramConstants {
      * @param printNetworkCommandToTerminal boolean
      * @return boolean - was the command sent?
      */
-    public boolean sendNetworkCommand(final String theNetworkCommand, boolean printNetworkCommandToTerminal) {
+    public boolean sendNetworkCommand(final String theNetworkCommand,
+            boolean printNetworkCommandToTerminal) {
         final InetAddress groupAddress;
         try {
-            groupAddress = InetAddress.getByName(groupAddressStr);
+            groupAddress = InetAddress.getByName(
+                    ZoneConstants.getInstance().getGroupAddressStr());
         } catch (UnknownHostException ex) {
-            Logger.getLogger(ZoneMulticastClient.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(
+                    ZoneMulticastClient.class.getName()).log(
+                    Level.SEVERE, null, ex);
             return false;
         }
 
         final byte[] buffer = theNetworkCommand.getBytes();
-        final DatagramPacket pack = new DatagramPacket(buffer, buffer.length, groupAddress, groupPortInt);
+        final DatagramPacket pack = new DatagramPacket(
+                buffer, buffer.length, groupAddress,
+                ZoneConstants.getInstance().getGroupPortInt());
         try {
             clientSocket.send(pack);
         } catch (IOException ex) {
-            Logger.getLogger(ZoneMulticastClient.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(
+                    ZoneMulticastClient.class.getName()).log(
+                    Level.SEVERE, null, ex);
             return false;
         }
 
         if (printNetworkCommandToTerminal) {
-            System.out.println(new Date().toString() + " - sent:\n" + theNetworkCommand);
+            System.out.println(new Date().toString()
+                    + " - sent:\n" + theNetworkCommand);
         }
 
         return true;

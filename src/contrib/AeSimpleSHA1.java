@@ -9,7 +9,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
- *
  * @author AnyExample.com
  * @see http://www.anyexample.com/license/
  */

@@ -9,12 +9,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import multicastmusiccontroller.ProgramConstants;
+import multicastmusiccontroller.MediaSearchType;
 
 /**
  * @author Jason Zerbe
  */
-public class ZoneSearchMedia_DialogPage extends HttpServlet implements ProgramConstants {
+public class ZoneSearchMedia_DialogPage extends HttpServlet {
+
+    private static final long serialVersionUID = 42L;
 
     public ZoneSearchMedia_DialogPage() {
     }

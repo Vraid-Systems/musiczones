@@ -1,5 +1,5 @@
 /*
- * singleton class for managing CIFS network connections
+ * singleton class for getting CIFS information
  */
 package contrib;
 
@@ -12,7 +12,7 @@ import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 
 /**
- * @author Jason
+ * @author Jason Zerbe
  */
 public class CIFSNetworkInterface {
 
@@ -32,14 +32,17 @@ public class CIFSNetworkInterface {
      * create a SmbFile from the passed path, and after making sure it is
      * indeed a directory, grab the directory contents
      * @param thePath String
-     * @return ArrayList<SmbFile>
+     * @return ArrayList<SmbFile>, on error null
      */
     public ArrayList<SmbFile> getDirectoryList(String thePath) {
         SmbFile aSmbFile = null;
         try {
             aSmbFile = new SmbFile(thePath);
         } catch (MalformedURLException ex) {
-            Logger.getLogger(CIFSNetworkInterface.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(
+                    CIFSNetworkInterface.class.getName()).log(
+                    Level.SEVERE, null, ex);
+            return null;
         }
         if (aSmbFile == null) {
             return null;
@@ -49,7 +52,10 @@ public class CIFSNetworkInterface {
         try {
             aSmbFileIsDirectory = aSmbFile.isDirectory();
         } catch (SmbException ex) {
-            Logger.getLogger(CIFSNetworkInterface.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(
+                    CIFSNetworkInterface.class.getName()).log(
+                    Level.SEVERE, null, ex);
+            return null;
         }
 
         if (aSmbFileIsDirectory) {
@@ -57,7 +63,10 @@ public class CIFSNetworkInterface {
             try {
                 aSmbFileArray = aSmbFile.listFiles();
             } catch (SmbException ex) {
-                Logger.getLogger(CIFSNetworkInterface.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(
+                        CIFSNetworkInterface.class.getName()).log(
+                        Level.WARNING, null, ex);
+                return null;
             }
             if (aSmbFileArray == null) {
                 return null;

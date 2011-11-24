@@ -1,6 +1,6 @@
 /*
  * provides Jetty 6.1.26 embedding bindings and control
- * 
+ *
  * THIS IS A SINGLETON IMPLEMENTATION see:
  * http://www.javaworld.com/javaworld/jw-04-2003/jw-0425-designpatterns.html
  */
@@ -9,7 +9,6 @@ package contrib;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import multicastmusiccontroller.ProgramConstants;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.webapp.WebAppContext;
@@ -17,18 +16,19 @@ import org.springframework.core.io.ClassPathResource;
 import servlets.ZoneLibrary;
 import servlets.ZonePlaylist;
 import servlets.ZoneSelection_Page;
-import servlets.ZoneAddMedia_DialogPage;
 import servlets.ZoneSearchMedia_DialogPage;
 
 /**
  * @author Mort Bay Consulting / Codehaus / Eclipse
  * @see http://docs.codehaus.org/display/JETTY/Embedding+Jetty#EmbeddingJetty-QuickStartServletsand.jsppages%28hostedwithinthesame.jarastheembedder%29
  */
-public class JettyWebServer implements ProgramConstants {
+public class JettyWebServer {
 
     private static JettyWebServer jws_SingleInstance = null;
     protected Server jws_serverInstance = null;
     protected int jws_serverPortInt = 80;
+    protected String webAppContextPathStr = "/";
+    protected String webAppDirStr = "../webapp";
 
     protected JettyWebServer(int theServerPortInt) {
         jws_serverInstance = new Server(theServerPortInt);
@@ -45,7 +45,6 @@ public class JettyWebServer implements ProgramConstants {
         webAppContext.addServlet(new ServletHolder(new ZoneSelection_Page()), "/servlets/list-zones");
         webAppContext.addServlet(new ServletHolder(new ZonePlaylist()), "/servlets/playlist");
         webAppContext.addServlet(new ServletHolder(new ZoneLibrary()), "/servlets/library");
-        webAppContext.addServlet(new ServletHolder(new ZoneAddMedia_DialogPage()), "/servlets/library-add-dialog");
         webAppContext.addServlet(new ServletHolder(new ZoneSearchMedia_DialogPage()), "/servlets/library-search-dialog");
         jws_serverInstance.addHandler(webAppContext);
     }
@@ -74,6 +73,10 @@ public class JettyWebServer implements ProgramConstants {
         } catch (Exception ex) {
             Logger.getLogger(JettyWebServer.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    public boolean isServerRunning() {
+        return jws_serverInstance.isRunning();
     }
 
     public void stopServer() {

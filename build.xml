@@ -23,24 +23,27 @@
     <property name="jdk-version.target" value="1.5"/>
 
 
+    <!-- initialize various path info -->
     <target name="init">
         <!-- add the jar libs -->
         <path id="jars">
             <fileset dir="${contrib}" includes="**/*.jar"/>
         </path>
-        <!-- create the time stamp for this build -->
-        <tstamp/>
         <!-- Create the build directory structure used by compile -->
         <mkdir dir="${build}"/>
     </target>
 
+    <!-- create the class files -->
     <target name="compile" depends="init" description="compile the source">
         <javac fork="true" srcdir="${src}" destdir="${build}" debug="${javac.debug}"
         memoryinitialsize="${init.mem.size}" memorymaximumsize="${max.mem.size}"
         target="${jdk-version.target}" source="${jdk-version.source}"
-        optimize="${optimize}" classpathref="jars"/>
+        optimize="${optimize}" classpathref="jars">
+            <compilerarg value="-Xlint"/>
+        </javac>
     </target>
     
+    <!-- move static html, js, images into build directory for jar packaging -->
     <target name="copyfiles" description="copy static files into build">
         <mkdir dir="${build}/webapp"/>
         <copy todir="${build}/webapp">
@@ -48,6 +51,7 @@
         </copy>
     </target>
     
+    <!-- create the documentation from the class files -->
     <target name="javadoc" depends="compile" description="create component docs">
         <delete dir="${docs}"/>
         <mkdir dir="${docs}"/>
@@ -59,26 +63,26 @@
         </javadoc>
     </target>
 
+    <!-- put together the jar package -->
     <target name="dist" depends="compile, copyfiles" description="generate the distribution">
         <!-- Create the distribution directory -->
         <mkdir dir="${dist}"/>
 
-        <!-- put everything in ${build} into the mmc-${DSTAMP}.jar file -->
-        <jar jarfile="${dist}/mmc-${DSTAMP}.jar" basedir="${build}">
+        <!-- put everything in ${build} into the mmc.jar file -->
+        <jar jarfile="${dist}/mmc.jar" basedir="${build}">
             <manifest>
                 <attribute name="Main-Class" value="${mainclass}"/>
             </manifest>
             <zipgroupfileset dir="${contrib}" includes="**/*.jar"/>
         </jar>
-        
-        <!-- copy the latest release to standard filename -->
-        <copy file="${dist}/mmc-${DSTAMP}.jar" tofile="${dist}/mmc.jar"/>
     </target>
     
+    <!-- run the packaged jar -->
     <target name="run" depends="dist" description="run the dist">
         <java jar="${dist}/mmc.jar" fork="true"/>
     </target>
 
+    <!-- remove the created class and jar file/s -->
     <target name="clean" description="clean up">
         <delete dir="${build}"/>
         <delete dir="${dist}"/>

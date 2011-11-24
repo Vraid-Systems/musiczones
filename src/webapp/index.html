@@ -26,7 +26,6 @@
             var kZoneSelectionPage = "/servlets/list-zones";
             var kPlayListPageUrlStr = "/servlets/playlist";
             var kLibraryServlet = "/servlets/library";
-            var kLibraryAddDialog = "/servlets/library-add-dialog";
             var kLibrarySearchDialog = "/servlets/library-search-dialog";
             var kLocalFileSystem = "file";
             var kInternetRadio = "radio";
@@ -87,73 +86,20 @@
             }
 
             //media library
-            function mediaLibrary_addMediaRoot() {
-                var newServerTypeVal = $("#newServerType option:selected").val();
-                var newMediaNameVal = $("#newMediaName").val();
-                var newServerAddressVal = $("#newServerAddress").val();
-                var newFilePathVal = $("#newFilePath").val();
-                $.post(kLibraryServlet, {
-                    opt: "addMediaRoot",
-                    newServerType: newServerTypeVal,
-                    newMediaName: newMediaNameVal,
-                    newServerAddress: newServerAddressVal,
-                    newFilePath: newFilePathVal
-                }, function(data) {
-                    mediaLibrary_Load();
-                });
-            }
-            function mediaLibrary_LoadDirectory(theDirectoryPath) {
-                $.mobile.changePage(kLibraryServlet, {
-                    data: {path: theDirectoryPath},
-                    reloadPage: true
-                });
-            }
-            function mediaLibrary_LoadDirectoryPage(theDirectoryPath, thePageInt) {
-                $.mobile.changePage(kLibraryServlet, {
-                    data: {
-                        page: thePageInt,
-                        path: theDirectoryPath
-                    },
-                    reloadPage: true
-                });
-            }
             function mediaLibrary_Load() {
                 $.mobile.changePage(kLibraryServlet, {
                     reloadPage: true
                 });
             }
-            function mediaLibrary_removeMediaRoot(elementId) {
-                var jhasha = elementId.split("_");
-                var mediaRootIndexInt = jhasha[(jhasha.length - 1)];
-                $.post(kLibraryServlet, {
-                    opt: "removeMediaRoot",
-                    index: mediaRootIndexInt
-                }, function(data) {
-                    mediaLibrary_Load();
-                });
-            }
-
-            //media library add page
-            function libraryAddPage_Load() {
-                $.mobile.changePage(kLibraryAddDialog, {
-                    transition: "pop",
+            function mediaLibrary_LoadMore(nextPageInt) {
+                $.mobile.changePage(kLibraryServlet, {
+                    data: {
+                        page: nextPageInt
+                    },
                     reloadPage: true
                 });
             }
-            function libraryAddPage_changeSelectHandler(elementId) {
-                var jQElementId = "#"+elementId;
-                var selectedValue = $(jQElementId + " option:selected").val();
-                
-                //kLocalFileSystem OR kInternetRadio
-                if ((selectedValue === kLocalFileSystem) || (selectedValue === kInternetRadio)) {
-                    document.getElementById("newServerAddressContain").style.display = "none";
-                    document.getElementById("newServerAddress").value = "empty";
-                } else {
-                    document.getElementById("newServerAddressContain").style.display = "";
-                    document.getElementById("newServerAddress").value = "";
-                }
-            }
-            
+
             //media library search page
             function librarySearchPage_Load() {
                 $.mobile.changePage(kLibrarySearchDialog, {
@@ -204,8 +150,8 @@
                 If you would like to go to a different media zone controller on
                 this network, pick <i>Zone Selection</i>. Want to manage the
                 tunes I am playing right now? See <i>Now Playing</i>. How about
-                adding some more tunes from the library or adding more or your
-                favorite media to my library? Check out the <i>Library</i>.
+                adding some more tunes from the library?
+                Check out the <i>Library</i>.
             </div>
 
             <div data-id="mainNavFooter" data-role="footer" data-position="fixed">

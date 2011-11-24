@@ -1,6 +1,6 @@
 /*
  * detector class for ped_Process exit
- * 
+ *
  * ped_Process is passed as constructor argument and entire thread does nothing else
  * than wait for the given ped_Process to finish and invokes the listeners
  */
