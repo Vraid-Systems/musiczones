@@ -30,6 +30,7 @@ public class MediaPlayer {
     public static final String prefMediaPlayerPathKeyStr = "media-player-bin-path";
     public static final String[] theSupportedContainers = {"mpg", "mpeg", "avi",
         "wmv", "wma", "mov", "mp3", "mp4", "ogg", "ogv", "mkv", "aac", "wav"};
+    public static final String[] thePlayListContainers = {"pls", "m3u"};
 
     protected MediaPlayer(boolean theDebugIsOn) {
         debugMessagesOn = theDebugIsOn;

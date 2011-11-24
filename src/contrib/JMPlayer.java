@@ -15,6 +15,7 @@ import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import multicastmusiccontroller.ZoneLibraryIndex;
 
 /**
  * @author Adrian BER
@@ -95,7 +96,11 @@ public class JMPlayer {
         }
 
         // start MPlayer as an external process
-        mplayerProcess = new ProcessBuilder(mplayerPath, mplayerOptions, theMediaPath).start();
+        if (ZoneLibraryIndex.getInstance().theContainerIsPlayList(theMediaPath)) {
+            mplayerProcess = new ProcessBuilder(mplayerPath, mplayerOptions, "-playlist", theMediaPath).start();
+        } else {
+            mplayerProcess = new ProcessBuilder(mplayerPath, mplayerOptions, theMediaPath).start();
+        }
 
         // create the piped streams where to redirect the standard output and error of MPlayer
         // specify a bigger pipesize

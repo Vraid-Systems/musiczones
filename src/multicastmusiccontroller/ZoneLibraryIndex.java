@@ -323,6 +323,22 @@ public class ZoneLibraryIndex {
                     return true;
                 }
             }
+            return theContainerIsPlayList(theFileName);
+        }
+        return false;
+    }
+
+    /**
+     * check to see if file is a valid playlist container file based
+     * on exact string extension matching
+     * @param theFileName String
+     * @return boolean - is it a playlist file?
+     */
+    public boolean theContainerIsPlayList(String theFileName) {
+        for (String aPlayListContainer : MediaPlayer.thePlayListContainers) {
+            if (theFileName.contains("." + aPlayListContainer)) {
+                return true;
+            }
         }
         return false;
     }
