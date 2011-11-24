@@ -36,7 +36,7 @@ public class ZoneLibraryIndex {
     protected HashMap<String, String> zli_FileMap = null; //<full file path, filename>
     protected Timer zli_Timer = null;
     protected boolean debugEventsOn = false;
-    protected int zli_RefreshIndexSeconds = 180;
+    protected int zli_RefreshIndexSeconds = 120;
     protected String[] zli_PathBlackListArray = {"$", "tftp", "install"};
 
     protected ZoneLibraryIndex(boolean theDebugIsOn) {
@@ -225,12 +225,56 @@ public class ZoneLibraryIndex {
      * @param thePathStr String
      */
     protected void removePath(String thePathStr) {
+        thePathStr = thePathStr.toLowerCase(Locale.ENGLISH);
+        try {
+            thePathStr = URLEncoder.encode(thePathStr, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
+        }
         for (String aTempFullFilePath : zli_FileMap.keySet()) {
             if (aTempFullFilePath.contains(thePathStr)) {
                 zli_FileMap.remove(aTempFullFilePath);
 
                 if (debugEventsOn) {
                     System.out.println("ZLI removePath - removed " + thePathStr);
+                }
+            }
+        }
+    }
+
+    /**
+     * remove all indexed media that does not contain a server in the input list
+     * @param theHostList LinkedList<SmbFile>
+     */
+    protected void removeOffline(LinkedList<SmbFile> theHostList) {
+        if ((theHostList == null) || (zli_FileMap == null)) {
+            return;
+        }
+
+        for (String aTempFullFilePath : zli_FileMap.keySet()) {
+            boolean aRemoveFile = true;
+
+            Iterator<SmbFile> aServerSmbFileIter = theHostList.iterator();
+            while (aServerSmbFileIter.hasNext()) {
+                SmbFile aServerSmbFile = aServerSmbFileIter.next();
+                String aServerStrEncoded;
+                try {
+                    aServerStrEncoded = URLEncoder.encode(aServerSmbFile.toString(), "UTF-8");
+                } catch (UnsupportedEncodingException ex) {
+                    Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
+                    continue;
+                }
+                if (aTempFullFilePath.contains(aServerStrEncoded)) {
+                    aRemoveFile = false;
+                    break;
+                }
+            }
+
+            if (aRemoveFile) {
+                zli_FileMap.remove(aTempFullFilePath);
+
+                if (debugEventsOn) {
+                    System.out.println("ZLI removeOffline - removed " + aTempFullFilePath);
                 }
             }
         }
@@ -305,23 +349,24 @@ public class ZoneLibraryIndex {
         private String aSmbPrefix = "smb://";
 
         public void run() {
+            //index CIFS network for servers
             LinkedList<SmbFile> aHostList = new LinkedList<SmbFile>();
             String[] aWorkGroupArray = null;
             try {
                 SmbFile aRootSmbFile = new SmbFile(aSmbPrefix);
                 try {
                     aWorkGroupArray = aRootSmbFile.list();
-                    if (aWorkGroupArray == null) {
-                        return;
-                    }
                 } catch (SmbException ex) {
                     Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
-                    return;
                 }
             } catch (MalformedURLException ex) {
                 Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            if (aWorkGroupArray == null) {
+                System.err.println("ZLI RefreshSearchIndexTask - no workgroups found");
                 return;
             }
+
             for (String aWorkGroup : aWorkGroupArray) {
                 SmbFile aWorkGroupSmbFile;
                 try {
@@ -349,6 +394,7 @@ public class ZoneLibraryIndex {
                         if (!aHostList.contains(aServerSmbFile)) {
                             if (!aServerSmbFile.toString().endsWith("/")) {
                                 String aServerStr = aServerSmbFile.toString() + "/";
+                                aServerStr = aServerStr.toLowerCase(Locale.ENGLISH);
                                 try {
                                     aServerSmbFile = new SmbFile(aServerStr);
                                 } catch (MalformedURLException ex) {
@@ -368,12 +414,17 @@ public class ZoneLibraryIndex {
                 }
             }
 
+            //remove offline media - indexed media no longer has an indexed server
+            removeOffline(aHostList);
+
+            //spider all open shares on indexed servers for media
             Iterator<SmbFile> aServerSmbFileIter = aHostList.iterator();
             while (aServerSmbFileIter.hasNext()) {
                 SmbFile aServerSmbFile = aServerSmbFileIter.next();
                 try {
                     String[] aSharePathArray = aServerSmbFile.list();
                     for (String aSharePath : aSharePathArray) {
+                        aSharePath = aSharePath.toLowerCase(Locale.ENGLISH);
                         if (!thePathIsBlackListed(aSharePath)) {
                             if (!aSharePath.endsWith("/")) {
                                 aSharePath = aSharePath + "/";

@@ -9,14 +9,14 @@
 # Short-Description:	MulticastMediaController
 ### END INIT INFO
 
-# This script requires screen and openjdk-jre installed
-# If running this headless I would suggest openjdk-6-jre-headless instead
-# apt-get install screen openjdk-6-jre-headless
+# This script requires screen and openjdk-jre to be installed.
+# If running this headless I would suggest: openjdk-6-jre-headless
+# Install dependencies: apt-get install screen openjdk-6-jre-headless
 # To install this startup script: sudo insserv mmc
 
 case "$1" in
   start)
-	screen -dmS mmc java -jar /srv/mmc.jar --zone-name=hp-brk
+	screen -dmS mmc java -jar /srv/mmc.jar --zone-name=mmc-zone
 	;;
   stop)
 	kill `pidof SCREEN`
