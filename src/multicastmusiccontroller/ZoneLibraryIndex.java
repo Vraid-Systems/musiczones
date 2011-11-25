@@ -7,8 +7,11 @@
 package multicastmusiccontroller;
 
 import contrib.CIFSNetworkInterface;
+import contrib.ID3MetaData;
 import contrib.MediaPlayer;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
@@ -25,6 +28,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
+import org.farng.mp3.TagException;
 import zonecontrol.ZoneServerUtility;
 
 /**
@@ -34,6 +38,8 @@ public class ZoneLibraryIndex {
 
     private static ZoneLibraryIndex zli_SingleInstance = null;
     protected HashMap<String, String> zli_FileMap = null; //<full file path, filename>
+    protected HashMap<String, LinkedList<String>> zli_GenreMap = null; //<genre, LinkedList<filenames>>
+    protected HashMap<String, LinkedList<String>> zli_AlbumMap = null; //<album, LinkedList<filenames>>
     protected Timer zli_Timer = null;
     protected boolean debugEventsOn = false;
     protected int zli_RefreshIndexSeconds = 120;
@@ -42,6 +48,8 @@ public class ZoneLibraryIndex {
     protected ZoneLibraryIndex(boolean theDebugIsOn) {
         debugEventsOn = theDebugIsOn;
         zli_FileMap = new HashMap<String, String>();
+        zli_GenreMap = new HashMap<String, LinkedList<String>>();
+        zli_AlbumMap = new HashMap<String, LinkedList<String>>();
         zli_Timer = new Timer();
         zli_Timer.schedule(new RefreshSearchIndexTask(), 0,
                 zli_RefreshIndexSeconds * 1000);
@@ -158,9 +166,29 @@ public class ZoneLibraryIndex {
                         if (theContainerIsSupported(aFullFilePathStr)) {
                             if (!zli_FileMap.containsValue(iSmbFile.getName())) {
                                 zli_FileMap.put(aFullFilePathStr, iSmbFile.getName());
-
                                 if (debugEventsOn) {
                                     System.out.println("ZLI indexPath - added " + aFullFilePathStr);
+                                }
+
+                                if (theContainerIsMp3(iSmbFile.getPath())) {
+                                    ID3MetaData aID3MetaData = null;
+                                    try {
+                                        aID3MetaData = new ID3MetaData(iSmbFile.getPath());
+                                    } catch (FileNotFoundException ex) {
+                                        Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
+                                        continue;
+                                    } catch (IOException ex) {
+                                        Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
+                                        continue;
+                                    } catch (TagException ex) {
+                                        Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
+                                        continue;
+                                    }
+                                    addToAlbum(iSmbFile.getName(), aID3MetaData.getAlbum());
+                                    if (debugEventsOn) {
+                                        System.out.println("ZLI indexPath - album is " + aID3MetaData.getAlbum());
+                                    }
+                                    addToGenre(iSmbFile.getName(), aID3MetaData.getGenresAsList());
                                 }
                             }
                         }
@@ -204,9 +232,29 @@ public class ZoneLibraryIndex {
                         if (theContainerIsSupported(aFullFilePathStr)) {
                             if (!zli_FileMap.containsValue(iFile.getName())) {
                                 zli_FileMap.put(aFullFilePathStr, iFile.getName());
-
                                 if (debugEventsOn) {
                                     System.out.println("ZLI indexPath - added " + aFullFilePathStr);
+                                }
+
+                                if (theContainerIsMp3(tempFilePathStr)) {
+                                    ID3MetaData aID3MetaData = null;
+                                    try {
+                                        aID3MetaData = new ID3MetaData(tempFilePathStr);
+                                    } catch (FileNotFoundException ex) {
+                                        Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
+                                        continue;
+                                    } catch (IOException ex) {
+                                        Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
+                                        continue;
+                                    } catch (TagException ex) {
+                                        Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
+                                        continue;
+                                    }
+                                    addToAlbum(iFile.getName(), aID3MetaData.getAlbum());
+                                    if (debugEventsOn) {
+                                        System.out.println("ZLI indexPath - album is " + aID3MetaData.getAlbum());
+                                    }
+                                    addToGenre(iFile.getName(), aID3MetaData.getGenresAsList());
                                 }
                             }
                         }
@@ -216,6 +264,58 @@ public class ZoneLibraryIndex {
 
             if (debugEventsOn) {
                 System.out.println("ZLI indexPath - done indexing " + thePathStr);
+            }
+        }
+    }
+
+    /**
+     * add a filename to a album group, create if !exists
+     * @param theFileName String
+     * @param theAlbumTitle String
+     */
+    protected void addToAlbum(String theFileName, String theAlbumTitle) {
+        if ((theFileName == null) || (theAlbumTitle == null)) {
+            return;
+        }
+
+        if (zli_AlbumMap.containsKey(theAlbumTitle)) {
+            if (zli_AlbumMap.get(theAlbumTitle) == null) {
+                LinkedList<String> aFileNameLL = new LinkedList<String>();
+                aFileNameLL.add(theFileName);
+                zli_AlbumMap.put(theAlbumTitle, aFileNameLL);
+            } else {
+                zli_AlbumMap.get(theAlbumTitle).add(theFileName);
+            }
+        } else {
+            LinkedList<String> aFileNameLL = new LinkedList<String>();
+            aFileNameLL.add(theFileName);
+            zli_AlbumMap.put(theAlbumTitle, aFileNameLL);
+        }
+    }
+
+    /**
+     * add a filename to multiple genres
+     * @param theFileName String
+     * @param theGenreList ArrayList<String>
+     */
+    protected void addToGenre(String theFileName, ArrayList<String> theGenreList) {
+        if ((theFileName == null) || (theGenreList == null)) {
+            return;
+        }
+
+        for (String aGenre : theGenreList) {
+            if (zli_GenreMap.containsKey(aGenre)) {
+                if (zli_AlbumMap.get(aGenre) == null) {
+                    LinkedList<String> aFileNameLL = new LinkedList<String>();
+                    aFileNameLL.add(theFileName);
+                    zli_AlbumMap.put(aGenre, aFileNameLL);
+                } else {
+                    zli_AlbumMap.get(aGenre).add(theFileName);
+                }
+            } else {
+                LinkedList<String> aFileNameLL = new LinkedList<String>();
+                aFileNameLL.add(theFileName);
+                zli_AlbumMap.put(aGenre, aFileNameLL);
             }
         }
     }
@@ -308,6 +408,10 @@ public class ZoneLibraryIndex {
             }
             return true;
         }
+    }
+
+    public boolean theContainerIsMp3(String theFileName) {
+        return theFileName.contains(".mp3");
     }
 
     /**
