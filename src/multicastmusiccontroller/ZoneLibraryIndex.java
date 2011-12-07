@@ -2,7 +2,9 @@
  * a singleton class for manging and allowing acces to the zone library search index
  * only indexes one copy of media with a certain filename
  *
- * NOTE: recursive symlinks does this puppy in
+ * support for grabbing ID3 metadata on MP3 files only
+ *
+ * NOTE: recursive symlinks in path to index kills this
  */
 package multicastmusiccontroller;
 
@@ -42,8 +44,8 @@ public class ZoneLibraryIndex {
     protected HashMap<String, LinkedList<String>> zli_AlbumMap = null; //<album, LinkedList<filenames>>
     protected Timer zli_Timer = null;
     protected boolean debugEventsOn = false;
-    protected int zli_RefreshIndexSeconds = 120;
-    protected String[] zli_PathBlackListArray = {"$", "tftp", "install"};
+    protected int zli_RefreshCIFSMediaSeconds = 80; //1:20 instead of 2:00, test traffic levels
+    protected String[] zli_CIFSPathBlackListArray = {"$"};
 
     protected ZoneLibraryIndex(boolean theDebugIsOn) {
         debugEventsOn = theDebugIsOn;
@@ -51,9 +53,9 @@ public class ZoneLibraryIndex {
         zli_GenreMap = new HashMap<String, LinkedList<String>>();
         zli_AlbumMap = new HashMap<String, LinkedList<String>>();
         zli_Timer = new Timer();
-        zli_Timer.schedule(new RefreshSearchIndexTask(), 0,
-                zli_RefreshIndexSeconds * 1000);
-        System.out.println("ZLI RefreshSearchIndexTask added");
+        zli_Timer.schedule(new RefreshCIFSMediaTask(), 0,
+                zli_RefreshCIFSMediaSeconds * 1000);
+        System.out.println("ZLI RefreshCIFSMediaTask added");
     }
 
     public static ZoneLibraryIndex getInstance() {
@@ -130,6 +132,7 @@ public class ZoneLibraryIndex {
 
     /**
      * add the contents of a certain path to the library index
+     * currently supports: CIFS and local files
      * @param thePathStr String
      */
     protected void indexPath(String thePathStr) {
@@ -453,7 +456,7 @@ public class ZoneLibraryIndex {
      * @return boolean - is it blacklisted?
      */
     protected boolean thePathIsBlackListed(String thePathStr) {
-        for (String aPathStr : zli_PathBlackListArray) {
+        for (String aPathStr : zli_CIFSPathBlackListArray) {
             if (thePathStr.contains(aPathStr)) {
                 return true;
             }
@@ -462,14 +465,14 @@ public class ZoneLibraryIndex {
     }
 
     /**
-     * private time task that adds all supported media from CIFS shares
+     * private timed task that adds all supported media from CIFS shares
      */
-    private class RefreshSearchIndexTask extends TimerTask {
+    private class RefreshCIFSMediaTask extends TimerTask {
 
         private String aSmbPrefix = "smb://";
 
         public void run() {
-            //index CIFS network for servers
+            //index CIFS network for any workgroups
             LinkedList<SmbFile> aHostList = new LinkedList<SmbFile>();
             String[] aWorkGroupArray = null;
             try {
@@ -487,6 +490,7 @@ public class ZoneLibraryIndex {
                 return;
             }
 
+            //check CIFS network for servers
             for (String aWorkGroup : aWorkGroupArray) {
                 SmbFile aWorkGroupSmbFile;
                 try {
@@ -502,7 +506,9 @@ public class ZoneLibraryIndex {
                     Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.WARNING, null, ex);
                     continue;
                 }
-                if (aServerArray != null) {
+                if (aServerArray == null) {
+                    System.err.println("ZLI RefreshSearchIndexTask - no hosts found in '" + aWorkGroup + "' workgroup");
+                } else {
                     for (String aServer : aServerArray) {
                         SmbFile aServerSmbFile;
                         try {
@@ -523,7 +529,7 @@ public class ZoneLibraryIndex {
                                 }
                             }
 
-                            aHostList.add(aServerSmbFile);
+                            aHostList.add(aServerSmbFile); //add new server to index list
 
                             if (debugEventsOn) {
                                 System.out.println("ZLI RefreshSearchIndexTask - added "
@@ -534,7 +540,7 @@ public class ZoneLibraryIndex {
                 }
             }
 
-            //remove offline media - indexed media no longer has an indexed server
+            //remove all indexed media that does not have a server found in online hosts list
             removeOffline(aHostList);
 
             //spider all open shares on indexed servers for media

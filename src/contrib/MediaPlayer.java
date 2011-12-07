@@ -28,8 +28,8 @@ public class MediaPlayer {
     protected int lengthOfPauseBetweenMediaInSeconds = 2;
     private JMPlayer vmp_JMPlayer = null;
     public static final String prefMediaPlayerPathKeyStr = "media-player-bin-path";
-    public static final String[] theSupportedContainers = {"mpg", "mpeg", "avi",
-        "wmv", "wma", "mov", "mp3", "mp4", "ogg", "ogv", "mkv", "aac", "wav"};
+    public static final String[] theSupportedContainers = {"mp3", "mp4", "ogg",
+        "wav", "flac", "aac", "wma"}; //MPlayer supports video as well, only wanted audio
     public static final String[] thePlayListContainers = {"pls", "m3u"};
 
     protected MediaPlayer(boolean theDebugIsOn) {
