@@ -18,6 +18,7 @@ import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import musiczones.HttpCmdClient;
 
 /**
  *
@@ -117,6 +118,7 @@ public class ZoneMulticastServer {
                 serverHasJoinedGroup = true; //finally connected to the group
             }
 
+            HttpCmdClient.getInstance().notifyUp(true); //notify master server that zone is ready
             System.out.println("ZMS started and listening to group");
 
             while (true) {

@@ -17,6 +17,7 @@ Java ID3 Tag Library = LGPL v2.1 [http://javamusictag.sourceforge.net/LGPL.html]
 JCIFS = LGPL v2.1 [http://www.gnu.org/licenses/lgpl-2.1.txt]
 Jetty = Apache License v2.0 [http://jetty.codehaus.org/jetty/license.html]
 JMPlayer [http://beradrian.wordpress.com/2008/01/30/jmplayer/] (non-licensed?)
+JUnit = Common Public v1.0 [http://junit.sourceforge.net/cpl-v10.html]
 ProcessExit [http://beradrian.wordpress.com/2008/11/03/detecting-process-exit-in-java/]
 SHA1 = almost public domain [http://www.anyexample.com/license/]
 Spring Framework = Apache License v2.0 [http://www.apache.org/licenses/LICENSE-2.0.html]

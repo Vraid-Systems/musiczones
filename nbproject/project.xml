@@ -3,14 +3,29 @@
     <type>org.netbeans.modules.ant.freeform</type>
     <configuration>
         <general-data xmlns="http://www.netbeans.org/ns/freeform-project/1">
+            <name>MusicZones</name>
+        </general-data>
+        <general-data xmlns="http://www.netbeans.org/ns/freeform-project/2">
             <!-- Do not use Project Properties customizer when editing this file manually. -->
             <name>MusicZones</name>
             <properties/>
             <folders>
                 <source-folder>
+                    <label>MusicZones</label>
+                    <location>.</location>
+                    <encoding>windows-1252</encoding>
+                </source-folder>
+                <source-folder>
                     <label>src</label>
                     <type>java</type>
                     <location>src</location>
+                    <encoding>windows-1252</encoding>
+                </source-folder>
+                <source-folder>
+                    <label>test</label>
+                    <type>java</type>
+                    <location>test</location>
+                    <encoding>windows-1252</encoding>
                 </source-folder>
             </folders>
             <ide-actions>
@@ -34,17 +49,19 @@
                     <script>nbproject/ide-targets.xml</script>
                     <target>debug-nb</target>
                 </action>
+                <action name="test">
+                    <target>junit</target>
+                </action>
             </ide-actions>
-            <export>
-                <type>folder</type>
-                <location>build</location>
-                <build-target>dist</build-target>
-            </export>
             <view>
                 <items>
                     <source-folder style="packages">
                         <label>src</label>
                         <location>src</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>test</label>
+                        <location>test</location>
                     </source-folder>
                     <source-file>
                         <location>build.xml</location>
@@ -56,16 +73,22 @@
                     <ide-action name="clean"/>
                     <ide-action name="javadoc"/>
                     <ide-action name="run"/>
+                    <ide-action name="test"/>
                     <ide-action name="debug"/>
                 </context-menu>
             </view>
             <subprojects/>
         </general-data>
-        <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/1">
+        <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/2">
             <compilation-unit>
                 <package-root>src</package-root>
                 <classpath mode="compile">contrib/jetty-6.1.26/jetty-6.1.26.jar;contrib/jetty-6.1.26/jetty-util-6.1.26.jar;contrib/jetty-6.1.26/servlet-api-2.5-20081211.jar;contrib/springframework/spring-1.2.6.jar;contrib/metadata/jid3lib-0.5.4.jar;contrib/filesystem/jcifs-1.3.17.jar</classpath>
-                <built-to>build</built-to>
+                <source-level>1.5</source-level>
+            </compilation-unit>
+            <compilation-unit>
+                <package-root>test</package-root>
+                <unit-tests/>
+                <classpath mode="compile">contrib/junit-4.10.jar;contrib/filesystem/jcifs-1.3.17.jar;contrib/jetty-6.1.26/jetty-6.1.26.jar;contrib/jetty-6.1.26/jetty-util-6.1.26.jar;contrib/jetty-6.1.26/servlet-api-2.5-20081211.jar;contrib/metadata/jid3lib-0.5.4.jar;contrib/springframework/spring-1.2.6.jar;src</classpath>
                 <source-level>1.5</source-level>
             </compilation-unit>
         </java-data>

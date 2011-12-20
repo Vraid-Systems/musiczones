@@ -52,6 +52,9 @@ public class MusicZones {
             }
         } //done processing arguments
 
+        //shutdown hook after arg proc, otherwise do un-needed traffic
+        Runtime.getRuntime().addShutdownHook(new RunWhenShuttingDown());
+
         //save mplayer path to prefs if it can be found and not already saved
         String savedMPlayerBinPath = ZoneServerUtility.getInstance().loadStringPref(MediaPlayer.prefMediaPlayerPathKeyStr, "");
         File aExistsFile = new File(savedMPlayerBinPath);
@@ -115,6 +118,21 @@ public class MusicZones {
 
         //start up the library indexing service
         ZoneLibraryIndex.getInstance(false);
+    }
+
+    /**
+     * stop all relevant services in order of graceful shutdown needs
+     */
+    public static class RunWhenShuttingDown extends Thread {
+
+        @Override
+        public void run() {
+            //1. remove node from master server - do not confuse users
+            HttpCmdClient.getInstance().notifyDown();
+
+            //2. shutdown jetty -  does not really matter if aborted abruptly
+            JettyWebServer.getInstance().stopServer();
+        }
     }
 
     /**

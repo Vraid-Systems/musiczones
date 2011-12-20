@@ -73,6 +73,14 @@ public class ZoneServerLogic {
         super.finalize();
     }
 
+    public String getUUID() {
+        return zsl_ZoneUUID;
+    }
+
+    public String getZoneName() {
+        return zsl_ZoneName;
+    }
+
     /**
      * allow for external setting of the zone name and refresh the UUID
      * @param theZoneName String
