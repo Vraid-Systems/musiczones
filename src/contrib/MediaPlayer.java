@@ -12,8 +12,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import multicastmusiccontroller.FileSystemType;
-import multicastmusiccontroller.MulticastMusicController;
+import musiczones.FileSystemType;
+import musiczones.MusicZones;
 import zonecontrol.ZoneServerUtility;
 
 /**
@@ -37,7 +37,7 @@ public class MediaPlayer {
         vmp_MediaUrlStringArray = new LinkedList<String>();
         String aMPlayerBinPath = ZoneServerUtility.getInstance().loadStringPref(prefMediaPlayerPathKeyStr, "");
         if (aMPlayerBinPath.isEmpty()) {
-            MulticastMusicController.MPlayerNotFound();
+            MusicZones.MPlayerNotFound();
         }
         vmp_JMPlayer = new JMPlayer();
         vmp_JMPlayer.setMPlayerPath(aMPlayerBinPath);
@@ -116,7 +116,7 @@ public class MediaPlayer {
                             try {
                                 Thread.sleep(lengthOfPauseBetweenMediaInSeconds * 1000);
                             } catch (InterruptedException ex) {
-                                Logger.getLogger(MulticastMusicController.class.getName()).log(Level.SEVERE, null, ex);
+                                Logger.getLogger(MusicZones.class.getName()).log(Level.SEVERE, null, ex);
                             }
 
                             if (debugMessagesOn) {

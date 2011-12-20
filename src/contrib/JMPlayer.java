@@ -15,7 +15,7 @@ import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import multicastmusiccontroller.ZoneLibraryIndex;
+import musiczones.ZoneLibraryIndex;
 
 /**
  * @author Adrian BER

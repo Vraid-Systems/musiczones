@@ -6,7 +6,7 @@
  *
  * NOTE: recursive symlinks in path to index kills this
  */
-package multicastmusiccontroller;
+package musiczones;
 
 import contrib.CIFSNetworkInterface;
 import contrib.ID3MetaData;

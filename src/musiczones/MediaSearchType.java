@@ -1,7 +1,7 @@
 /*
  * how are we matching keywords?
  */
-package multicastmusiccontroller;
+package musiczones;
 
 /**
  * @author Jason Zerbe

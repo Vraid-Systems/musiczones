@@ -1,22 +1,22 @@
 
-<project name="MulticastMusicController" default="dist" basedir=".">
+<project name="MusicZones" default="dist" basedir=".">
     <description>
         build the node software for the LAN IPv4 multicast music controller system
     </description>
-    
+
     <!-- global properties -->
-    <property name="mainclass" value="multicastmusiccontroller.MulticastMusicController"/>
-    
+    <property name="mainclass" value="musiczones.MusicZones"/>
+
     <property name="src" location="src"/>
     <property name="contrib" location="contrib"/>
     <property name="build" location="build"/>
     <property name="dist" location="dist"/>
     <property name="docs" location="docs"/>
     <property name="debug" location="debug"/>
-    
+
     <property name="init.mem.size" value="128m"/>
     <property name="max.mem.size" value="256m"/>
-    
+
     <property name="javac.debug" value="true"/>
     <property name="optimize" value="true"/>
     <property name="jdk-version.source" value="1.5"/>
@@ -42,7 +42,7 @@
             <compilerarg value="-Xlint"/>
         </javac>
     </target>
-    
+
     <!-- move static html, js, images into build directory for jar packaging -->
     <target name="copyfiles" description="copy static files into build">
         <mkdir dir="${build}/webapp"/>
@@ -50,12 +50,12 @@
             <fileset dir="${src}/webapp"/>
         </copy>
     </target>
-    
+
     <!-- create the documentation from the class files -->
     <target name="javadoc" depends="compile" description="create component docs">
         <delete dir="${docs}"/>
         <mkdir dir="${docs}"/>
-        
+
         <javadoc author="true" bottom="${component.title}" destdir="${docs}"
         source="${jdk-version.source}" doctitle="${component.title}"
         packagenames="*" access="protected" sourcepath="${src}"
@@ -68,18 +68,18 @@
         <!-- Create the distribution directory -->
         <mkdir dir="${dist}"/>
 
-        <!-- put everything in ${build} into the mmc.jar file -->
-        <jar jarfile="${dist}/mmc.jar" basedir="${build}">
+        <!-- put everything in ${build} into the mz.jar file -->
+        <jar jarfile="${dist}/mz.jar" basedir="${build}">
             <manifest>
                 <attribute name="Main-Class" value="${mainclass}"/>
             </manifest>
             <zipgroupfileset dir="${contrib}" includes="**/*.jar"/>
         </jar>
     </target>
-    
+
     <!-- run the packaged jar -->
     <target name="run" depends="dist" description="run the dist">
-        <java jar="${dist}/mmc.jar" fork="true"/>
+        <java jar="${dist}/mz.jar" fork="true"/>
     </target>
 
     <!-- remove the created class and jar file/s -->

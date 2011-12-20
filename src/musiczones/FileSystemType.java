@@ -1,7 +1,7 @@
 /*
  * what filesystems are we using?
  */
-package multicastmusiccontroller;
+package musiczones;
 
 /**
  * @author Jason Zerbe

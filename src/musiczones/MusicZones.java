@@ -1,7 +1,7 @@
 /*
  * main class for application
  */
-package multicastmusiccontroller;
+package musiczones;
 
 import contrib.JettyWebServer;
 import contrib.MediaPlayer;
@@ -15,7 +15,7 @@ import zonecontrol.ZoneServerUtility;
 /**
  * @author Jason Zerbe
  */
-public class MulticastMusicController {
+public class MusicZones {
 
     protected static String global_ZoneName = null;
     protected static int global_webInterfacePortInt = 80;
@@ -106,7 +106,7 @@ public class MulticastMusicController {
         try {
             Thread.sleep(100);
         } catch (InterruptedException ex) {
-            Logger.getLogger(MulticastMusicController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MusicZones.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         //after networking is in place, finally ready to start accepting control packets
