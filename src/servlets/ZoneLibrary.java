@@ -3,14 +3,21 @@
  */
 package servlets;
 
+import contrib.MediaPlayer;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
+import java.util.Random;
+import java.util.TreeMap;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import musiczones.ID3FieldList;
 import musiczones.MediaSearchType;
 import musiczones.ZoneLibraryIndex;
 
@@ -83,43 +90,180 @@ public class ZoneLibrary extends HttpServlet {
 
             //get search results from library index
             out.println("<ul id='zoneLibraryList' data-role='listview' data-theme='d'>");
-            HashMap<String, String> outputFilesMap = ZoneLibraryIndex.getInstance().getFiles(
-                    searchKeywordArray, searchMatchAllKeywords, startIndexInt, endIndexInt); //<full file path, filename>
+            TreeMap<String, String> outputFilesMap = ZoneLibraryIndex.getInstance().getFiles(
+                    searchKeywordArray, searchMatchAllKeywords, startIndexInt, endIndexInt); //<filename, full file path>
             if (outputFilesMap.size() > 0) {
                 int i = 0;
-                for (String aTempFullFilePath : outputFilesMap.keySet()) {
-                    out.println("<li class='zoneLibraryListItem_" + i + "'>");
+                for (String aTempFileName : outputFilesMap.keySet()) {
+                    out.println("<li id='zoneLibraryListItem_" + i + "'>");
                     out.println("<a href='javascript:playList_addMediaPath_NoRedir(&quot;"
-                            + aTempFullFilePath + "&quot;);'>"
-                            + outputFilesMap.get(aTempFullFilePath) + "</a>");
+                            + outputFilesMap.get(aTempFileName) + "&quot;);'>"
+                            + aTempFileName + "</a>");
                     out.println("</li>");
                     i++;
                 }
             }
             out.println("</ul>");
-        } else { //general browsing - dump EVERATHANG
-            //output end of header and start of content
-            out.println("<a href='javascript:mediaLibrary_LoadMore("
-                    + aNextPageInt + ");' data-role='button' data-icon='grid'>More</a>");
-
+        } else if ((req.getParameter("list") != null)
+                && (!req.getParameter("list").equals(""))) { //sort on ID3 param
             out.println("</div>" //end header
                     + "<div data-role='content'>"); //and start content
-
-            //get search results from library index
-            out.println("<ul id='zoneLibraryList' data-role='listview' data-theme='d'>");
-            HashMap<String, String> outputFilesMap = ZoneLibraryIndex.getInstance().getFiles(
-                    startIndexInt, endIndexInt); //<full file path, filename>
-            if (outputFilesMap.size() > 0) {
-                int i = 0;
-                for (String aTempFullFilePath : outputFilesMap.keySet()) {
-                    out.println("<li class='zoneLibraryListItem_" + i + "'>");
-                    out.println("<a href='javascript:playList_addMediaPath_NoRedir(&quot;"
-                            + aTempFullFilePath + "&quot;);'>"
-                            + outputFilesMap.get(aTempFullFilePath) + "</a>");
-                    out.println("</li>");
-                    i++;
+            out.println("<ul id='zoneLibraryList' data-role='listview' data-inset='true' data-filter='true' data-theme='d'>");
+            if (req.getParameter("list").equals(ID3FieldList.Album.toString())) {
+                if ((req.getParameter("filter") != null) && (!req.getParameter("filter").equals(""))) {
+                    TreeMap<String, String> outputTitlesMap = ZoneLibraryIndex.getInstance().getTitlesFromAlbum(req.getParameter("filter"));
+                    if (outputTitlesMap.size() > 0) {
+                        int i = 0;
+                        for (String aTempTitle : outputTitlesMap.keySet()) {
+                            out.println("<li id='zoneLibraryListItem_" + i + "'>");
+                            out.println("<a href='javascript:playList_addMediaPath_NoRedir(&quot;"
+                                    + outputTitlesMap.get(aTempTitle) + "&quot;);'>"
+                                    + aTempTitle + "</a>");
+                            out.println("</li>");
+                            i++;
+                        }
+                    }
+                } else {
+                    TreeMap<String, LinkedList<String>> outputAlbumMap = ZoneLibraryIndex.getInstance().getAlbumMap();
+                    if (outputAlbumMap.size() > 0) {
+                        int i = 0;
+                        for (String aTempAlbumName : outputAlbumMap.keySet()) {
+                            out.println("<li id='zoneLibraryListItem_" + i + "'>");
+                            out.println("<a href='javascript:mediaLibrary_SubList(&quot;"
+                                    + ID3FieldList.Album.toString() + "&quot;, "
+                                    + "&quot;" + aTempAlbumName + "&quot;);'>"
+                                    + aTempAlbumName + "</a>");
+                            out.println("</li>");
+                            i++;
+                        }
+                    }
+                }
+            } else if (req.getParameter("list").equals(ID3FieldList.Artist.toString())) {
+                if ((req.getParameter("filter") != null) && (!req.getParameter("filter").equals(""))) {
+                    TreeMap<String, String> outputTitlesMap = ZoneLibraryIndex.getInstance().getTitlesFromArtist(req.getParameter("filter"));
+                    if (outputTitlesMap.size() > 0) {
+                        int i = 0;
+                        for (String aTempTitle : outputTitlesMap.keySet()) {
+                            out.println("<li id='zoneLibraryListItem_" + i + "'>");
+                            out.println("<a href='javascript:playList_addMediaPath_NoRedir(&quot;"
+                                    + outputTitlesMap.get(aTempTitle) + "&quot;);'>"
+                                    + aTempTitle + "</a>");
+                            out.println("</li>");
+                            i++;
+                        }
+                    }
+                } else {
+                    TreeMap<String, LinkedList<String>> outputArtistMap = ZoneLibraryIndex.getInstance().getArtistMap();
+                    if (outputArtistMap.size() > 0) {
+                        int i = 0;
+                        for (String aTempArtistName : outputArtistMap.keySet()) {
+                            out.println("<li id='zoneLibraryListItem_" + i + "'>");
+                            out.println("<a href='javascript:mediaLibrary_SubList(&quot;"
+                                    + ID3FieldList.Artist.toString() + "&quot;, "
+                                    + "&quot;" + aTempArtistName + "&quot;);'>"
+                                    + aTempArtistName + "</a>");
+                            out.println("</li>");
+                            i++;
+                        }
+                    }
+                }
+            } else if (req.getParameter("list").equals(ID3FieldList.Genre.toString())) {
+                if ((req.getParameter("filter") != null) && (!req.getParameter("filter").equals(""))) {
+                    TreeMap<String, String> outputTitlesMap = ZoneLibraryIndex.getInstance().getTitlesFromGenre(req.getParameter("filter"));
+                    if (outputTitlesMap.size() > 0) {
+                        int i = 0;
+                        for (String aTempTitle : outputTitlesMap.keySet()) {
+                            out.println("<li id='zoneLibraryListItem_" + i + "'>");
+                            out.println("<a href='javascript:playList_addMediaPath_NoRedir(&quot;"
+                                    + outputTitlesMap.get(aTempTitle) + "&quot;);'>"
+                                    + aTempTitle + "</a>");
+                            out.println("</li>");
+                            i++;
+                        }
+                    }
+                } else {
+                    TreeMap<String, LinkedList<String>> outputGenreMap = ZoneLibraryIndex.getInstance().getGenreMap();
+                    if (outputGenreMap.size() > 0) {
+                        int i = 0;
+                        for (String aTempGenre : outputGenreMap.keySet()) {
+                            out.println("<li id='zoneLibraryListItem_" + i + "'>");
+                            out.println("<a href='javascript:mediaLibrary_SubList(&quot;"
+                                    + ID3FieldList.Genre.toString() + "&quot;, "
+                                    + "&quot;" + aTempGenre + "&quot;);'>"
+                                    + aTempGenre + "</a>");
+                            out.println("</li>");
+                            i++;
+                        }
+                    }
+                }
+            } else if (req.getParameter("list").equals(ID3FieldList.Random.toString())) { //get a list of random files not in current Now Playing
+                HashMap<String, String> outputFilesMap = ZoneLibraryIndex.getInstance().getAllFiles(); //<filename, full file path>
+                if (outputFilesMap.size() > 0) {
+                    Random aRandom = new Random();
+                    List<String> aFileNameArray = Arrays.asList(outputFilesMap.keySet().toArray(new String[0]));
+                    int i = 0;
+                    while (i < 20) {
+                        String aRandomFileName = aFileNameArray.get(aRandom.nextInt(aFileNameArray.size()));
+                        String aFullPathFromRandomFileName = ZoneLibraryIndex.getInstance().getFullPathFromFileName(aRandomFileName);
+                        if (MediaPlayer.getInstance().getPlayList().contains(aFullPathFromRandomFileName)) {
+                            continue;
+                        } else {
+                            out.println("<li id='zoneLibraryListItem_" + i + "'>");
+                            out.println("<a href='javascript:playList_addMediaPath_NoRedir(&quot;"
+                                    + aFullPathFromRandomFileName + "&quot;);'>"
+                                    + aRandomFileName + "</a>");
+                            out.println("</li>");
+                            i++;
+                        }
+                    }
+                }
+            } else if (req.getParameter("list").equals(ID3FieldList.Title.toString())) {
+                TreeMap<String, LinkedList<String>> outputAllTitles = ZoneLibraryIndex.getInstance().getAllTitles();
+                if (outputAllTitles.size() > 0) {
+                    int i = 0;
+                    for (String aTempTitle : outputAllTitles.keySet()) {
+                        for (String aTempFileName : outputAllTitles.get(aTempTitle)) {
+                            out.println("<li id='zoneLibraryListItem_" + i + "'>");
+                            out.println("<a href='javascript:playList_addMediaPath_NoRedir(&quot;"
+                                    + ZoneLibraryIndex.getInstance().getFullPathFromFileName(aTempFileName)
+                                    + "&quot;);'>" + aTempTitle + "</a>");
+                            out.println("</li>");
+                            i++;
+                        }
+                    }
+                }
+            } else { //ALL
+                HashMap<String, String> outputFilesMap = ZoneLibraryIndex.getInstance().getAllFiles(); //<filename, full file path>
+                if (outputFilesMap.size() > 0) {
+                    int i = 0;
+                    for (String aTempFileName : outputFilesMap.keySet()) {
+                        out.println("<li id='zoneLibraryListItem_" + i + "'>");
+                        out.println("<a href='javascript:playList_addMediaPath_NoRedir(&quot;"
+                                + outputFilesMap.get(aTempFileName) + "&quot;);'>"
+                                + aTempFileName + "</a>");
+                        out.println("</li>");
+                        i++;
+                    }
                 }
             }
+            out.println("</ul>");
+        } else { //iOS inspired start page
+            if (!ZoneLibraryIndex.getInstance().getIndexIsBuilding()) {
+                if ((req.getParameter("rebuild") != null) && (req.getParameter("rebuild").equals("true"))) {
+                    ZoneLibraryIndex.getInstance().manualRebuildIndex();
+                } else {
+                    out.println("<a href='javascript:mediaLibrary_Rebuild();' data-role='button' data-icon='grid'>Rebuild</a>");
+                }
+            }
+            out.println("</div>" //end header
+                    + "<div data-role='content'>"); //and start content
+            out.println("<ul id='zoneLibraryList' data-role='listview' data-theme='d'>");
+            out.println("<li><a href='javascript:mediaLibrary_List(&quot;Album&quot;);'>Albums</a></li>");
+            out.println("<li><a href='javascript:mediaLibrary_List(&quot;Artist&quot;);'>Artists</a></li>");
+            out.println("<li><a href='javascript:mediaLibrary_List(&quot;Genre&quot;);'>Genres</a></li>");
+            out.println("<li><a href='javascript:mediaLibrary_List(&quot;Title&quot;);'>Songs</a></li>");
+            out.println("<li><a href='javascript:mediaLibrary_List(&quot;Random&quot;);'>20 Random Files</a></li>");
+            out.println("<li><a href='javascript:mediaLibrary_List(&quot;All&quot;);'>All Files</a></li>");
             out.println("</ul>");
         }
 

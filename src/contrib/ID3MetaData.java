@@ -37,6 +37,10 @@ public class ID3MetaData {
         return imd_ID3.getAlbumTitle();
     }
 
+    public String getArtist() {
+        return imd_ID3.getLeadArtist();
+    }
+
     /**
      * gets the genre ID3 string from file, parses into list
      * @return ArrayList<String>
@@ -58,5 +62,9 @@ public class ID3MetaData {
             aGenreReturnList.add(aSongGenre);
         }
         return aGenreReturnList;
+    }
+
+    public String getTitle() {
+        return imd_ID3.getSongTitle();
     }
 }

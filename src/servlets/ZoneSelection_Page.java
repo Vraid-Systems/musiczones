@@ -37,7 +37,7 @@ public class ZoneSelection_Page extends HttpServlet {
                 + "<h1>Zone Selection</h1>"
                 + "</div>"
                 + "<div data-role='content'>"
-                + "<ul data-role='listview'>");
+                + "<ul data-role='listview' data-inset='true' data-filter='true'>");
 
         String aPageContentPartListStr = "";
         for (String aNodeUUIDStr : zcld_ZoneInfoMap.keySet()) {
