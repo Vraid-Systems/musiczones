@@ -66,8 +66,8 @@ if (isset($_GET['opt']) && ($_GET['opt'] != '')) {
 
             <link rel="shortcut icon" href="/favicon.ico" />
 
-            <title>MusicZones</title>
-            <!-- <?php echo $aLocalHttpUrl; ?> -->
+            <title>MyMusicZones</title>
+            <!-- raw data URL = <?php echo $aLocalHttpUrl; ?> -->
             <meta name="robots" content="noindex,nofollow" />
 
             <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.css" />
@@ -77,7 +77,7 @@ if (isset($_GET['opt']) && ($_GET['opt'] != '')) {
         <body>
             <div id="zoneController" data-role="page" data-theme="d">
                 <div data-role="header" data-theme="b" data-position="fixed">
-                    <h1>MusicZones</h1>
+                    <h1>MyMusicZones</h1>
                 </div>
 
                 <div id="zoneContent" data-role="content">
