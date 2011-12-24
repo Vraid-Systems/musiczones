@@ -20,11 +20,23 @@ public class MusicZones {
     protected static String global_ZoneName = null;
     protected static int global_webInterfacePortInt = 80;
     protected static String global_MPlayerBinPath = null;
+    protected static boolean global_IsLowMem = false;
+    protected static boolean global_IsDebugOn = false;
     protected static String global_MPlayerNotFoundStr = "unable to find mplayer executable, please use --mplayer-bin-path=";
     protected static final String global_usageStr = "usage: java -jar mmc.jar "
             + "--zone-name=[zone controller's name] "
             + "--web-port=[web interface port number (default=80)] "
-            + "--mplayer-bin-path=[path to mplayer]";
+            + "--mplayer-bin-path=[path to mplayer] "
+            + "--low-mem (do not build metadata indexes or other memory intensive tasks) "
+            + "--debug-on (output debug information)";
+
+    public static boolean getIsDebugOn() {
+        return global_IsDebugOn;
+    }
+    
+    public static boolean getIsLowMem() {
+        return global_IsLowMem;
+    }
 
     /**
      * master start of application
@@ -49,6 +61,10 @@ public class MusicZones {
                 if (!currentArgArray[1].isEmpty()) {
                     global_MPlayerBinPath = currentArgArray[1];
                 }
+            } else if (currentArg.contains("--low-mem")) {
+                global_IsLowMem = true;
+            } else if (currentArg.contains("--debug-on")) {
+                global_IsDebugOn = true;
             }
         } //done processing arguments
 
@@ -96,8 +112,8 @@ public class MusicZones {
         JettyWebServer theWebServer = JettyWebServer.getInstance(global_webInterfacePortInt);
         theWebServer.startServer();
 
-        //create system-wide MediaPlayer instance with debug off
-        MediaPlayer.getInstance(false);
+        //create system-wide MediaPlayer instance
+        MediaPlayer.getInstance(getIsDebugOn());
 
         //then bring up the zone controller logic
         ZoneServerLogic mainServerLogic = ZoneServerLogic.getInstance();
@@ -113,11 +129,11 @@ public class MusicZones {
         }
 
         //after networking is in place, finally ready to start accepting control packets
-        ZoneMulticastServer theZoneServer = new ZoneMulticastServer(false); //debug off
+        ZoneMulticastServer theZoneServer = new ZoneMulticastServer(getIsDebugOn());
         theZoneServer.startServer();
 
         //start up the library indexing service
-        ZoneLibraryIndex.getInstance(false);
+        ZoneLibraryIndex.getInstance(getIsDebugOn());
     }
 
     /**

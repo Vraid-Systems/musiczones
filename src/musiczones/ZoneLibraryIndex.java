@@ -12,8 +12,6 @@ import contrib.CIFSNetworkInterface;
 import contrib.ID3MetaData;
 import contrib.MediaPlayer;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
@@ -34,7 +32,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
-import org.farng.mp3.TagException;
+import org.blinkenlights.jid3.ID3Exception;
 import zonecontrol.ZoneServerUtility;
 
 /**
@@ -410,44 +408,50 @@ public class ZoneLibraryIndex {
                         System.out.println("ZLI addFileToIndex - added " + aFullFilePathStr);
                     }
 
-                    if (theContainerIsMp3(theRawFullFilePath)) {
+                    if ((!MusicZones.getIsLowMem()) && (theContainerIsMp3(theRawFullFilePath))) {
                         ID3MetaData aID3MetaData = null;
                         try {
                             aID3MetaData = new ID3MetaData(theRawFullFilePath);
-                        } catch (FileNotFoundException ex) {
-                            if (debugEventsOn) {
-                                Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                            return;
-                        } catch (IOException ex) {
-                            if (debugEventsOn) {
-                                Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                            return;
-                        } catch (TagException ex) {
-                            if (debugEventsOn) {
-                                Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                            return;
-                        } catch (UnsupportedOperationException ex) { //when ID3 library shits its pants
+                        } catch (MalformedURLException ex) {
                             if (debugEventsOn) {
                                 Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.WARNING, null, ex);
                             }
-                            return;
+                        } catch (ID3Exception ex) {
+                            if (debugEventsOn) {
+                                Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.WARNING, null, ex);
+                            }
                         }
-                        if (debugEventsOn) {
-                            System.out.println("ZLI addFileToIndex - album is " + aID3MetaData.getAlbum());
+
+                        if (aID3MetaData != null) {
+                            String aFieldAlbum = aID3MetaData.getAlbum();
+                            if (aFieldAlbum != null) {
+                                if (debugEventsOn) {
+                                    System.out.println("ZLI addFileToIndex - album = '" + aFieldAlbum + "'");
+                                }
+                                addToAlbum(theRawFileName, aFieldAlbum);
+                            }
+
+                            String aFieldArtist = aID3MetaData.getArtist();
+                            if (aFieldArtist != null) {
+                                if (debugEventsOn) {
+                                    System.out.println("ZLI addFileToIndex - artist = '" + aFieldArtist + "'");
+                                }
+                                addToArtist(theRawFileName, aFieldArtist);
+                            }
+
+                            String aFieldTitle = aID3MetaData.getTitle();
+                            if (aFieldTitle != null) {
+                                if (debugEventsOn) {
+                                    System.out.println("ZLI addFileToIndex - title = '" + aFieldTitle + "'");
+                                }
+                                addToTitle(theRawFileName, aFieldTitle);
+                            }
+
+                            ArrayList<String> aFieldGenresList = aID3MetaData.getGenresAsList();
+                            if (aFieldGenresList != null) {
+                                addToGenre(theRawFileName, aFieldGenresList);
+                            }
                         }
-                        addToAlbum(theRawFileName, aID3MetaData.getAlbum());
-                        if (debugEventsOn) {
-                            System.out.println("ZLI addFileToIndex - artist is " + aID3MetaData.getArtist());
-                        }
-                        addToArtist(theRawFileName, aID3MetaData.getArtist());
-                        if (debugEventsOn) {
-                            System.out.println("ZLI addFileToIndex - title is " + aID3MetaData.getTitle());
-                        }
-                        addToTitle(theRawFileName, aID3MetaData.getTitle());
-                        addToGenre(theRawFileName, aID3MetaData.getGenresAsList());
                     }
                 }
             }

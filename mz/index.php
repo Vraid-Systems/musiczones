@@ -197,9 +197,9 @@ function setNodeIsOffline($SQLite_conn, $theUUID) {
 
 /**
  * minimal SQL filtering function to foil stupid attackers
- * only allows periods, dashes, underscores, and alphanumeric characters
+ * only allows periods, dashes, and alphanumeric characters
  */
 function filterSqlVariable($theDataVariable) {
-    return (ereg_replace("[^A-Za-z0-9.-_]", "", $theDataVariable));
+    return (ereg_replace("[^A-Za-z0-9.-]", "", $theDataVariable));
 }
 ?>

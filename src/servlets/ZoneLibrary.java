@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import musiczones.ID3FieldList;
 import musiczones.MediaSearchType;
+import musiczones.MusicZones;
 import musiczones.ZoneLibraryIndex;
 
 /**
@@ -258,10 +259,12 @@ public class ZoneLibrary extends HttpServlet {
             out.println("</div>" //end header
                     + "<div data-role='content'>"); //and start content
             out.println("<ul id='zoneLibraryList' data-role='listview' data-theme='d'>");
-            out.println("<li><a href='javascript:mediaLibrary_List(&quot;Album&quot;);'>Albums</a></li>");
-            out.println("<li><a href='javascript:mediaLibrary_List(&quot;Artist&quot;);'>Artists</a></li>");
-            out.println("<li><a href='javascript:mediaLibrary_List(&quot;Genre&quot;);'>Genres</a></li>");
-            out.println("<li><a href='javascript:mediaLibrary_List(&quot;Title&quot;);'>Songs</a></li>");
+            if (!MusicZones.getIsLowMem()) {
+                out.println("<li><a href='javascript:mediaLibrary_List(&quot;Album&quot;);'>Albums</a></li>");
+                out.println("<li><a href='javascript:mediaLibrary_List(&quot;Artist&quot;);'>Artists</a></li>");
+                out.println("<li><a href='javascript:mediaLibrary_List(&quot;Genre&quot;);'>Genres</a></li>");
+                out.println("<li><a href='javascript:mediaLibrary_List(&quot;Title&quot;);'>Songs</a></li>");
+            }
             out.println("<li><a href='javascript:mediaLibrary_List(&quot;Random&quot;);'>20 Random Files</a></li>");
             out.println("<li><a href='javascript:mediaLibrary_List(&quot;All&quot;);'>All Files</a></li>");
             out.println("</ul>");

@@ -4,12 +4,12 @@
 package contrib;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
-import org.farng.mp3.TagException;
-import org.farng.mp3.id3.ID3v2_3;
+import jcifs.smb.SmbFile;
+import org.blinkenlights.jid3.ID3Exception;
+import org.blinkenlights.jid3.MP3File;
+import org.blinkenlights.jid3.v2.ID3V2Tag;
 import zonecontrol.ZoneServerUtility;
 
 /**
@@ -17,28 +17,31 @@ import zonecontrol.ZoneServerUtility;
  */
 public class ID3MetaData {
 
-    private ID3v2_3 imd_ID3 = null;
+    private MP3File imd_mp3File = null;
+    private ID3V2Tag imd_id3Tag = null;
+    public static final String imd_kSmbPrefix = "smb:";
     public static final String imd_GenreSplitString = ";";
 
-    public ID3MetaData(File theMediaFile) throws FileNotFoundException, IOException, TagException {
-        RandomAccessFile aRandomAccessFile = new RandomAccessFile(theMediaFile, "r");
-        imd_ID3 = new ID3v2_3(aRandomAccessFile);
-    }
-
-    public ID3MetaData(String theMediaFilePathStr) throws FileNotFoundException, IOException, TagException {
-        if (ZoneServerUtility.getInstance().isWindows()) {
-            theMediaFilePathStr = theMediaFilePathStr.replace("smb:", "\\");
+    public ID3MetaData(String theMediaFilePathStr) throws MalformedURLException, ID3Exception {
+        if (theMediaFilePathStr.contains(imd_kSmbPrefix)) {
+            if (ZoneServerUtility.getInstance().isWindows()) { //use Window's built in SMB support
+                theMediaFilePathStr = theMediaFilePathStr.replace(imd_kSmbPrefix, "\\");
+                imd_mp3File = new MP3File(new File(theMediaFilePathStr));
+            } else { //use Smb specialty file handle on POSIX
+                imd_mp3File = new MP3File(new SmbFileSourceImpl(new SmbFile(theMediaFilePathStr)));
+            }
+        } else { //regular file
+            imd_mp3File = new MP3File(new File(theMediaFilePathStr));
         }
-        RandomAccessFile aRandomAccessFile = new RandomAccessFile(new File(theMediaFilePathStr), "r");
-        imd_ID3 = new ID3v2_3(aRandomAccessFile);
+        imd_id3Tag = imd_mp3File.getID3V2Tag();
     }
 
     public String getAlbum() {
-        return imd_ID3.getAlbumTitle();
+        return imd_id3Tag.getAlbum();
     }
 
     public String getArtist() {
-        return imd_ID3.getLeadArtist();
+        return imd_id3Tag.getArtist();
     }
 
     /**
@@ -46,7 +49,7 @@ public class ID3MetaData {
      * @return ArrayList<String>
      */
     public ArrayList<String> getGenresAsList() {
-        String aSongGenre = imd_ID3.getSongGenre();
+        String aSongGenre = imd_id3Tag.getGenre();
         if (aSongGenre == null) {
             return null;
         }
@@ -65,6 +68,6 @@ public class ID3MetaData {
     }
 
     public String getTitle() {
-        return imd_ID3.getSongTitle();
+        return imd_id3Tag.getTitle();
     }
 }
