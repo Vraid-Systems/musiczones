@@ -96,6 +96,15 @@
                     reloadPage: true
                 });
             }
+            function mediaLibrary_ListMore(theFieldList, nextPageInt) {
+                $.mobile.changePage(kLibraryServlet, {
+                    data: {
+                        list: theFieldList,
+                        page: nextPageInt
+                    },
+                    reloadPage: true
+                });
+            }
             function mediaLibrary_Rebuild() {
                 $.mobile.changePage(kLibraryServlet, {
                     data: {

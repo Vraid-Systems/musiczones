@@ -36,11 +36,11 @@ public class ZoneSearchMedia_DialogPage extends HttpServlet {
         out.println("<div data-role='content'>");
 
         out.println("<div data-role='fieldcontain' id='searchKeywordsContain'>"
-                + "<label for='searchKeywords'>Search Keywords:</label>"
+                + "<label for='searchKeywords'>Keywords:</label>"
                 + "<input type='text' name='searchKeywords' id='searchKeywords' placeholder='Filename Keyword' /></div>");
 
         out.println("<div data-role='fieldcontain' id='searchTypeContain'>"
-                + "<label for='searchType'>Choose Keyword Matching:</label>"
+                + "<label for='searchType'>Match:</label>"
                 + "<select name='searchType' id='searchType' data-native-menu='false'>"
                 + "<option value='" + MediaSearchType.all.toString() + "'>All Keywords</option>"
                 + "<option value='" + MediaSearchType.any.toString() + "'>Any Keywords</option>"

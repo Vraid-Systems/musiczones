@@ -15,6 +15,7 @@ import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import musiczones.MusicZones;
 import musiczones.ZoneLibraryIndex;
 
 /**
@@ -55,7 +56,9 @@ public class JMPlayer {
             try {
                 // read line by line
                 while ((line = reader.readLine()) != null) {
-                    logger.log(Level.INFO, "{0}{1}", new Object[]{prefix != null ? prefix : "", line});
+                    if (MusicZones.getIsDebugOn()) {
+                        logger.log(Level.INFO, "{0}{1}", new Object[]{prefix != null ? prefix : "", line});
+                    }
                     printStream.println(line);
                 }
             } catch (IOException ex) {
@@ -117,7 +120,9 @@ public class JMPlayer {
 
         // wait to start playing
         waitForAnswer("Starting playback...");
-        logger.log(Level.INFO, "Started playing file {0}", theMediaPath);
+        if (MusicZones.getIsDebugOn()) {
+            logger.log(Level.INFO, "Started playing file {0}", theMediaPath);
+        }
 
         //for use in attaching an exit handler in the calling class
         return mplayerProcess;
@@ -222,14 +227,20 @@ public class JMPlayer {
      */
     private String execute(String command, String expected) {
         if (mplayerProcess != null) {
-            logger.log(Level.INFO, "Send to MPlayer the command \"{0}\" and expecting {1}", new Object[]{command, expected != null ? "\"" + expected + "\"" : "no answer"});
+            if (MusicZones.getIsDebugOn()) {
+                logger.log(Level.INFO, "Send to MPlayer the command \"{0}\" and expecting {1}", new Object[]{command, expected != null ? "\"" + expected + "\"" : "no answer"});
+            }
             mplayerIn.print(command);
             mplayerIn.print("\n");
             mplayerIn.flush();
-            logger.info("Command sent");
+            if (MusicZones.getIsDebugOn()) {
+                logger.info("Command sent");
+            }
             if (expected != null) {
                 String response = waitForAnswer(expected);
-                logger.log(Level.INFO, "MPlayer command response: {0}", response);
+                if (MusicZones.getIsDebugOn()) {
+                    logger.log(Level.INFO, "MPlayer command response: {0}", response);
+                }
                 return response;
             }
         }
@@ -247,7 +258,9 @@ public class JMPlayer {
         if (expected != null) {
             try {
                 while ((line = mplayerOutErr.readLine()) != null) {
-                    logger.log(Level.INFO, "Reading line: {0}", line);
+                    if (MusicZones.getIsDebugOn()) {
+                        logger.log(Level.INFO, "Reading line: {0}", line);
+                    }
                     if (line.startsWith(expected)) {
                         return line;
                     }
