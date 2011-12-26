@@ -9,9 +9,9 @@
 # Short-Description:	MusicZones control software
 ### END INIT INFO
 
-# This script requires screen and openjdk-jre to be installed.
-# If running this headless I would suggest: openjdk-6-jre-headless
-# Install dependencies: apt-get install screen openjdk-6-jre-headless
+# This script requires screen and openjdk-jre to run properly.
+# If running this headless I would suggest using openjdk-6-jre-headless.
+# To install dependencies: apt-get install screen openjdk-6-jre-headless
 #
 # To install:
 # 0) wget --no-check-certificate https://github.com/downloads/jzerbe/MusicZones/mz.jar
