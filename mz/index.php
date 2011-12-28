@@ -1,6 +1,9 @@
 <?php
 header("Access-Control-Allow-Origin: *"); //http://enable-cors.org/#how-php
 
+$myCurrentTimeInt = date("YmdHis");
+$myExpiryTimeInt = $myCurrentTimeInt - (4 * 60);
+
 /**
  * SQLite database and table setup
  */
@@ -119,15 +122,18 @@ if (isset($_GET['opt']) && ($_GET['opt'] != '')) {
  * return a 2-d array containing node information for all available nodes
  * @param SQLite $SQLite_conn
  * @param string $theWanAddress - the WAN IP Address to match on
+ * @global int $myExpiryTimeInt - if node is older (less) than this = offline
  * @return array
  */
 function getNodesOnline($SQLite_conn, $theWanAddress) {
+    global $myExpiryTimeInt;
+
     if (!filter_var($theWanAddress, FILTER_VALIDATE_IP)) {
         return false; //http://www.w3schools.com/php/filter_validate_ip.asp
     }
 
-    $results = $SQLite_conn->query("SELECT name, localaddress, http "
-            . "FROM Nodes WHERE online=1 AND wanaddress='$theWanAddress'");
+    $results = $SQLite_conn->query("SELECT name, localaddress, http FROM Nodes "
+            . "WHERE online>=$myExpiryTimeInt AND wanaddress='$theWanAddress'");
     if (!$results) {
         return false;
     }
@@ -151,9 +157,12 @@ function getNodesOnline($SQLite_conn, $theWanAddress) {
  * @param string $theWanAddress
  * @param string $theLocalAddress
  * @param int $theWebPort
+ * @global int $myCurrentTimeInt
  * @return boolean - did the set work?
  */
 function setNodeIsOnline($SQLite_conn, $theUUID, $theNodeName, $theWanAddress, $theLocalAddress, $theWebPort) {
+    global $myCurrentTimeInt;
+
     $theUUID = filterSqlVariable($theUUID);
     $theNodeName = filterSqlVariable($theNodeName);
     if (!filter_var($theWanAddress, FILTER_VALIDATE_IP)
@@ -167,11 +176,11 @@ function setNodeIsOnline($SQLite_conn, $theUUID, $theNodeName, $theWanAddress, $
     if ($aResultCount == 0) {
         return ($SQLite_conn->queryExec("INSERT INTO Nodes VALUES(NULL, '$theUUID', "
                         . "'$theNodeName', '$theWanAddress', '$theLocalAddress', "
-                        . "'$theWebPort', 1)"));
+                        . "'$theWebPort', $myCurrentTimeInt)"));
     } elseif ($aResultCount == 1) {
         return ($SQLite_conn->queryExec("UPDATE Nodes SET wanaddress='$theWanAddress',"
                         . " localaddress='$theLocalAddress', http='$theWebPort',"
-                        . " online=1 WHERE uuid='$theUUID'"));
+                        . " online=$myCurrentTimeInt WHERE uuid='$theUUID'"));
     } else {
         return false;
     }

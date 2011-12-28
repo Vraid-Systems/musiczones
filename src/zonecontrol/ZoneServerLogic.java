@@ -20,6 +20,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.prefs.Preferences;
 
 /**
  *
@@ -31,6 +32,8 @@ public class ZoneServerLogic {
     protected String zsl_ZoneUUID = null;
     protected String zsl_ZoneName = null;
     protected ZoneMulticastClient zsl_MulticastClient = null;
+    private Preferences zsl_Preferences = null;
+    public static final String kNodeUUIDKeyStr = "NodeUUID";
     protected HashMap<String, String> zsl_ZoneInfoMap = null; //<UUID, Zone Name>
     protected HashMap<String, Calendar> zsl_ZoneExpireMap = null; //<UUID, expire Calendar>
     protected HashMap<String, String> zsl_ZoneDashBoardMap = null; //<UUID, dashboard url>
@@ -46,7 +49,13 @@ public class ZoneServerLogic {
         int randomIndex = generator.nextInt(19580427);
         zsl_ZoneName += String.valueOf(randomIndex);
         System.out.println("default zone-name = " + zsl_ZoneName);
-        zsl_ZoneUUID = generateZoneUUID();
+
+        zsl_Preferences = Preferences.userNodeForPackage(getClass());
+        zsl_ZoneUUID = zsl_Preferences.get(kNodeUUIDKeyStr, zsl_ZoneUUID);
+        if (zsl_ZoneUUID == null) {
+            zsl_ZoneUUID = generateZoneUUID();
+            zsl_Preferences.put(kNodeUUIDKeyStr, zsl_ZoneUUID);
+        }
 
         zsl_ZoneInfoMap = new HashMap<String, String>();
         zsl_ZoneExpireMap = new HashMap<String, Calendar>();

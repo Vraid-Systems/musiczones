@@ -49,7 +49,7 @@ public class ZoneLibraryIndex {
     protected Timer zli_Timer = null;
     protected boolean debugEventsOn = false;
     private RefreshCIFSMediaTask zli_RCMT = null;
-    protected int zli_RefreshCIFSMediaSeconds = 1800; //30 minutes
+    protected int zli_RefreshCIFSMediaSeconds = 3600; //60 minutes
     protected String[] zli_CIFSPathBlackListArray = {"$"};
     protected int zli_IPv4ScanMin = 5;
     protected int zli_IPv4ScanMax = 15;

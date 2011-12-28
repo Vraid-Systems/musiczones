@@ -11,6 +11,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import zonecontrol.ZoneServerLogic;
@@ -23,9 +25,17 @@ public class HttpCmdClient {
     private static HttpCmdClient hcc_singleInstance = null;
     private boolean hcc_DebugOn = false;
     private String hcc_theMasterServerUrlStr = "http://mz.vraidsys.com/";
+    protected int hcc_kPingServerSeconds = 120; //2 minutes
+    protected Timer hcc_Timer = null;
+    private PingServerTask hcc_PST = null;
 
     protected HttpCmdClient(boolean theDebugOn) {
         hcc_DebugOn = theDebugOn;
+        hcc_Timer = new Timer();
+        hcc_PST = new PingServerTask();
+        hcc_Timer.schedule(hcc_PST, 1000,
+                hcc_kPingServerSeconds * 1000);
+        System.out.println("HCC PingServerTask added");
     }
 
     public static HttpCmdClient getInstance() {
@@ -50,12 +60,21 @@ public class HttpCmdClient {
         return hcc_theMasterServerUrlStr;
     }
 
+    private class PingServerTask extends TimerTask {
+
+        @Override
+        public void run() {
+            notifyUp(true, 3);
+        }
+    }
+
     /**
      * notify master server (calling) node is up, empty response = no errors
      * @param thePersistentFlagIsOn boolean - shall it keep retrying?
+     * @param theTryCount int - how many times to attempt?
      * @return boolean - did server respond with empty page?
      */
-    public boolean notifyUp(boolean thePersistentFlagIsOn) {
+    public boolean notifyUp(boolean thePersistentFlagIsOn, int theTryCount) {
         String aURLConnectionParamStr = "opt=ping"
                 + "&uuid=" + ZoneServerLogic.getInstance().getUUID()
                 + "&http=" + String.valueOf(JettyWebServer.getInstance().getServerPortInt())
@@ -63,7 +82,8 @@ public class HttpCmdClient {
                 + "&name=" + replaceSpacesWithUnderscores(ZoneServerLogic.getInstance().getZoneName());
 
         boolean loggedToMasterServer = false;
-        while (!loggedToMasterServer) {
+        int aTryCount = 0;
+        while ((!loggedToMasterServer) && (aTryCount < theTryCount)) {
             loggedToMasterServer = voidServerMethod(hcc_theMasterServerUrlStr, aURLConnectionParamStr);
             if (!thePersistentFlagIsOn) {
                 break;
@@ -75,6 +95,7 @@ public class HttpCmdClient {
                     Logger.getLogger(HttpCmdClient.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
+            aTryCount++;
         }
 
         return loggedToMasterServer;

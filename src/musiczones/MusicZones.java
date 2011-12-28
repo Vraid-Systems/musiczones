@@ -33,7 +33,7 @@ public class MusicZones {
     public static boolean getIsDebugOn() {
         return global_IsDebugOn;
     }
-    
+
     public static boolean getIsLowMem() {
         return global_IsLowMem;
     }
@@ -134,6 +134,9 @@ public class MusicZones {
 
         //start up the library indexing service
         ZoneLibraryIndex.getInstance(getIsDebugOn());
+
+        //start the master server notification point
+        HttpCmdClient.getInstance(getIsDebugOn());
     }
 
     /**
@@ -143,7 +146,7 @@ public class MusicZones {
 
         @Override
         public void run() {
-            //1. remove node from master server - do not confuse users
+            //1. remove node from master server - will just timeout on server if this is not done
             HttpCmdClient.getInstance().notifyDown();
 
             //2. shutdown jetty -  does not really matter if aborted abruptly

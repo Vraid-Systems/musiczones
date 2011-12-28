@@ -34,7 +34,7 @@ public class HttpCmdClientTest {
         System.out.println("notifyUp");
         HttpCmdClient instance = HttpCmdClient.getInstance(true);
         boolean expResult = true;
-        boolean result = instance.notifyUp(false);
+        boolean result = instance.notifyUp(false, 1);
         instance.notifyDown();
         assertEquals(expResult, result);
     }
