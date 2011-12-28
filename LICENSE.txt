@@ -1,26 +1,8 @@
-This software is licensed under a BSD-Type License
-See: http://www.opensource.org/licenses/bsd-license.php
+MusicZones by Jason Zerbe is licensed under a
+Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+All rights reserved.
+http://vraidsys.com/musiczones_license/
 
-Copyright (c) 2011, Jason Zerbe
-Most rights reserved?
-
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-1) Redistributions of source code must retain the above copyright notice, this
-list of conditions and the following disclaimer.
-2) Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.
-
-3rd Party Code/Library License NOTES
-JCIFS = LGPL v2.1 [http://www.gnu.org/licenses/lgpl-2.1.txt]
-Jetty = Apache License v2.0 [http://jetty.codehaus.org/jetty/license.html]
-JID3 = LGPL [http://jid3.blinkenlights.org/]
-JMPlayer [http://beradrian.wordpress.com/2008/01/30/jmplayer/] (non-licensed?)
-JUnit = Common Public v1.0 [http://junit.sourceforge.net/cpl-v10.html]
-ProcessExit [http://beradrian.wordpress.com/2008/11/03/detecting-process-exit-in-java/]
-SHA1 = almost public domain [http://www.anyexample.com/license/]
-Spring Framework = Apache License v2.0 [http://www.apache.org/licenses/LICENSE-2.0.html]
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED

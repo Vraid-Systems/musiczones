@@ -13,6 +13,7 @@
     <property name="test.build.dir" location="build-test" />
     <property name="docs.dir" location="docs" />
     <property name="dist.file" location="mz.jar" />
+    <property name="junit.filename" value="junit-4.10.jar" />
 
     <!-- new forked jvm settings -->
     <property name="init.mem.size" value="128m" />
@@ -34,7 +35,7 @@
 
         <!-- junit classpath: include junit and built classes -->
         <path id="junit.classpath">
-            <pathelement location="contrib/junit-4.10.jar" />
+            <pathelement location="contrib/${junit.filename}" />
             <pathelement location="${test.build.dir}" />
         </path>
 
@@ -112,7 +113,8 @@
                 <attribute name="Main-Class" value="${src.mainclass}" />
             </manifest>
             <!-- add in contrib jars otherwise classpath will be lacking -->
-            <zipgroupfileset dir="${contrib.dir}" includes="**/*.jar" />
+            <zipgroupfileset dir="${contrib.dir}" includes="**/*.jar"
+            excludes="**/${junit.filename}" />
         </jar>
     </target>
 
