@@ -20,6 +20,8 @@ public class MusicZones {
     protected static String global_ZoneName = null;
     protected static int global_webInterfacePortInt = 80;
     protected static String global_MPlayerBinPath = null;
+    protected static int global_ScanMinInt = 5;
+    protected static int global_ScanMaxInt = 15;
     protected static boolean global_IsLowMem = false;
     protected static boolean global_IsDebugOn = false;
     protected static String global_MPlayerNotFoundStr = "unable to find mplayer executable, please use --mplayer-bin-path=";
@@ -27,6 +29,8 @@ public class MusicZones {
             + "--zone-name=[zone controller's name] "
             + "--web-port=[web interface port number (default=80)] "
             + "--mplayer-bin-path=[path to mplayer] "
+            + "--set-scan-min=[last octet of IPv4 in int] "
+            + "--set-scan-max=[last octent of IPv4 in int] "
             + "--low-mem (do not build metadata indexes or other memory intensive tasks) "
             + "--debug-on (output debug information)";
 
@@ -60,6 +64,16 @@ public class MusicZones {
                 String currentArgArray[] = currentArg.split("=");
                 if (!currentArgArray[1].isEmpty()) {
                     global_MPlayerBinPath = currentArgArray[1];
+                }
+            } else if (currentArg.contains("--set-scan-min=")) {
+                String currentArgArray[] = currentArg.split("=");
+                if (!currentArgArray[1].isEmpty()) {
+                    global_ScanMinInt = Integer.valueOf(currentArgArray[1]);
+                }
+            } else if (currentArg.contains("--set-scan-max=")) {
+                String currentArgArray[] = currentArg.split("=");
+                if (!currentArgArray[1].isEmpty()) {
+                    global_ScanMaxInt = Integer.valueOf(currentArgArray[1]);
                 }
             } else if (currentArg.contains("--low-mem")) {
                 global_IsLowMem = true;
@@ -134,6 +148,8 @@ public class MusicZones {
 
         //start up the library indexing service
         ZoneLibraryIndex.getInstance(getIsDebugOn());
+        ZoneLibraryIndex.getInstance().setScanMin(global_ScanMinInt);
+        ZoneLibraryIndex.getInstance().setScanMax(global_ScanMaxInt);
 
         //start the master server notification point
         HttpCmdClient.getInstance(getIsDebugOn());

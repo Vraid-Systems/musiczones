@@ -83,6 +83,14 @@ public class ZoneLibraryIndex {
         return zli_SingleInstance;
     }
 
+    public void setScanMin(int theScanMin) {
+        zli_IPv4ScanMin = theScanMin;
+    }
+
+    public void setScanMax(int theScanMax) {
+        zli_IPv4ScanMax = theScanMax;
+    }
+
     public void manualRebuildIndex() {
         zli_RCMT.run();
     }
