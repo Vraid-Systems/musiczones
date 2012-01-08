@@ -21,6 +21,7 @@ import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
+import musiczones.MusicZones;
 
 /**
  *
@@ -63,10 +64,12 @@ public class ZoneServerLogic {
         zsl_MulticastClient = new ZoneMulticastClient();
         System.out.println("ZSL started");
 
-        zsl_Timer = new Timer();
-        zsl_Timer.schedule(new AllNodesPingTimerTask(), 0, allNodesPingInterval * 1000);
-        zsl_Timer.schedule(new RemoveHardExpiredNodesTimerTask(), 0, allNodesHardExpire * 1000);
-        System.out.println("ZSL timed events added");
+        if (MusicZones.getIsOnline()) {
+            zsl_Timer = new Timer();
+            zsl_Timer.schedule(new AllNodesPingTimerTask(), 0, allNodesPingInterval * 1000);
+            zsl_Timer.schedule(new RemoveHardExpiredNodesTimerTask(), 0, allNodesHardExpire * 1000);
+            System.out.println("ZSL timed events added");
+        }
     }
 
     public static ZoneServerLogic getInstance() {

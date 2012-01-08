@@ -24,6 +24,7 @@ public class MusicZones {
     protected static int global_ScanMaxInt = 15;
     protected static boolean global_IsLowMem = false;
     protected static boolean global_IsDebugOn = false;
+    protected static boolean global_IsOnline = true;
     protected static String global_MPlayerNotFoundStr = "unable to find mplayer executable, please use --mplayer-bin-path=";
     protected static final String global_usageStr = "usage: java -jar mmc.jar "
             + "--zone-name=[zone controller's name] "
@@ -32,7 +33,8 @@ public class MusicZones {
             + "--set-scan-min=[last octet of IPv4 in int] "
             + "--set-scan-max=[last octent of IPv4 in int] "
             + "--low-mem (do not build metadata indexes or other memory intensive tasks) "
-            + "--debug-on (output debug information)";
+            + "--debug-on (output debug information) "
+            + "--offline (no LAN/WAN route)";
 
     public static boolean getIsDebugOn() {
         return global_IsDebugOn;
@@ -40,6 +42,10 @@ public class MusicZones {
 
     public static boolean getIsLowMem() {
         return global_IsLowMem;
+    }
+
+    public static boolean getIsOnline() {
+        return global_IsOnline;
     }
 
     /**
@@ -79,6 +85,8 @@ public class MusicZones {
                 global_IsLowMem = true;
             } else if (currentArg.contains("--debug-on")) {
                 global_IsDebugOn = true;
+            } else if (currentArg.contains("--offline")) {
+                global_IsOnline = false;
             }
         } //done processing arguments
 
@@ -143,16 +151,22 @@ public class MusicZones {
         }
 
         //after networking is in place, finally ready to start accepting control packets
-        ZoneMulticastServer theZoneServer = new ZoneMulticastServer(getIsDebugOn());
-        theZoneServer.startServer();
+        if (getIsOnline()) {
+            ZoneMulticastServer theZoneServer = new ZoneMulticastServer(getIsDebugOn());
+            theZoneServer.startServer();
+        }
 
         //start up the library indexing service
-        ZoneLibraryIndex.getInstance(getIsDebugOn());
-        ZoneLibraryIndex.getInstance().setScanMin(global_ScanMinInt);
-        ZoneLibraryIndex.getInstance().setScanMax(global_ScanMaxInt);
+        if (getIsOnline()) {
+            ZoneLibraryIndex.getInstance(getIsDebugOn());
+            ZoneLibraryIndex.getInstance().setScanMin(global_ScanMinInt);
+            ZoneLibraryIndex.getInstance().setScanMax(global_ScanMaxInt);
+        }
 
         //start the master server notification point
-        HttpCmdClient.getInstance(getIsDebugOn());
+        if (getIsOnline()) {
+            HttpCmdClient.getInstance(getIsDebugOn());
+        }
     }
 
     /**
@@ -163,7 +177,9 @@ public class MusicZones {
         @Override
         public void run() {
             //1. remove node from master server - will just timeout on server if this is not done
-            HttpCmdClient.getInstance().notifyDown();
+            if (getIsOnline()) {
+                HttpCmdClient.getInstance().notifyDown();
+            }
 
             //2. shutdown jetty -  does not really matter if aborted abruptly
             JettyWebServer.getInstance().stopServer();

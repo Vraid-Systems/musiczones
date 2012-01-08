@@ -62,11 +62,13 @@ public class ZoneLibraryIndex {
         zli_GenreMap = new TreeMap<String, LinkedList<String>>();
         zli_AlbumMap = new TreeMap<String, LinkedList<String>>();
         zli_ArtistMap = new TreeMap<String, LinkedList<String>>();
-        zli_Timer = new Timer();
-        zli_RCMT = new RefreshCIFSMediaTask();
-        zli_Timer.schedule(zli_RCMT, 0,
-                zli_RefreshCIFSMediaSeconds * 1000);
-        System.out.println("ZLI RefreshCIFSMediaTask added");
+        if (MusicZones.getIsOnline()) {
+            zli_Timer = new Timer();
+            zli_RCMT = new RefreshCIFSMediaTask();
+            zli_Timer.schedule(zli_RCMT, 0,
+                    zli_RefreshCIFSMediaSeconds * 1000);
+            System.out.println("ZLI RefreshCIFSMediaTask added");
+        }
     }
 
     public static ZoneLibraryIndex getInstance() {
