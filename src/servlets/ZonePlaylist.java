@@ -35,9 +35,13 @@ public class ZonePlaylist extends HttpServlet {
         PrintWriter out = resp.getWriter(); //get the response writer for later
 
         out.println("<div id='zonePlaylistPage' data-role='page' data-theme='d'>"
-                + "<div data-role='header' data-theme='b' data-position='fixed'>"
-                + "<a href='javascript:playList_Stop();' data-role='button' data-icon='delete'>Stop</a>"
-                + "<h1>Now Playing</h1>"
+                + "<div data-role='header' data-theme='b' data-position='fixed'>");
+        if (MediaPlayer.getInstance().isStopped()) {
+            out.println("<a href='javascript:playList_Clear();' data-role='button' data-icon='delete'>Clear</a>");
+        } else {
+            out.println("<a href='javascript:playList_Stop();' data-role='button' data-icon='delete'>Stop</a>");
+        }
+        out.println("<h1>Now Playing</h1>"
                 + "<a href='javascript:playList_Shuffle();' data-role='button' data-icon='grid'>Shuffle</a>"
                 + "</div>"
                 + "<div data-role='content'>");
@@ -117,6 +121,9 @@ public class ZonePlaylist extends HttpServlet {
             } else if (opt.equals("stop")) { //stop now playing
                 MediaPlayer.getInstance().stop();
                 resp.getOutputStream().println("playback stopped");
+            } else if (opt.equals("clear")) { //clear playlist of all items
+                MediaPlayer.getInstance().clearPlaylist();
+                resp.getOutputStream().println("playlist cleared");
             }
         }
     }

@@ -199,6 +199,15 @@ public class MediaPlayer {
         stop(-1);
     }
 
+    public boolean isStopped() {
+        return (vmp_PlayBackIndexInt < 0);
+    }
+
+    public void clearPlaylist() {
+        stop();
+        vmp_MediaUrlStringArray.clear();
+    }
+
     public int getCurrentIndex() {
         return vmp_PlayBackIndexInt;
     }

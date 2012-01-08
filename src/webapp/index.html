@@ -42,6 +42,13 @@
                     path: theMediaPath
                 });
             }
+            function playList_Clear() {
+                $.post(kPlayListPageUrlStr, {
+                    opt: "clear"
+                }, function(data) {
+                    playList_Load();
+                });
+            }
             function playList_Load() {
                 $.mobile.changePage(kPlayListPageUrlStr, {
                     reloadPage: true
