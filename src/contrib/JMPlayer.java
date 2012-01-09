@@ -86,7 +86,7 @@ public class JMPlayer {
     }
 
     /** Sets the path to the MPlayer executable.
-     * @param mplayerPath the new MPlayer path; this will be actually efective
+     * @param mplayerPath the new MPlayer path; this will be in effect
      * after {@link #close() closing} the currently running player.
      */
     public void setMPlayerPath(String mplayerPath) {

@@ -28,7 +28,7 @@ public class ZonePlaylist extends HttpServlet {
      * @param req HttpServletRequest
      * @param resp HttpServletResponse
      * @throws ServletException
-     * @throws IOException 
+     * @throws IOException
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -72,9 +72,10 @@ public class ZonePlaylist extends HttpServlet {
                 + "<div data-id='mainNavFooter' data-role='footer' data-position='fixed'>"
                 + "<div data-role='navbar'>"
                 + "<ul>"
-                + "<li><a href='javascript:zoneSelection_Load();'>Zone Selection</a></li>"
+                + "<li><a href='javascript:zoneSelection_Load();'>Other Zones</a></li>"
                 + "<li><a href='javascript:playList_Load();' class='ui-btn-active ui-state-persist'>Now Playing</a></li>"
-                + "<li><a href='javascript:mediaLibrary_Load();'>Media Library</a></li>"
+                + "<li><a href='javascript:mediaLibrary_Load();'>Library</a></li>"
+                + "<li><a href='javascript:radioPage_Load();'>Radio</a></li>"
                 + "</ul>"
                 + "</div>"
                 + "</div>"
@@ -86,7 +87,7 @@ public class ZonePlaylist extends HttpServlet {
      * @param req HttpServletRequest
      * @param resp HttpServletResponse
      * @throws ServletException
-     * @throws IOException 
+     * @throws IOException
      */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

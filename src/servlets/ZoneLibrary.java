@@ -60,7 +60,7 @@ public class ZoneLibrary extends HttpServlet {
                 + "<div data-role='header' data-theme='b' data-position='fixed'>"
                 + "<a href='javascript:librarySearchPage_Load();' "
                 + "data-role='button' data-icon='search'>Search</a>"
-                + "<h1>Media Library</h1>");
+                + "<h1>Library</h1>");
 
         if ((req.getParameter("type") != null)
                 && (!req.getParameter("type").equals(""))) { //keywords search
@@ -400,9 +400,10 @@ public class ZoneLibrary extends HttpServlet {
                 + "<div data-id='mainNavFooter' data-role='footer' data-position='fixed'>"
                 + "<div data-role='navbar'>"
                 + "<ul>"
-                + "<li><a href='javascript:zoneSelection_Load();'>Zone Selection</a></li>"
+                + "<li><a href='javascript:zoneSelection_Load();'>Other Zones</a></li>"
                 + "<li><a href='javascript:playList_Load();'>Now Playing</a></li>"
-                + "<li><a href='javascript:mediaLibrary_Load();' class='ui-btn-active ui-state-persist'>Media Library</a></li>"
+                + "<li><a href='javascript:mediaLibrary_Load();' class='ui-btn-active ui-state-persist'>Library</a></li>"
+                + "<li><a href='javascript:radioPage_Load();'>Radio</a></li>"
                 + "</ul>"
                 + "</div>"
                 + "</div>"

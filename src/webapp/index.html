@@ -22,6 +22,7 @@
             //servlet constants that should be loaded dynamically. eventually?
             var kZoneSelectionPage = "/servlets/list-zones";
             var kPlayListPageUrlStr = "/servlets/playlist";
+            var kRadioPageServlet = "/servlets/radio";
             var kLibraryServlet = "/servlets/library";
             var kLibrarySearchDialog = "/servlets/library-search-dialog";
             var kLocalFileSystem = "file";
@@ -159,6 +160,13 @@
                 });
             }
 
+            //internet radio tab
+            function radioPage_Load() {
+                $.mobile.changePage(kRadioPageServlet, {
+                    reloadPage: true
+                });
+            }
+
             //other
             function zoneSelection_Load() {
                 $.mobile.changePage(kZoneSelectionPage, {
@@ -177,19 +185,21 @@
                 Welcome! To get started please select from one of the below
                 navigation options.<br />
                 <br />
-                If you would like to go to a different media zone controller on
-                this network, pick <i>Zone Selection</i>. Want to manage the
+                If you would like to control a different media zone on
+                this network, pick <i>Other Zones</i>. Want to manage the
                 tunes I am playing right now? See <i>Now Playing</i>. How about
                 adding some more tunes from the library?
-                Check out the <i>Library</i>.
+                Check out the <i>Library</i>. Finally, a list of Internet radio
+                stations can be found under <i>Radio</i>.
             </div>
 
             <div data-id="mainNavFooter" data-role="footer" data-position="fixed">
                 <div data-role="navbar">
                     <ul>
-                        <li><a href="javascript:zoneSelection_Load();">Zone Selection</a></li>
+                        <li><a href="javascript:zoneSelection_Load();">Other Zones</a></li>
                         <li><a href="javascript:playList_Load();">Now Playing</a></li>
                         <li><a href="javascript:mediaLibrary_Load();">Library</a></li>
+                        <li><a href="javascript:radioPage_Load();">Radio</a></li>
                     </ul>
                 </div>
             </div>

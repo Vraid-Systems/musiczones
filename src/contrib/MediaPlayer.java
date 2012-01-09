@@ -22,7 +22,7 @@ import zonecontrol.ZoneServerUtility;
 public class MediaPlayer {
 
     private static MediaPlayer vmp_SingleInstance = null;
-    private List<String> vmp_MediaUrlStringArray = null;
+    private List<String> vmp_MediaUrlStrList = null;
     private int vmp_PlayBackIndexInt = -1;
     private boolean debugMessagesOn = false;
     protected int lengthOfPauseBetweenMediaInSeconds = 2;
@@ -34,7 +34,7 @@ public class MediaPlayer {
 
     protected MediaPlayer(boolean theDebugIsOn) {
         debugMessagesOn = theDebugIsOn;
-        vmp_MediaUrlStringArray = new LinkedList<String>();
+        vmp_MediaUrlStrList = new LinkedList<String>();
         String aMPlayerBinPath = ZoneServerUtility.getInstance().loadStringPref(prefMediaPlayerPathKeyStr, "");
         if (aMPlayerBinPath.isEmpty()) {
             MusicZones.MPlayerNotFound();
@@ -64,13 +64,16 @@ public class MediaPlayer {
     }
 
     public void addMediaUrl(String theMediaUrlStr) {
-        vmp_MediaUrlStringArray.add(theMediaUrlStr);
+        vmp_MediaUrlStrList.add(theMediaUrlStr);
         if (debugMessagesOn) {
             System.out.println("added media url: " + theMediaUrlStr);
         }
     }
 
     protected String formatMediaUrl(String theMediaUrlStr) {
+        //remove media file name if prepended
+        theMediaUrlStr = ZoneServerUtility.getInstance().getPlainUrlFromUrlStr(theMediaUrlStr);
+
         //format windowsy backslashes if this is on a windows host and samba-ing
         if (ZoneServerUtility.getInstance().isWindows()
                 && theMediaUrlStr.contains(FileSystemType.smb.toString().concat(ZoneServerUtility.prefixUriStr))) {
@@ -97,7 +100,7 @@ public class MediaPlayer {
     public void playIndex(int theIndex) {
         vmp_PlayBackIndexInt = theIndex;
         try {
-            String theMediaStr = formatMediaUrl(vmp_MediaUrlStringArray.get(vmp_PlayBackIndexInt));
+            String theMediaStr = formatMediaUrl(vmp_MediaUrlStrList.get(vmp_PlayBackIndexInt));
             if (debugMessagesOn) {
                 System.out.println("will now play: " + theMediaStr);
             }
@@ -144,18 +147,18 @@ public class MediaPlayer {
 
     public void removeIndex(int theIndex) {
         stop(-1);
-        vmp_MediaUrlStringArray.remove(theIndex);
+        vmp_MediaUrlStrList.remove(theIndex);
     }
 
     public void shufflePlayList() {
-        if ((vmp_MediaUrlStringArray != null)
-                && (vmp_MediaUrlStringArray.size() > 0)
-                && (vmp_PlayBackIndexInt < vmp_MediaUrlStringArray.size())) {
+        if ((vmp_MediaUrlStrList != null)
+                && (vmp_MediaUrlStrList.size() > 0)
+                && (vmp_PlayBackIndexInt < vmp_MediaUrlStrList.size())) {
             if (vmp_PlayBackIndexInt >= 0) {
-                String aCurrentMediaUrlStr = vmp_MediaUrlStringArray.get(vmp_PlayBackIndexInt);
-                Collections.shuffle(vmp_MediaUrlStringArray);
+                String aCurrentMediaUrlStr = vmp_MediaUrlStrList.get(vmp_PlayBackIndexInt);
+                Collections.shuffle(vmp_MediaUrlStrList);
                 int i = 0;
-                for (String aMediaUrlStr : vmp_MediaUrlStringArray) {
+                for (String aMediaUrlStr : vmp_MediaUrlStrList) {
                     if (aMediaUrlStr.equals(aCurrentMediaUrlStr)) {
                         vmp_PlayBackIndexInt = i;
                         break;
@@ -163,7 +166,7 @@ public class MediaPlayer {
                     i++;
                 }
             } else {
-                Collections.shuffle(vmp_MediaUrlStringArray);
+                Collections.shuffle(vmp_MediaUrlStrList);
             }
         }
     }
@@ -173,7 +176,7 @@ public class MediaPlayer {
     }
 
     public void next() {
-        if ((vmp_PlayBackIndexInt + 1) < vmp_MediaUrlStringArray.size()) {
+        if ((vmp_PlayBackIndexInt + 1) < vmp_MediaUrlStrList.size()) {
             vmp_PlayBackIndexInt++;
             playIndex();
         } else { //no more items in playlist, stop process
@@ -205,7 +208,7 @@ public class MediaPlayer {
 
     public void clearPlaylist() {
         stop();
-        vmp_MediaUrlStringArray.clear();
+        vmp_MediaUrlStrList.clear();
     }
 
     public int getCurrentIndex() {
@@ -213,6 +216,6 @@ public class MediaPlayer {
     }
 
     public List<String> getPlayList() {
-        return vmp_MediaUrlStringArray;
+        return vmp_MediaUrlStrList;
     }
 }

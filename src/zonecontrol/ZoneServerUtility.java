@@ -115,6 +115,20 @@ public class ZoneServerUtility {
         return returnStr;
     }
 
+    public String getPlainUrlFromUrlStr(String theUrlString) {
+        if (debugMessagesOn) {
+            System.out.println("url to format: " + theUrlString);
+        }
+        String returnStr = null;
+        if (theUrlString.contains(mediaNameSplitStr)) {
+            String[] theUrlStringArray = theUrlString.split(mediaNameSplitStr);
+            returnStr = theUrlStringArray[1];
+        } else {
+            returnStr = theUrlString;
+        }
+        return returnStr;
+    }
+
     public boolean isWindows() {
         String os = System.getProperty("os.name").toLowerCase();
         return (os.indexOf("win") >= 0);
