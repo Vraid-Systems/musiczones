@@ -33,6 +33,7 @@ public class ZoneLibrary extends HttpServlet {
     private static final int mediaItemsPerPage = 30;
     private static final String kListParamStr = "list";
     private static final String kFilterParamStr = "filter";
+    public static final String kQuoteReplaceStr = "!!quote!!";
 
     public ZoneLibrary() {
     }
@@ -118,10 +119,10 @@ public class ZoneLibrary extends HttpServlet {
                 if ((req.getParameter(kFilterParamStr) != null) && (!req.getParameter(kFilterParamStr).equals(""))) {
                     out.println("<ul id='zoneLibraryList' data-role='listview' data-inset='true' data-filter='true' data-theme='d'>");
 
-                    if (req.getParameter(kFilterParamStr).length() == 1) { //get first char match
+                    if (req.getParameter(kFilterParamStr).replace(kQuoteReplaceStr, "'").length() == 1) { //get first char match
                         TreeMap<String, LinkedList<String>> outputAlbumMap = ZoneLibraryIndex.getInstance().getAlbumMap();
                         if (outputAlbumMap.size() > 0) {
-                            String aFirstCharStr = req.getParameter(kFilterParamStr).substring(0, 1);
+                            String aFirstCharStr = req.getParameter(kFilterParamStr).replace(kQuoteReplaceStr, "'").substring(0, 1);
                             int aFirstChar = aFirstCharStr.charAt(0);
                             String aNextChar = String.valueOf((char) (aFirstChar + 1));
                             SortedMap<String, LinkedList<String>> aSubMap = outputAlbumMap.subMap(
@@ -132,7 +133,7 @@ public class ZoneLibrary extends HttpServlet {
                                     out.println("<li id='zoneLibraryListItem_" + i + "'>");
                                     out.println("<a href='javascript:mediaLibrary_SubList(&quot;"
                                             + ID3FieldList.Album.toString() + "&quot;, "
-                                            + "&quot;" + aTempAlbumName + "&quot;);'>"
+                                            + "&quot;" + aTempAlbumName.replace("'", kQuoteReplaceStr) + "&quot;);'>"
                                             + aTempAlbumName + "</a>");
                                     out.println("</li>");
                                     i++;
@@ -140,7 +141,7 @@ public class ZoneLibrary extends HttpServlet {
                             }
                         }
                     } else { //get complete album match
-                        TreeMap<String, String> outputAlbumMap = ZoneLibraryIndex.getInstance().getTitlesFromAlbum(req.getParameter(kFilterParamStr));
+                        TreeMap<String, String> outputAlbumMap = ZoneLibraryIndex.getInstance().getTitlesFromAlbum(req.getParameter(kFilterParamStr).replace(kQuoteReplaceStr, "'"));
                         if (outputAlbumMap.size() > 0) {
                             int i = 0;
                             for (String aTempAlbum : outputAlbumMap.keySet()) {
@@ -169,7 +170,7 @@ public class ZoneLibrary extends HttpServlet {
                             out.println("<li id='zoneLibraryListItem_" + i + "'>");
                             out.println("<a href='javascript:mediaLibrary_SubList(&quot;"
                                     + ID3FieldList.Album.toString() + "&quot;, "
-                                    + "&quot;" + aFirstCharStr + "&quot;);'>"
+                                    + "&quot;" + aFirstCharStr.replace("'", kQuoteReplaceStr) + "&quot;);'>"
                                     + aFirstCharStr + "</a>");
                             out.println("</li>");
                             i++;
@@ -183,10 +184,10 @@ public class ZoneLibrary extends HttpServlet {
                 if ((req.getParameter(kFilterParamStr) != null) && (!req.getParameter(kFilterParamStr).equals(""))) {
                     out.println("<ul id='zoneLibraryList' data-role='listview' data-inset='true' data-filter='true' data-theme='d'>");
 
-                    if (req.getParameter(kFilterParamStr).length() == 1) { //get first char match
+                    if (req.getParameter(kFilterParamStr).replace(kQuoteReplaceStr, "'").length() == 1) { //get first char match
                         TreeMap<String, LinkedList<String>> outputArtistMap = ZoneLibraryIndex.getInstance().getArtistMap();
                         if (outputArtistMap.size() > 0) {
-                            String aFirstCharStr = req.getParameter(kFilterParamStr).substring(0, 1);
+                            String aFirstCharStr = req.getParameter(kFilterParamStr).replace(kQuoteReplaceStr, "'").substring(0, 1);
                             int aFirstChar = aFirstCharStr.charAt(0);
                             String aNextChar = String.valueOf((char) (aFirstChar + 1));
                             SortedMap<String, LinkedList<String>> aSubMap = outputArtistMap.subMap(
@@ -197,7 +198,7 @@ public class ZoneLibrary extends HttpServlet {
                                     out.println("<li id='zoneLibraryListItem_" + i + "'>");
                                     out.println("<a href='javascript:mediaLibrary_SubList(&quot;"
                                             + ID3FieldList.Artist.toString() + "&quot;, "
-                                            + "&quot;" + aTempArtistName + "&quot;);'>"
+                                            + "&quot;" + aTempArtistName.replace("'", kQuoteReplaceStr) + "&quot;);'>"
                                             + aTempArtistName + "</a>");
                                     out.println("</li>");
                                     i++;
@@ -205,7 +206,7 @@ public class ZoneLibrary extends HttpServlet {
                             }
                         }
                     } else { //get complete artist match
-                        TreeMap<String, String> outputTitlesMap = ZoneLibraryIndex.getInstance().getTitlesFromArtist(req.getParameter(kFilterParamStr));
+                        TreeMap<String, String> outputTitlesMap = ZoneLibraryIndex.getInstance().getTitlesFromArtist(req.getParameter(kFilterParamStr).replace(kQuoteReplaceStr, "'"));
                         if (outputTitlesMap.size() > 0) {
                             int i = 0;
                             for (String aTempTitle : outputTitlesMap.keySet()) {
@@ -234,7 +235,7 @@ public class ZoneLibrary extends HttpServlet {
                             out.println("<li id='zoneLibraryListItem_" + i + "'>");
                             out.println("<a href='javascript:mediaLibrary_SubList(&quot;"
                                     + ID3FieldList.Artist.toString() + "&quot;, "
-                                    + "&quot;" + aFirstCharStr + "&quot;);'>"
+                                    + "&quot;" + aFirstCharStr.replace("'", kQuoteReplaceStr) + "&quot;);'>"
                                     + aFirstCharStr + "</a>");
                             out.println("</li>");
                             i++;
@@ -247,7 +248,7 @@ public class ZoneLibrary extends HttpServlet {
                 out.println("<ul id='zoneLibraryList' data-role='listview' data-inset='true' data-filter='true' data-theme='d'>");
 
                 if ((req.getParameter(kFilterParamStr) != null) && (!req.getParameter(kFilterParamStr).equals(""))) {
-                    TreeMap<String, String> outputTitlesMap = ZoneLibraryIndex.getInstance().getTitlesFromGenre(req.getParameter(kFilterParamStr));
+                    TreeMap<String, String> outputTitlesMap = ZoneLibraryIndex.getInstance().getTitlesFromGenre(req.getParameter(kFilterParamStr).replace(kQuoteReplaceStr, "'"));
                     if (outputTitlesMap.size() > 0) {
                         int i = 0;
                         for (String aTempTitle : outputTitlesMap.keySet()) {
@@ -267,7 +268,7 @@ public class ZoneLibrary extends HttpServlet {
                             out.println("<li id='zoneLibraryListItem_" + i + "'>");
                             out.println("<a href='javascript:mediaLibrary_SubList(&quot;"
                                     + ID3FieldList.Genre.toString() + "&quot;, "
-                                    + "&quot;" + aTempGenre + "&quot;);'>"
+                                    + "&quot;" + aTempGenre.replace("'", kQuoteReplaceStr) + "&quot;);'>"
                                     + aTempGenre + "</a>");
                             out.println("</li>");
                             i++;
@@ -312,7 +313,7 @@ public class ZoneLibrary extends HttpServlet {
                         && (!req.getParameter(kFilterParamStr).equals(""))) { //dump all titles in single letter range
                     out.println("<ul id='zoneLibraryList' data-role='listview' data-inset='true' data-filter='true' data-theme='d'>");
 
-                    String aFirstCharStr = req.getParameter(kFilterParamStr).substring(0, 1);
+                    String aFirstCharStr = req.getParameter(kFilterParamStr).replace(kQuoteReplaceStr, "'").substring(0, 1);
                     int aFirstChar = aFirstCharStr.charAt(0);
                     String aNextChar = String.valueOf((char) (aFirstChar + 1));
                     if (outputAllTitles.size() > 0) {
@@ -345,7 +346,7 @@ public class ZoneLibrary extends HttpServlet {
                             out.println("<li id='zoneLibraryListItem_" + i + "'>");
                             out.println("<a href='javascript:mediaLibrary_SubList(&quot;"
                                     + ID3FieldList.Title.toString() + "&quot;, "
-                                    + "&quot;" + aFirstCharStr + "&quot;);'>"
+                                    + "&quot;" + aFirstCharStr.replace("'", kQuoteReplaceStr) + "&quot;);'>"
                                     + aFirstCharStr + "</a>");
                             out.println("</li>");
                             i++;
