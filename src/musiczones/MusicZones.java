@@ -130,6 +130,23 @@ public class MusicZones {
         }
         ZoneServerUtility.getInstance().saveStringPref(MediaPlayer.prefMediaPlayerPathKeyStr, global_MPlayerBinPath);
 
+        //wait until network route is up
+        String aIPv4Address = null;
+        while (aIPv4Address == null) {
+            aIPv4Address = ZoneServerUtility.getInstance().getIPv4LanAddress();
+            if (aIPv4Address == null) {
+                try {
+                    if (getIsDebugOn()) {
+                        System.out.println("route not ready, sleeping 2 seconds ...");
+                    }
+                    Thread.sleep((2 * 1000)); //2 seconds
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(MusicZones.class.getName()).log(Level.WARNING, null, ex);
+                }
+            }
+        }
+        System.out.println("route is ready");
+
         //first intialize jetty in-case using custom webserver port
         JettyWebServer theWebServer = JettyWebServer.getInstance(global_webInterfacePortInt);
         theWebServer.startServer();
@@ -147,7 +164,7 @@ public class MusicZones {
         try {
             Thread.sleep(100);
         } catch (InterruptedException ex) {
-            Logger.getLogger(MusicZones.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MusicZones.class.getName()).log(Level.WARNING, null, ex);
         }
 
         //after networking is in place, finally ready to start accepting control packets
