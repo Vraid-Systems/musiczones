@@ -6,6 +6,7 @@ package servlets;
 import contrib.MediaPlayer;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -282,13 +283,16 @@ public class ZoneLibrary extends HttpServlet {
                 if (outputFilesMap.size() > 0) {
                     Random aRandom = new Random();
                     List<String> aFileNameArray = Arrays.asList(outputFilesMap.keySet().toArray(new String[0]));
+                    ArrayList<String> aPreviousPathList = new ArrayList<String>(); //for tracking already output files
                     int i = 0;
                     while (i < 20) {
                         String aRandomFileName = aFileNameArray.get(aRandom.nextInt(aFileNameArray.size()));
                         String aFullPathFromRandomFileName = ZoneLibraryIndex.getInstance().getFullPathFromFileName(aRandomFileName);
-                        if (MediaPlayer.getInstance().getPlayList().contains(aFullPathFromRandomFileName)) {
+                        if (MediaPlayer.getInstance().getPlayList().contains(aFullPathFromRandomFileName)
+                                || aPreviousPathList.contains(aFullPathFromRandomFileName)) {
                             continue;
                         } else {
+                            aPreviousPathList.add(aFullPathFromRandomFileName);
                             out.println("<li id='zoneLibraryListItem_" + i + "'>");
                             out.println("<a href='javascript:playList_addMediaPath_NoRedir(&quot;"
                                     + aFullPathFromRandomFileName + "&quot;);'>"
