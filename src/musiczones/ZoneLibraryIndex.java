@@ -415,7 +415,7 @@ public class ZoneLibraryIndex {
                 if (!zli_FileMap.containsKey(theRawFileName)) {
                     zli_FileMap.put(theRawFileName, aFullFilePathStr);
                     if (debugEventsOn) {
-                        System.out.println("ZLI addFileToIndex - added " + aFullFilePathStr);
+                        System.out.println("ZLI addFileToMaps - added " + aFullFilePathStr);
                     }
 
                     if ((!MusicZones.getIsLowMem()) && (theContainerIsMp3(theRawFullFilePath))) {
@@ -436,23 +436,20 @@ public class ZoneLibraryIndex {
                             String aFieldAlbum = aID3MetaData.getAlbum();
                             if (aFieldAlbum != null) {
                                 if (debugEventsOn) {
-                                    System.out.println("ZLI addFileToIndex - album = '" + aFieldAlbum + "'");
+                                    System.out.println("ZLI addFileToMaps - album = '" + aFieldAlbum + "'");
                                 }
                                 addToAlbum(theRawFileName, aFieldAlbum);
                             }
 
-                            String aFieldArtist = aID3MetaData.getArtist();
-                            if (aFieldArtist != null) {
-                                if (debugEventsOn) {
-                                    System.out.println("ZLI addFileToIndex - artist = '" + aFieldArtist + "'");
-                                }
-                                addToArtist(theRawFileName, aFieldArtist);
+                            List<String> aFieldArtistList = aID3MetaData.getArtistsAsList();
+                            if (aFieldArtistList != null) {
+                                addToArtist(theRawFileName, aFieldArtistList);
                             }
 
                             String aFieldTitle = aID3MetaData.getTitle();
                             if (aFieldTitle != null) {
                                 if (debugEventsOn) {
-                                    System.out.println("ZLI addFileToIndex - title = '" + aFieldTitle + "'");
+                                    System.out.println("ZLI addFileToMaps - title = '" + aFieldTitle + "'");
                                 }
                                 addToTitle(theRawFileName, aFieldTitle);
                             }
@@ -499,25 +496,27 @@ public class ZoneLibraryIndex {
     /**
      * add a filename to an artist group, create if it does not exist
      * @param theFileName String
-     * @param theArtistName String
+     * @param theArtistNameList List<String>
      */
-    protected void addToArtist(String theFileName, String theArtistName) {
-        if ((theFileName == null) || (theArtistName == null)) {
+    protected void addToArtist(String theFileName, List<String> theArtistNameList) {
+        if ((theFileName == null) || (theArtistNameList == null)) {
             return;
         }
 
-        if (zli_ArtistMap.containsKey(theArtistName)) {
-            if (zli_ArtistMap.get(theArtistName) == null) {
+        for (String theArtistName : theArtistNameList) {
+            if (zli_ArtistMap.containsKey(theArtistName)) {
+                if (zli_ArtistMap.get(theArtistName) == null) {
+                    LinkedList<String> aFileNameLL = new LinkedList<String>();
+                    aFileNameLL.add(theFileName);
+                    zli_ArtistMap.put(theArtistName, aFileNameLL);
+                } else {
+                    zli_ArtistMap.get(theArtistName).add(theFileName);
+                }
+            } else {
                 LinkedList<String> aFileNameLL = new LinkedList<String>();
                 aFileNameLL.add(theFileName);
                 zli_ArtistMap.put(theArtistName, aFileNameLL);
-            } else {
-                zli_ArtistMap.get(theArtistName).add(theFileName);
             }
-        } else {
-            LinkedList<String> aFileNameLL = new LinkedList<String>();
-            aFileNameLL.add(theFileName);
-            zli_ArtistMap.put(theArtistName, aFileNameLL);
         }
     }
 

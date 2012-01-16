@@ -20,7 +20,7 @@ public class ID3MetaData {
     private MP3File imd_mp3File = null;
     private ID3V2Tag imd_id3Tag = null;
     public static final String imd_kSmbPrefix = "smb:";
-    public static final String imd_GenreSplitString = ";";
+    public static final String[] imd_FieldSplitStringArray = {";", "/"};
 
     public ID3MetaData(String theMediaFilePathStr) throws MalformedURLException, ID3Exception {
         if (theMediaFilePathStr.contains(imd_kSmbPrefix)) {
@@ -40,8 +40,32 @@ public class ID3MetaData {
         return imd_id3Tag.getAlbum();
     }
 
-    public String getArtist() {
-        return imd_id3Tag.getArtist();
+    /**
+     * retrieves Artist ID3 string from file, parses into list
+     * @return ArrayList<String>
+     */
+    public ArrayList<String> getArtistsAsList() {
+        String aSongArtistField = imd_id3Tag.getArtist();
+        if (aSongArtistField == null) {
+            return null;
+        }
+
+        ArrayList<String> aSongArtistReturnList = new ArrayList<String>();
+        for (String aFieldSplitString : imd_FieldSplitStringArray) {
+            if (aSongArtistField.contains(aFieldSplitString)) {
+                String[] aSongArtistArray = aSongArtistField.split(aFieldSplitString);
+                for (String aSongArtist : aSongArtistArray) {
+                    aSongArtist = aSongArtist.trim();
+                    aSongArtistReturnList.add(aSongArtist);
+                }
+                break;
+            }
+        }
+
+        if (aSongArtistReturnList.isEmpty()) {
+            aSongArtistReturnList.add(aSongArtistField);
+        }
+        return aSongArtistReturnList;
     }
 
     /**
@@ -49,20 +73,25 @@ public class ID3MetaData {
      * @return ArrayList<String>
      */
     public ArrayList<String> getGenresAsList() {
-        String aSongGenre = imd_id3Tag.getGenre();
-        if (aSongGenre == null) {
+        String aSongGenreField = imd_id3Tag.getGenre();
+        if (aSongGenreField == null) {
             return null;
         }
 
         ArrayList<String> aGenreReturnList = new ArrayList<String>();
-        if (aSongGenre.contains(imd_GenreSplitString)) {
-            String[] aSongGenreArray = aSongGenre.split(imd_GenreSplitString);
-            for (String aGenre : aSongGenreArray) {
-                aGenre = aGenre.trim();
-                aGenreReturnList.add(aGenre);
+        for (String aFieldSplitString : imd_FieldSplitStringArray) {
+            if (aSongGenreField.contains(aFieldSplitString)) {
+                String[] aSongGenreArray = aSongGenreField.split(aFieldSplitString);
+                for (String aGenre : aSongGenreArray) {
+                    aGenre = aGenre.trim();
+                    aGenreReturnList.add(aGenre);
+                }
+                break;
             }
-        } else {
-            aGenreReturnList.add(aSongGenre);
+        }
+
+        if (aGenreReturnList.isEmpty()) {
+            aGenreReturnList.add(aSongGenreField);
         }
         return aGenreReturnList;
     }
