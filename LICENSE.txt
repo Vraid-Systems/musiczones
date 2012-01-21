@@ -1,7 +1,7 @@
 MusicZones by Jason Zerbe is licensed under a
 Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License.
 All rights reserved.
-http://vraidsys.com/musiczones_license/
+https://github.com/jzerbe/MusicZones/wiki/License
 
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
