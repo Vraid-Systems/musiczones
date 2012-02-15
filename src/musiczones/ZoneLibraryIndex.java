@@ -778,7 +778,28 @@ public class ZoneLibraryIndex {
                     Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-            if (aWorkGroupArray == null) { //scrape subnet for servers
+            //check localhost for possible SMB shares
+            if (MusicZones.getIsIndexLocalHost()) {
+                String zoneIPv4Addr = Layer3Info.getInstance().getValidIPAddress(Layer3Info.IpAddressType.IPv4).trim();
+                if (zoneIPv4Addr != null) {
+                    SmbFile aServerSmbFile = null;
+                    try {
+                        aServerSmbFile = new SmbFile(kSmbPrefix + zoneIPv4Addr + "/");
+                    } catch (MalformedURLException ex) {
+                        Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    if ((aServerSmbFile != null) && (!aHostList.contains(aServerSmbFile))) {
+                        aHostList.add(aServerSmbFile);
+
+                        if (debugEventsOn) {
+                            System.out.println("ZLI RefreshSearchIndexTask - added "
+                                    + aServerSmbFile.toString() + " to host cache");
+                        }
+                    }
+                }
+            }
+            //scrape subnet for servers if none found with master browsers
+            if (MusicZones.getIsOnline() && (aWorkGroupArray == null)) {
                 System.err.println("ZLI RefreshSearchIndexTask - no workgroups found");
                 String zoneIPv4Addr = Layer3Info.getInstance().getValidIPAddress(Layer3Info.IpAddressType.IPv4).trim();
                 System.out.println("ZLI RefreshSearchIndexTask - " + zoneIPv4Addr + " will now scrape subnet ...");
@@ -812,27 +833,7 @@ public class ZoneLibraryIndex {
                     System.err.println("ZLI RefreshSearchIndexTask - unable to build subnet "
                             + "prefix for scraping - got " + zoneIPv4AddrOctets.length + " octets");
                 }
-
-                //check localhost
-                String aLocalHostAddr = "127.0.0.1";
-                if (isPossibleSambaHost(aLocalHostAddr)) {
-                    //if TCP 139 is active then add to host list
-                    SmbFile aServerSmbFile = null;
-                    try {
-                        aServerSmbFile = new SmbFile(kSmbPrefix + aLocalHostAddr + "/");
-                    } catch (MalformedURLException ex) {
-                        Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    if ((aServerSmbFile != null) && (!aHostList.contains(aServerSmbFile))) {
-                        aHostList.add(aServerSmbFile);
-
-                        if (debugEventsOn) {
-                            System.out.println("ZLI RefreshSearchIndexTask - added "
-                                    + aServerSmbFile.toString() + " to host cache");
-                        }
-                    }
-                }
-            } else { //check workgroups for servers
+            } else if (aWorkGroupArray != null) { //check workgroups for servers if found with master browser
                 for (String aWorkGroup : aWorkGroupArray) {
                     SmbFile aWorkGroupSmbFile = null;
                     try {

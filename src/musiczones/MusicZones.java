@@ -25,6 +25,7 @@ public class MusicZones {
     protected static boolean global_IsLowMem = false;
     protected static boolean global_IsDebugOn = false;
     protected static boolean global_IsOnline = true;
+    protected static boolean global_IndexLocalHost = false;
     protected static String global_MPlayerNotFoundStr = "unable to find mplayer executable, please use --mplayer-bin-path=";
     protected static final String global_usageStr = "usage: java -jar mmc.jar "
             + "--zone-name=[zone controller's name] "
@@ -34,7 +35,8 @@ public class MusicZones {
             + "--set-scan-max=[last octent of IPv4 in int] "
             + "--low-mem (do not build metadata indexes or other memory intensive tasks) "
             + "--debug-on (output debug information) "
-            + "--offline (no LAN/WAN route)";
+            + "--offline (no LAN/WAN route) "
+            + "--localhost (force index of localhost)";
 
     public static boolean getIsDebugOn() {
         return global_IsDebugOn;
@@ -46,6 +48,10 @@ public class MusicZones {
 
     public static boolean getIsOnline() {
         return global_IsOnline;
+    }
+
+    public static boolean getIsIndexLocalHost() {
+        return global_IndexLocalHost;
     }
 
     /**
@@ -87,6 +93,8 @@ public class MusicZones {
                 global_IsDebugOn = true;
             } else if (currentArg.contains("--offline")) {
                 global_IsOnline = false;
+            } else if (currentArg.contains("--localhost")) {
+                global_IndexLocalHost = true;
             }
         } //done processing arguments
 
@@ -131,21 +139,23 @@ public class MusicZones {
         ZoneServerUtility.getInstance().saveStringPref(MediaPlayer.prefMediaPlayerPathKeyStr, global_MPlayerBinPath);
 
         //wait until network route is up
-        String aIPv4Address = null;
-        while (aIPv4Address == null) {
-            aIPv4Address = ZoneServerUtility.getInstance().getIPv4LanAddress();
-            if (aIPv4Address == null) {
-                try {
-                    if (getIsDebugOn()) {
-                        System.out.println("route not ready, sleeping 2 seconds ...");
+        if (getIsOnline()) {
+            String aIPv4Address = null;
+            while (aIPv4Address == null) {
+                aIPv4Address = ZoneServerUtility.getInstance().getIPv4LanAddress();
+                if (aIPv4Address == null) {
+                    try {
+                        if (getIsDebugOn()) {
+                            System.out.println("route not ready, sleeping 2 seconds ...");
+                        }
+                        Thread.sleep((2 * 1000)); //2 seconds
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(MusicZones.class.getName()).log(Level.WARNING, null, ex);
                     }
-                    Thread.sleep((2 * 1000)); //2 seconds
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(MusicZones.class.getName()).log(Level.WARNING, null, ex);
                 }
             }
+            System.out.println("route is ready");
         }
-        System.out.println("route is ready");
 
         //first intialize jetty in-case using custom webserver port
         JettyWebServer theWebServer = JettyWebServer.getInstance(global_webInterfacePortInt);
