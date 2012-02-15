@@ -20,8 +20,8 @@ public class MusicZones {
     protected static String global_ZoneName = null;
     protected static int global_webInterfacePortInt = 80;
     protected static String global_MPlayerBinPath = null;
-    protected static int global_ScanMinInt = 5;
-    protected static int global_ScanMaxInt = 15;
+    protected static int global_ScanMinInt = 1;
+    protected static int global_ScanMaxInt = 10;
     protected static boolean global_IsLowMem = false;
     protected static boolean global_IsDebugOn = false;
     protected static boolean global_IsOnline = true;
@@ -174,11 +174,9 @@ public class MusicZones {
         }
 
         //start up the library indexing service
-        if (getIsOnline()) {
-            ZoneLibraryIndex.getInstance(getIsDebugOn());
-            ZoneLibraryIndex.getInstance().setScanMin(global_ScanMinInt);
-            ZoneLibraryIndex.getInstance().setScanMax(global_ScanMaxInt);
-        }
+        ZoneLibraryIndex.getInstance(getIsDebugOn());
+        ZoneLibraryIndex.getInstance().setScanMin(global_ScanMinInt);
+        ZoneLibraryIndex.getInstance().setScanMax(global_ScanMaxInt);
 
         //start the master server notification point
         if (getIsOnline()) {

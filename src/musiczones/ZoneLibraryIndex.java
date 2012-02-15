@@ -51,8 +51,8 @@ public class ZoneLibraryIndex {
     private RefreshCIFSMediaTask zli_RCMT = null;
     protected int zli_RefreshCIFSMediaSeconds = 3600; //60 minutes
     protected String[] zli_CIFSPathBlackListArray = {"$"};
-    protected int zli_IPv4ScanMin = 5;
-    protected int zli_IPv4ScanMax = 15;
+    protected int zli_IPv4ScanMin = 1;
+    protected int zli_IPv4ScanMax = 10;
     private boolean zli_isBuilding = false;
 
     protected ZoneLibraryIndex(boolean theDebugIsOn) {
@@ -62,13 +62,11 @@ public class ZoneLibraryIndex {
         zli_GenreMap = new TreeMap<String, LinkedList<String>>();
         zli_AlbumMap = new TreeMap<String, LinkedList<String>>();
         zli_ArtistMap = new TreeMap<String, LinkedList<String>>();
-        if (MusicZones.getIsOnline()) {
-            zli_Timer = new Timer();
-            zli_RCMT = new RefreshCIFSMediaTask();
-            zli_Timer.schedule(zli_RCMT, 0,
-                    zli_RefreshCIFSMediaSeconds * 1000);
-            System.out.println("ZLI RefreshCIFSMediaTask added");
-        }
+        zli_Timer = new Timer();
+        zli_RCMT = new RefreshCIFSMediaTask();
+        zli_Timer.schedule(zli_RCMT, 0,
+                zli_RefreshCIFSMediaSeconds * 1000);
+        System.out.println("ZLI RefreshCIFSMediaTask added");
     }
 
     public static ZoneLibraryIndex getInstance() {
@@ -732,6 +730,24 @@ public class ZoneLibraryIndex {
     }
 
     /**
+     * check if netbios-ssn (TCP 139) is open on machine
+     *
+     * @param theValidIPv4Addr String
+     * @return boolean - does host possibly have Samba shares?
+     */
+    protected boolean isPossibleSambaHost(String theValidIPv4Addr) {
+        InetSocketAddress aTestInetSocketAddress = new InetSocketAddress(theValidIPv4Addr, 139);
+        Socket aTestSocket = new Socket();
+        try {
+            aTestSocket.connect(aTestInetSocketAddress, 100); //milliseconds
+            aTestSocket.close();
+            return true;
+        } catch (Exception ex) {
+            return false; //socket not open
+        }
+    }
+
+    /**
      * private timed task that adds all supported media from all CIFS shares on local network
      * if we are unable to raise the Master Browser, then scrape the local subnet for shares
      */
@@ -750,15 +766,17 @@ public class ZoneLibraryIndex {
 
             //query CIFS master browser for any workgroups
             String[] aWorkGroupArray = null;
-            try {
-                SmbFile aRootSmbFile = new SmbFile(kSmbPrefix);
+            if (MusicZones.getIsOnline()) {
                 try {
-                    aWorkGroupArray = aRootSmbFile.list();
-                } catch (SmbException ex) {
-                    Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.WARNING, null, ex);
+                    SmbFile aRootSmbFile = new SmbFile(kSmbPrefix);
+                    try {
+                        aWorkGroupArray = aRootSmbFile.list();
+                    } catch (SmbException ex) {
+                        Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.WARNING, null, ex);
+                    }
+                } catch (MalformedURLException ex) {
+                    Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            } catch (MalformedURLException ex) {
-                Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
             }
             if (aWorkGroupArray == null) { //scrape subnet for servers
                 System.err.println("ZLI RefreshSearchIndexTask - no workgroups found");
@@ -771,29 +789,21 @@ public class ZoneLibraryIndex {
                     for (int i = zli_IPv4ScanMin; i <= zli_IPv4ScanMax; i++) {
                         String aNewValidIPv4Addr = aValidIPv4Prefix + String.valueOf(i);
 
-                        //do quick check if netbios-ssn (TCP 139) is open on machine
-                        InetSocketAddress aTestInetSocketAddress = new InetSocketAddress(aNewValidIPv4Addr, 139);
-                        Socket aTestSocket = new Socket();
-                        try {
-                            aTestSocket.connect(aTestInetSocketAddress, 100); //milliseconds
-                            aTestSocket.close();
-                        } catch (Exception ex) {
-                            continue; //socket not open
-                        }
+                        if (isPossibleSambaHost(aNewValidIPv4Addr)) {
+                            //if TCP 139 is active then add to host list
+                            SmbFile aServerSmbFile = null;
+                            try {
+                                aServerSmbFile = new SmbFile(kSmbPrefix + aNewValidIPv4Addr + "/");
+                            } catch (MalformedURLException ex) {
+                                Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                            if ((aServerSmbFile != null) && (!aHostList.contains(aServerSmbFile))) {
+                                aHostList.add(aServerSmbFile);
 
-                        //if TCP 139 is active then add to host list
-                        SmbFile aServerSmbFile = null;
-                        try {
-                            aServerSmbFile = new SmbFile(kSmbPrefix + aNewValidIPv4Addr + "/");
-                        } catch (MalformedURLException ex) {
-                            Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                        if ((aServerSmbFile != null) && (!aHostList.contains(aServerSmbFile))) {
-                            aHostList.add(aServerSmbFile);
-
-                            if (debugEventsOn) {
-                                System.out.println("ZLI RefreshSearchIndexTask - added "
-                                        + aServerSmbFile.toString() + " to host cache");
+                                if (debugEventsOn) {
+                                    System.out.println("ZLI RefreshSearchIndexTask - added "
+                                            + aServerSmbFile.toString() + " to host cache");
+                                }
                             }
                         }
                     }
@@ -801,6 +811,26 @@ public class ZoneLibraryIndex {
                 } else {
                     System.err.println("ZLI RefreshSearchIndexTask - unable to build subnet "
                             + "prefix for scraping - got " + zoneIPv4AddrOctets.length + " octets");
+                }
+
+                //check localhost
+                String aLocalHostAddr = "127.0.0.1";
+                if (isPossibleSambaHost(aLocalHostAddr)) {
+                    //if TCP 139 is active then add to host list
+                    SmbFile aServerSmbFile = null;
+                    try {
+                        aServerSmbFile = new SmbFile(kSmbPrefix + aLocalHostAddr + "/");
+                    } catch (MalformedURLException ex) {
+                        Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    if ((aServerSmbFile != null) && (!aHostList.contains(aServerSmbFile))) {
+                        aHostList.add(aServerSmbFile);
+
+                        if (debugEventsOn) {
+                            System.out.println("ZLI RefreshSearchIndexTask - added "
+                                    + aServerSmbFile.toString() + " to host cache");
+                        }
+                    }
                 }
             } else { //check workgroups for servers
                 for (String aWorkGroup : aWorkGroupArray) {
