@@ -6,7 +6,7 @@
     <property name="src.mainclass" value="musiczones.MusicZones"/>
 
     <!-- directories and files -->
-    <property name="contrib.dir" location="contrib" />
+    <property name="libs.dir" location="libs" />
     <property name="src.dir" location="src" />
     <property name="test.dir" location="test" />
     <property name="src.build.dir" location="build-src" />
@@ -30,7 +30,7 @@
     <target name="init">
         <!-- add the contrib jars to the "jars.classpath" classpath -->
         <path id="jars.classpath">
-            <fileset dir="${contrib.dir}" includes="**/*.jar" />
+            <fileset dir="${libs.dir}" includes="**/*.jar" />
         </path>
 
         <!-- junit classpath: include junit and built classes -->
@@ -113,7 +113,7 @@
                 <attribute name="Main-Class" value="${src.mainclass}" />
             </manifest>
             <!-- add in contrib jars otherwise classpath will be lacking -->
-            <zipgroupfileset dir="${contrib.dir}" includes="**/*.jar"
+            <zipgroupfileset dir="${libs.dir}" includes="**/*.jar"
             excludes="**/${junit.filename}" />
         </jar>
     </target>

@@ -1,4 +1,5 @@
 #!/bin/sh
 cd $(dirname $0)
 cd ..
-ant run
+cd ..
+ant clean

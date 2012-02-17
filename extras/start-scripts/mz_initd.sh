@@ -14,7 +14,7 @@
 # To install dependencies: apt-get install screen openjdk-6-jre-headless
 #
 # To install:
-# 0) wget --no-check-certificate https://github.com/downloads/jzerbe/MusicZones/mz.jar
+# 0) wget http://dl.dropbox.com/u/44649188/software/mz.jar
 # 1) mv mz.jar /srv/mz.jar
 # 2) cp mz_initd.sh /etc/init.d/mz
 # 3) chmod +x /etc/init.d/mz
