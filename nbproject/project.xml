@@ -30,27 +30,23 @@
             </folders>
             <ide-actions>
                 <action name="build">
-                    <target>dist</target>
+                    <target>jar-dist</target>
                 </action>
                 <action name="clean">
-                    <target>clean</target>
+                    <target>clean-all</target>
                 </action>
                 <action name="javadoc">
                     <target>javadoc</target>
                 </action>
                 <action name="rebuild">
-                    <target>clean</target>
-                    <target>dist</target>
+                    <target>clean-all</target>
+                    <target>jar-dist</target>
                 </action>
                 <action name="run">
-                    <target>run</target>
-                </action>
-                <action name="debug">
-                    <script>nbproject/ide-targets.xml</script>
-                    <target>debug-nb</target>
+                    <target>jar-run</target>
                 </action>
                 <action name="test">
-                    <target>junit</target>
+                    <target>jar-junit</target>
                 </action>
             </ide-actions>
             <view>
