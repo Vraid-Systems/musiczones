@@ -104,8 +104,7 @@ if (isset($_GET['opt']) && ($_GET['opt'] != '')) {
                     } else {
                         ?>
                         <p>
-                            You do not seem to have any
-                            <a href="http://vraidsys.com/musiczones/">MusicZones</a>
+                            You do not seem to have any MusicZones
                             online. Why not start a few?
                         </p>
                         <?php

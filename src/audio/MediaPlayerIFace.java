@@ -1,5 +1,5 @@
 /*
- * interface for keeping consitent MediaPlayer on JAR and Android
+ * interface for keeping consistent MediaPlayer on JAR and Android
  */
 package audio;
 
