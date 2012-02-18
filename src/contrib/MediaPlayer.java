@@ -36,7 +36,7 @@ public class MediaPlayer {
         debugMessagesOn = theDebugIsOn;
         vmp_MediaUrlStrList = new LinkedList<String>();
         String aMPlayerBinPath = ZoneServerUtility.getInstance().loadStringPref(prefMediaPlayerPathKeyStr, "");
-        if (aMPlayerBinPath.isEmpty()) {
+        if ("".equals(aMPlayerBinPath)) {
             MusicZones.MPlayerNotFound();
         }
         vmp_JMPlayer = new JMPlayer();

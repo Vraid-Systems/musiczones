@@ -1,5 +1,5 @@
 /*
- * a singleton class for manging and allowing acces to the zone library search index
+ * a singleton class for managing and allowing access to the zone library search index
  * only indexes one copy of media with a certain filename
  *
  * support for grabbing ID3 metadata on MP3 files only
@@ -17,6 +17,7 @@ import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -342,13 +343,13 @@ public class ZoneLibraryIndex {
             LinkedList<SmbFile> aSmbFileLinkedList = new LinkedList<SmbFile>(aCIFSDirList);
 
             while (aSmbFileLinkedList.peek() != null) {
-                SmbFile iSmbFile = aSmbFileLinkedList.pop();
+                SmbFile iSmbFile = aSmbFileLinkedList.removeFirst();
 
                 if (iSmbFile.getPath().endsWith("/")) { //recurse into directory during search
                     ArrayList<SmbFile> tempSmbFiles = CIFSNetworkInterface.getInstance().getDirectoryList(iSmbFile.getPath());
                     if ((tempSmbFiles != null) && (tempSmbFiles.size() > 0)) {
                         for (SmbFile tempSmbFile : tempSmbFiles) {
-                            aSmbFileLinkedList.push(tempSmbFile);
+                            aSmbFileLinkedList.addFirst(tempSmbFile);
 
                             if (debugEventsOn) {
                                 System.out.println("ZLI indexPath - will follow " + tempSmbFile.toString());
@@ -370,13 +371,13 @@ public class ZoneLibraryIndex {
             aFileLinkedList.addAll(Arrays.asList(files));
 
             while (aFileLinkedList.peek() != null) {
-                File iFile = aFileLinkedList.pop();
+                File iFile = aFileLinkedList.removeFirst();
 
                 if (iFile.isDirectory()) { //recurse into directory during search
                     File[] tempFileArray = iFile.listFiles();
                     if (tempFileArray != null) {
                         for (File tempFile : tempFileArray) {
-                            aFileLinkedList.push(tempFile);
+                            aFileLinkedList.addFirst(tempFile);
                         }
                     }
                 } else { //have a file, add it to the file index map
@@ -846,7 +847,7 @@ public class ZoneLibraryIndex {
                         continue;
                     }
 
-                    String[] aServerArray; //get a list of servers in workgroup
+                    String[] aServerArray = null; //get a list of servers in workgroup
                     try {
                         aServerArray = aWorkGroupSmbFile.list();
                     } catch (SmbException ex) {

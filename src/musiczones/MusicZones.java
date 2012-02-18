@@ -10,6 +10,8 @@ import zonecontrol.ZoneServerLogic;
 import zonecontrol.ZoneMulticastServer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import musiczones.Layer3Info.IpAddressType;
 import zonecontrol.ZoneServerUtility;
 
 /**
@@ -69,22 +71,22 @@ public class MusicZones {
                 global_ZoneName = currentArgArray[1];
             } else if (currentArg.contains("--web-port=")) {
                 String currentArgArray[] = currentArg.split("=");
-                if (!currentArgArray[1].isEmpty()) {
+                if (!"".equals(currentArgArray[1])) {
                     global_webInterfacePortInt = Integer.valueOf(currentArgArray[1]);
                 }
             } else if (currentArg.contains("--mplayer-bin-path=")) {
                 String currentArgArray[] = currentArg.split("=");
-                if (!currentArgArray[1].isEmpty()) {
+                if (!"".equals(currentArgArray[1])) {
                     global_MPlayerBinPath = currentArgArray[1];
                 }
             } else if (currentArg.contains("--set-scan-min=")) {
                 String currentArgArray[] = currentArg.split("=");
-                if (!currentArgArray[1].isEmpty()) {
+                if (!"".equals(currentArgArray[1])) {
                     global_ScanMinInt = Integer.valueOf(currentArgArray[1]);
                 }
             } else if (currentArg.contains("--set-scan-max=")) {
                 String currentArgArray[] = currentArg.split("=");
-                if (!currentArgArray[1].isEmpty()) {
+                if (!"".equals(currentArgArray[1])) {
                     global_ScanMaxInt = Integer.valueOf(currentArgArray[1]);
                 }
             } else if (currentArg.contains("--low-mem")) {
@@ -106,7 +108,7 @@ public class MusicZones {
         File aExistsFile = new File(savedMPlayerBinPath);
         if (aExistsFile.exists()) {
             global_MPlayerBinPath = savedMPlayerBinPath;
-        } else if ((!aExistsFile.exists()) && ((global_MPlayerBinPath == null) || (global_MPlayerBinPath.isEmpty()))) {
+        } else if ((!aExistsFile.exists()) && ((global_MPlayerBinPath == null) || ("".equals(global_MPlayerBinPath)))) {
             if (ZoneServerUtility.getInstance().isWindows()) {
                 global_MPlayerBinPath = "C:\\Program Files\\SMPlayer\\mplayer\\mplayer.exe";
                 aExistsFile = new File(global_MPlayerBinPath);
@@ -142,7 +144,7 @@ public class MusicZones {
         if (getIsOnline()) {
             String aIPv4Address = null;
             while (aIPv4Address == null) {
-                aIPv4Address = ZoneServerUtility.getInstance().getIPv4LanAddress();
+                aIPv4Address = Layer3Info.getInstance().getValidIPAddress(IpAddressType.IPv4);
                 if (aIPv4Address == null) {
                     try {
                         if (getIsDebugOn()) {
@@ -166,7 +168,7 @@ public class MusicZones {
 
         //then bring up the zone controller logic
         ZoneServerLogic mainServerLogic = ZoneServerLogic.getInstance();
-        if ((global_ZoneName != null) && (!global_ZoneName.isEmpty())) {
+        if ((global_ZoneName != null) && (!"".equals(global_ZoneName))) {
             mainServerLogic.setZoneName(global_ZoneName);
         }
 

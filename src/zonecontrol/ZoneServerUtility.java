@@ -1,16 +1,8 @@
 /*
- * a singleton class for doing various utlity functions
+ * a singleton class for doing various Zone utility functions
  */
 package zonecontrol;
 
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.InterfaceAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.Enumeration;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 import musiczones.FileSystemType;
 
@@ -42,43 +34,6 @@ public class ZoneServerUtility {
             zsu_SingleInstance = new ZoneServerUtility(theDebugIsOn);
         }
         return zsu_SingleInstance;
-    }
-
-    /**
-     * gets the correct LAN IPv4 address of the local machine
-     * @return String, null on error
-     */
-    public String getIPv4LanAddress() {
-        Enumeration<NetworkInterface> aNetworkInterfaceEnumeration = null;
-        try {
-            aNetworkInterfaceEnumeration = NetworkInterface.getNetworkInterfaces();
-        } catch (SocketException ex) {
-            Logger.getLogger(ZoneServerUtility.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
-        while (aNetworkInterfaceEnumeration.hasMoreElements()) {
-            NetworkInterface currentNetworkInterface = aNetworkInterfaceEnumeration.nextElement();
-            try {
-                if (currentNetworkInterface.isLoopback()) {
-                    continue;
-                }
-            } catch (SocketException ex) {
-                Logger.getLogger(ZoneServerUtility.class.getName()).log(Level.SEVERE, null, ex);
-                return null;
-            }
-
-            for (InterfaceAddress currentNetworkInterfaceAddress : currentNetworkInterface.getInterfaceAddresses()) {
-                InetAddress currentNetworkInterfaceInetAddress = currentNetworkInterfaceAddress.getAddress();
-
-                if (!(currentNetworkInterfaceInetAddress instanceof Inet4Address)) {
-                    continue;
-                }
-
-                return currentNetworkInterfaceInetAddress.getHostAddress();
-            }
-        }
-
-        return null;
     }
 
     public void saveIntPref(String theIntPrefKey, int theIntPrefValue) {

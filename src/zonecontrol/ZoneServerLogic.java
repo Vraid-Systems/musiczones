@@ -1,6 +1,6 @@
 /*
  * logic for processing the commands send over the network that the
- * server recieves
+ * server receives
  *
  * THIS IS A SINGLETON IMPLEMENTATION see:
  * http://www.javaworld.com/javaworld/jw-04-2003/jw-0425-designpatterns.html
@@ -21,6 +21,9 @@ import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
+
+import musiczones.Layer3Info;
+import musiczones.Layer3Info.IpAddressType;
 import musiczones.MusicZones;
 
 /**
@@ -108,7 +111,7 @@ public class ZoneServerLogic {
      * @param theNetworkCommand String
      */
     public void processNetworkCommand(String theNetworkCommand) {
-        if (!theNetworkCommand.isEmpty() && theNetworkCommand.contains("\n")) {
+        if ((!"".equals(theNetworkCommand)) && theNetworkCommand.contains("\n")) {
             String[] theNetworkCommandArray = theNetworkCommand.split("\n");
             if (theNetworkCommandArray.length == 1) {
                 String[] singleLineStrArray = theNetworkCommandArray[0].split("=");
@@ -123,7 +126,7 @@ public class ZoneServerLogic {
                 if (firstLineArray[0].equals("zone")) {
                     if (firstLineArray[1].equals(zsl_ZoneUUID)
                             && secondLineArray[0].equals("mediaurl")
-                            && !secondLineArray[1].isEmpty()) { //play an audio URL
+                            && (!"".equals(secondLineArray[1]))) { //play an audio URL
                         MediaPlayer.getInstance().addMediaUrl(secondLineArray[1]);
                     }
                 }
@@ -194,7 +197,7 @@ public class ZoneServerLogic {
      */
     private void doZoneUUIDResponse() {
         String aZoneDashBoardStr = "http://"
-                + ZoneServerUtility.getInstance().getIPv4LanAddress()
+                + Layer3Info.getInstance().getValidIPAddress(IpAddressType.IPv4)
                 + ":" + String.valueOf(JettyWebServer.getInstance().getServerPortInt());
         String theResponseStr = "zone=" + zsl_ZoneUUID + "\n"
                 + "name=" + zsl_ZoneName + "\n"
