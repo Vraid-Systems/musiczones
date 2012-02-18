@@ -4,7 +4,6 @@
 package zonecontrol;
 
 import java.util.prefs.Preferences;
-import musiczones.FileSystemType;
 
 /**
  * @author Jason Zerbe

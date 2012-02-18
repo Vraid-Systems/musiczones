@@ -1,7 +1,7 @@
 /*
  * interface for custom event listener that is triggered on process events
  */
-package contrib.ProcessExit;
+package ipc;
 
 import java.util.EventListener;
 

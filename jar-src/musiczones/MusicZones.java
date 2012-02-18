@@ -1,17 +1,19 @@
 /*
- * main class for application
+ * main class for JAR application
  */
 package musiczones;
 
+import audio.MediaPlayerImpl;
 import contrib.JettyWebServer;
-import contrib.MediaPlayer;
 import java.io.File;
-import zonecontrol.ZoneServerLogic;
-import zonecontrol.ZoneMulticastServer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import musiczones.Layer3Info.IpAddressType;
+import netutil.HttpCmdClient;
+import netutil.IpAddressType;
+import netutil.Layer3Info;
+import zonecontrol.ZoneLibraryIndex;
+import zonecontrol.ZoneMulticastServer;
+import zonecontrol.ZoneServerLogic;
 import zonecontrol.ZoneServerUtility;
 
 /**
@@ -104,7 +106,7 @@ public class MusicZones {
         Runtime.getRuntime().addShutdownHook(new RunWhenShuttingDown());
 
         //save mplayer path to prefs if it can be found and not already saved
-        String savedMPlayerBinPath = ZoneServerUtility.getInstance().loadStringPref(MediaPlayer.prefMediaPlayerPathKeyStr, "");
+        String savedMPlayerBinPath = ZoneServerUtility.getInstance().loadStringPref(MediaPlayerImpl.prefMediaPlayerPathKeyStr, "");
         File aExistsFile = new File(savedMPlayerBinPath);
         if (aExistsFile.exists()) {
             global_MPlayerBinPath = savedMPlayerBinPath;
@@ -138,7 +140,7 @@ public class MusicZones {
                 MPlayerNotFound();
             }
         }
-        ZoneServerUtility.getInstance().saveStringPref(MediaPlayer.prefMediaPlayerPathKeyStr, global_MPlayerBinPath);
+        ZoneServerUtility.getInstance().saveStringPref(MediaPlayerImpl.prefMediaPlayerPathKeyStr, global_MPlayerBinPath);
 
         //wait until network route is up
         if (getIsOnline()) {
@@ -164,7 +166,7 @@ public class MusicZones {
         theWebServer.startServer();
 
         //create system-wide MediaPlayer instance
-        MediaPlayer.getInstance(getIsDebugOn());
+        MediaPlayerImpl.getInstance(getIsDebugOn());
 
         //then bring up the zone controller logic
         ZoneServerLogic mainServerLogic = ZoneServerLogic.getInstance();

@@ -1,42 +1,44 @@
 
 <project name="MusicZones" default="jar-dist" basedir=".">
-	<description>
+    <description>
         ant buildfile for the MusicZones controller software
     </description>
 
-	<!-- for javadoc -->
-	<property name="component.title" value="MusicZones" />
-	<property name="component.version" value="2.1" />
+    <!-- for javadoc -->
+    <property name="component.title" value="MusicZones" />
+    <property name="component.version" value="2.1" />
 
-	<!-- directories and files -->
-	<property name="libs.dir" location="libs" />
-	<property name="src.dir" location="src" />
-	<property name="test.dir" location="test" />
-	<property name="bin.dir" location="bin" />
-	<property name="jar.src.build.dir" location="jar-build-src" />
-	<property name="jar.test.build.dir" location="jar-build-test" />
-	<property name="docs.dir" location="docs" />
-	<property name="dist.file" location="mz.jar" />
-	<property name="junit.filename" value="junit-4.10.jar" />
+    <!-- directories and files -->
+    <property name="libs.dir" location="libs" />
+    <property name="src.dir" location="src" />
+    <property name="android.src.dir" location="android-src" />
+    <property name="jar.src.dir" location="jar-src" />
+    <property name="test.dir" location="test" />
+    <property name="bin.dir" location="bin" />
+    <property name="jar.src.build.dir" location="jar-build-src" />
+    <property name="jar.test.build.dir" location="jar-build-test" />
+    <property name="docs.dir" location="docs" />
+    <property name="dist.file" location="mz.jar" />
+    <property name="junit.filename" value="junit-4.10.jar" />
 
-	<!-- new forked jvm settings -->
-	<property name="init.mem.size" value="128m" />
-	<property name="max.mem.size" value="256m" />
+    <!-- new forked jvm settings -->
+    <property name="init.mem.size" value="128m" />
+    <property name="max.mem.size" value="256m" />
 
-	<!-- javac properties -->
-	<property name="javac.debug" value="true" />
-	<property name="javac.fork" value="true" />
-	<property name="javac.optimize" value="true" />
+    <!-- javac properties -->
+    <property name="javac.debug" value="true" />
+    <property name="javac.fork" value="true" />
+    <property name="javac.optimize" value="true" />
 
 
-	<!-- setup Android build environment -->
-	<!-- The local.properties file is created and updated by the 'android'
+    <!-- setup Android build environment -->
+    <!-- The local.properties file is created and updated by the 'android'
     tool. It contains the path to the SDK. It should *NOT* be checked into
     Version Control Systems. -->
-	<property name="sdk.dir" value="C:\android-sdk-windows" />
-	<property file="local.properties" />
+    <property name="sdk.dir" value="C:\android-sdk-windows" />
+    <property file="local.properties" />
 
-	<!-- The ant.properties file can be created by you. It is only
+    <!-- The ant.properties file can be created by you. It is only
     edited by the 'android' tool to add properties to it.
     This is the place to change some Ant specific build properties.
     Here are some properties you may want to change/update:
@@ -54,9 +56,9 @@
 
     This file is an integral part of the build system for your
     application and should be checked into Version Control Systems. -->
-	<property file="ant.properties" />
+    <property file="ant.properties" />
 
-	<!-- The project.properties file is created and updated by the 'android'
+    <!-- The project.properties file is created and updated by the 'android'
     tool, as well as ADT.
 
     This contains project specific properties such as project target, and library
@@ -65,12 +67,12 @@
 
     This file is an integral part of the build system for your
     application and should be checked into Version Control Systems. -->
-	<loadproperties srcFile="project.properties" />
+    <loadproperties srcFile="project.properties" />
 
-	<!-- quick check on sdk.dir -->
-	<fail message="missing sdk.dir. generate local.properties 'android update project' or use env var" unless="sdk.dir" />
+    <!-- quick check on sdk.dir -->
+    <fail message="missing sdk.dir. generate local.properties 'android update project' or use env var" unless="sdk.dir" />
 
-	<!-- Import the actual build file.
+    <!-- Import the actual build file.
     To customize existing targets, there are two options:
     - Customize only one target:
         - copy/paste the target into this file, *before* the <import> task.
@@ -86,115 +88,137 @@
     In all cases you must update the value of version-tag below to read 'custom' instead of an integer,
     in order to avoid having your file be overridden by tools such as "android update project"
     -->
-	<!-- version-tag: 1 -->
-	<import file="${sdk.dir}/tools/ant/build.xml" />
+    <!-- version-tag: 1 -->
+    <import file="${sdk.dir}/tools/ant/build.xml" />
 
 
-	<!-- javadoc is independent of build process -->
-	<target name="javadoc">
-		<!-- keep docs fresh -->
-		<delete dir="${docs.dir}" />
-		<mkdir dir="${docs.dir}" />
+    <!-- javadoc is independent of build process -->
+    <target name="javadoc">
+        <!-- create path ref for multiple source files -->
+        <path id="javadoc.pathref">
+            <pathelement path="${src.dir}/" />
+            <pathelement path="${android.src.dir}/" />
+            <pathelement path="${jar.src.dir}" />
+        </path>
 
-		<!-- build the component docs, ${component.*} is predefined -->
-		<javadoc author="true" bottom="${component.title}" destdir="${docs.dir}" doctitle="${component.title}" packagenames="*" access="protected" sourcepath="${src.dir}" version="true" windowtitle="${component.title} (Version ${component.version})">
-		</javadoc>
-	</target>
+        <!-- keep docs fresh -->
+        <delete dir="${docs.dir}" />
+        <mkdir dir="${docs.dir}" />
 
-
-	<!-- clean process independent of platform -->
-	<target name="clean-all" description="clean up all generated content">
-		<delete dir="${jar.src.build.dir}" />
-		<delete dir="${jar.test.build.dir}" />
-		<delete dir="${bin.dir}" />
-		<delete dir="${docs.dir}" />
-		<delete file="${dist.file}" />
-	</target>
-
-	<target name="android-help" depends="help" description="android build help">
-	</target>
-
-	<target name="android-debug-build" depends="debug" description="build Android project in debug mode">
-	</target>
-
-	<target name="android-release-build" depends="release" description="build Android project in release mode">
-	</target>
+        <!-- build the component docs, ${component.*} is predefined -->
+        <javadoc author="true" bottom="${component.title}" destdir="${docs.dir}"
+        doctitle="${component.title}" packagenames="*" access="protected"
+        sourcepathref="javadoc.pathref" version="true"
+        windowtitle="${component.title} (Version ${component.version})">
+        </javadoc>
+    </target>
 
 
-	<!-- target for setup to build jar -->
-	<target name="jar-init">
-		<property name="src.mainclass" value="musiczones.MusicZones" />
-		<!-- add the contrib jars to the "jars.classpath" classpath -->
-		<path id="jars.classpath">
-			<fileset dir="${libs.dir}" includes="**/*.jar" />
-		</path>
+    <!-- clean process independent of platform -->
+    <target name="clean-all" description="clean up all generated content">
+        <delete dir="${jar.src.build.dir}" />
+        <delete dir="${jar.test.build.dir}" />
+        <delete dir="${bin.dir}" />
+        <delete dir="${docs.dir}" />
+        <delete file="${dist.file}" />
+    </target>
 
-		<!-- junit classpath: include junit and built classes -->
-		<path id="junit.classpath">
-			<pathelement location="contrib/${junit.filename}" />
-			<pathelement location="${jar.test.build.dir}" />
-		</path>
+    <target name="android-help" depends="help"
+    description="android build help">
+    </target>
 
-		<!-- created the needed class output directory -->
-		<mkdir dir="${jar.src.build.dir}" />
-	</target>
+    <target name="android-debug-build" depends="debug"
+    description="build Android project in debug mode">
+    </target>
 
-	<target name="jar-compile-source" depends="jar-init">
-		<javac fork="${javac.fork}" srcdir="${src.dir}" destdir="${jar.src.build.dir}" debug="${javac.debug}" memoryinitialsize="${init.mem.size}" memorymaximumsize="${max.mem.size}" optimize="${javac.optimize}" classpathref="jars.classpath">
-			<compilerarg value="-Xlint" />
-		</javac>
-	</target>
+    <target name="android-release-build" depends="release"
+    description="build Android project in release mode">
+    </target>
 
-	<target name="jar-compile-tests" depends="jar-compile-source">
-		<!-- keep the tests fresh -->
-		<delete dir="${jar.test.build.dir}" />
-		<mkdir dir="${jar.test.build.dir}" />
 
-		<!-- need the compiled original classes for our tests to compile/run -->
-		<copy todir="${jar.test.build.dir}">
-			<fileset dir="${jar.src.build.dir}" />
-		</copy>
+    <!-- target for setup to build jar -->
+    <target name="jar-init">
+        <property name="src.mainclass" value="musiczones.MusicZones" />
+        <!-- add the contrib jars to the "jars.classpath" classpath -->
+        <path id="jars.classpath">
+            <fileset dir="${libs.dir}" includes="**/*.jar" />
+        </path>
 
-		<!-- create the tests anew -->
-		<javac fork="${javac.fork}" srcdir="${test.dir}" destdir="${jar.test.build.dir}" debug="${javac.debug}" memoryinitialsize="${init.mem.size}" memorymaximumsize="${max.mem.size}" optimize="${javac.optimize}" classpathref="junit.classpath">
-			<compilerarg value="-Xlint" />
-		</javac>
-	</target>
+        <!-- junit classpath: include junit and built classes -->
+        <path id="junit.classpath">
+            <pathelement location="contrib/${junit.filename}" />
+            <pathelement location="${jar.test.build.dir}" />
+        </path>
 
-	<target name="jar-junit" depends="jar-compile-tests">
-		<junit fork="true" printsummary="true" showoutput="true" maxmemory="${max.mem.size}">
-			<classpath>
-				<path refid="junit.classpath" />
-				<path refid="jars.classpath" />
-			</classpath>
-			<formatter type="plain" usefile="false" />
-			<batchtest>
-				<fileset dir="${test.dir}">
-					<include name="**/*Test*.java" />
-				</fileset>
-			</batchtest>
-		</junit>
-	</target>
+        <!-- created the needed class output directory -->
+        <mkdir dir="${jar.src.build.dir}" />
+    </target>
 
-	<target name="jar-dist" depends="jar-compile-source">
-		<!-- copy static files into build dir for dist packaging -->
-		<mkdir dir="${jar.src.build.dir}/webapp" />
-		<copy todir="${jar.src.build.dir}/webapp">
-			<fileset dir="${src.dir}/webapp" />
-		</copy>
+    <target name="jar-compile-source" depends="jar-init">
+        <javac fork="${javac.fork}" srcdir="${src.dir}:${jar.src.dir}"
+        destdir="${jar.src.build.dir}" debug="${javac.debug}"
+        memoryinitialsize="${init.mem.size}"
+        memorymaximumsize="${max.mem.size}"
+        optimize="${javac.optimize}" classpathref="jars.classpath">
+            <compilerarg value="-Xlint" />
+        </javac>
+    </target>
 
-		<!-- put everything in ${jar.src.build.dir} into the ${dist.file} file -->
-		<jar jarfile="${dist.file}" basedir="${jar.src.build.dir}">
-			<!-- create application entry point -->
-			<manifest>
-				<attribute name="Main-Class" value="${src.mainclass}" />
-			</manifest>
-			<!-- add in contrib jars otherwise classpath will be lacking -->
-			<zipgroupfileset dir="${libs.dir}" includes="**/*.jar" excludes="**/${junit.filename}" />
-		</jar>
-	</target>
+    <target name="jar-compile-tests" depends="jar-compile-source">
+        <!-- keep the tests fresh -->
+        <delete dir="${jar.test.build.dir}" />
+        <mkdir dir="${jar.test.build.dir}" />
 
-	<target name="jar-run" depends="jar-dist">
-		<java jar="${dist.file}" fork="true" />
-	</target>
+        <!-- need the compiled original classes for our tests to compile/run -->
+        <copy todir="${jar.test.build.dir}">
+            <fileset dir="${jar.src.build.dir}" />
+        </copy>
+
+        <!-- create the tests anew -->
+        <javac fork="${javac.fork}" srcdir="${test.dir}"
+        destdir="${jar.test.build.dir}" debug="${javac.debug}"
+        memoryinitialsize="${init.mem.size}"
+        memorymaximumsize="${max.mem.size}"
+        optimize="${javac.optimize}" classpathref="junit.classpath">
+            <compilerarg value="-Xlint" />
+        </javac>
+    </target>
+
+    <target name="jar-junit" depends="jar-compile-tests">
+        <junit fork="true" printsummary="true" showoutput="true"
+        maxmemory="${max.mem.size}">
+            <classpath>
+                <path refid="junit.classpath" />
+                <path refid="jars.classpath" />
+            </classpath>
+            <formatter type="plain" usefile="false" />
+            <batchtest>
+                <fileset dir="${test.dir}">
+                    <include name="**/*Test*.java" />
+                </fileset>
+            </batchtest>
+        </junit>
+    </target>
+
+    <target name="jar-dist" depends="jar-compile-source">
+        <!-- copy static files into build dir for dist packaging -->
+        <mkdir dir="${jar.src.build.dir}/webapp" />
+        <copy todir="${jar.src.build.dir}/webapp">
+            <fileset dir="${src.dir}/webapp" />
+        </copy>
+
+        <!-- put everything in ${jar.src.build.dir} into the ${dist.file} file -->
+        <jar jarfile="${dist.file}" basedir="${jar.src.build.dir}">
+            <!-- create application entry point -->
+            <manifest>
+                <attribute name="Main-Class" value="${src.mainclass}" />
+            </manifest>
+            <!-- add in library jars otherwise classpath will be lacking -->
+            <zipgroupfileset dir="${libs.dir}" includes="**/*.jar" excludes="**/${junit.filename}" />
+        </jar>
+    </target>
+
+    <target name="jar-run" depends="jar-dist">
+        <java jar="${dist.file}" fork="true" />
+    </target>
 </project>

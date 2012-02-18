@@ -6,18 +6,16 @@
  *
  * NOTE: recursive symlinks in path to index kills this
  */
-package musiczones;
+package zonecontrol;
 
-import contrib.CIFSNetworkInterface;
+import audio.MediaPlayerImpl;
 import contrib.ID3MetaData;
-import contrib.MediaPlayer;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URLEncoder;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -33,8 +31,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
+import musiczones.MusicZones;
+import netutil.CIFSNetworkInterface;
+import netutil.IpAddressType;
+import netutil.Layer3Info;
 import org.blinkenlights.jid3.ID3Exception;
-import zonecontrol.ZoneServerUtility;
 
 /**
  * @author Jason Zerbe
@@ -691,7 +692,7 @@ public class ZoneLibraryIndex {
      */
     public boolean theContainerIsSupported(String theFileName) {
         if (theFileName.contains(".")) {
-            for (String aSupportedContainer : MediaPlayer.theSupportedContainers) {
+            for (String aSupportedContainer : MediaPlayerImpl.theSupportedContainers) {
                 if (theFileName.contains("." + aSupportedContainer)) {
                     return true;
                 }
@@ -708,7 +709,7 @@ public class ZoneLibraryIndex {
      * @return boolean - is it a playlist file?
      */
     public boolean theContainerIsPlayList(String theFileName) {
-        for (String aPlayListContainer : MediaPlayer.thePlayListContainers) {
+        for (String aPlayListContainer : MediaPlayerImpl.thePlayListContainers) {
             if (theFileName.contains("." + aPlayListContainer)) {
                 return true;
             }
@@ -756,6 +757,7 @@ public class ZoneLibraryIndex {
 
         private String kSmbPrefix = "smb://";
 
+        @Override
         public void run() {
             if (getIndexIsBuilding()) {
                 return; //stop if index is already building
@@ -781,7 +783,7 @@ public class ZoneLibraryIndex {
             }
             //check localhost for possible SMB shares
             if (MusicZones.getIsIndexLocalHost()) {
-                String zoneIPv4Addr = Layer3Info.getInstance().getValidIPAddress(Layer3Info.IpAddressType.IPv4).trim();
+                String zoneIPv4Addr = Layer3Info.getInstance().getValidIPAddress(IpAddressType.IPv4).trim();
                 if (zoneIPv4Addr != null) {
                     SmbFile aServerSmbFile = null;
                     try {
@@ -802,7 +804,7 @@ public class ZoneLibraryIndex {
             //scrape subnet for servers if none found with master browsers
             if (MusicZones.getIsOnline() && (aWorkGroupArray == null)) {
                 System.err.println("ZLI RefreshSearchIndexTask - no workgroups found");
-                String zoneIPv4Addr = Layer3Info.getInstance().getValidIPAddress(Layer3Info.IpAddressType.IPv4).trim();
+                String zoneIPv4Addr = Layer3Info.getInstance().getValidIPAddress(IpAddressType.IPv4).trim();
                 System.out.println("ZLI RefreshSearchIndexTask - " + zoneIPv4Addr + " will now scrape subnet ...");
                 String[] zoneIPv4AddrOctets = zoneIPv4Addr.split("\\."); //dot is reserved char in regex
                 if (zoneIPv4AddrOctets.length == 4) {

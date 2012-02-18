@@ -3,7 +3,7 @@
  */
 package servlets;
 
-import contrib.MediaPlayer;
+import audio.MediaPlayerImpl;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -19,10 +19,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import musiczones.ID3FieldList;
-import musiczones.MediaSearchType;
 import musiczones.MusicZones;
-import musiczones.ZoneLibraryIndex;
+import zonecontrol.ZoneLibraryIndex;
 
 /**
  * @author Jason Zerbe
@@ -68,9 +66,9 @@ public class ZoneLibrary extends HttpServlet {
                 && (!req.getParameter("type").equals(""))) { //keywords search
             //get search parameters
             boolean searchMatchAllKeywords = false; //default to any keyword matching (OR)
-            String searchTypeStr = MediaSearchType.any.toString(); //default to any keyword matching (OR)
-            if (req.getParameter("type").equals(MediaSearchType.all.toString())) {
-                searchTypeStr = MediaSearchType.all.toString();
+            String searchTypeStr = ZoneSearchMedia_SearchType.any.toString(); //default to any keyword matching (OR)
+            if (req.getParameter("type").equals(ZoneSearchMedia_SearchType.all.toString())) {
+                searchTypeStr = ZoneSearchMedia_SearchType.all.toString();
                 searchMatchAllKeywords = true;
             }
             String rawSearchKeywordsStr = req.getParameter("keywords");
@@ -289,7 +287,7 @@ public class ZoneLibrary extends HttpServlet {
                     while (i < 20) {
                         String aRandomFileName = aFileNameArray.get(aRandom.nextInt(aFileNameArray.size()));
                         String aFullPathFromRandomFileName = ZoneLibraryIndex.getInstance().getFullPathFromFileName(aRandomFileName);
-                        if (MediaPlayer.getInstance().getPlayList().contains(aFullPathFromRandomFileName)
+                        if (MediaPlayerImpl.getInstance().getPlayList().contains(aFullPathFromRandomFileName)
                                 || aPreviousPathList.contains(aFullPathFromRandomFileName)) {
                             continue;
                         } else {

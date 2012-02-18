@@ -25,10 +25,12 @@ public class SmbFileSourceImpl implements IFileSource {
         mySmbFile = theSmbFile;
     }
 
+    @Override
     public IFileSource createTempFile(String string, String string1) throws IOException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
     public boolean delete() {
         try {
             mySmbFile.delete();
@@ -41,10 +43,12 @@ public class SmbFileSourceImpl implements IFileSource {
         }
     }
 
+    @Override
     public String getName() {
         return mySmbFile.getName();
     }
 
+    @Override
     public InputStream getInputStream() throws FileNotFoundException {
         InputStream aReturnInputStream = null;
         try {
@@ -55,6 +59,7 @@ public class SmbFileSourceImpl implements IFileSource {
         return aReturnInputStream;
     }
 
+    @Override
     public OutputStream getOutputStream() throws FileNotFoundException {
         OutputStream aReturnOutputStream = null;
         try {
@@ -65,6 +70,7 @@ public class SmbFileSourceImpl implements IFileSource {
         return aReturnOutputStream;
     }
 
+    @Override
     public long length() {
         long aReturnLong = 0L;
         try {
@@ -75,6 +81,7 @@ public class SmbFileSourceImpl implements IFileSource {
         return aReturnLong;
     }
 
+    @Override
     public boolean renameTo(IFileSource theIFileSource) throws IOException {
         if (theIFileSource instanceof SmbFileSourceImpl) {
             try {

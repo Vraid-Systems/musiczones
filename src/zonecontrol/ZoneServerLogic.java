@@ -7,8 +7,8 @@
  */
 package zonecontrol;
 
+import audio.MediaPlayerImpl;
 import contrib.JettyWebServer;
-import contrib.MediaPlayer;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
@@ -21,10 +21,9 @@ import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
-
-import musiczones.Layer3Info;
-import musiczones.Layer3Info.IpAddressType;
 import musiczones.MusicZones;
+import netutil.IpAddressType;
+import netutil.Layer3Info;
 
 /**
  *
@@ -127,7 +126,7 @@ public class ZoneServerLogic {
                     if (firstLineArray[1].equals(zsl_ZoneUUID)
                             && secondLineArray[0].equals("mediaurl")
                             && (!"".equals(secondLineArray[1]))) { //play an audio URL
-                        MediaPlayer.getInstance().addMediaUrl(secondLineArray[1]);
+                        MediaPlayerImpl.getInstance().addMediaUrl(secondLineArray[1]);
                     }
                 }
             } else if (theNetworkCommandArray.length == 3) {
@@ -235,7 +234,7 @@ public class ZoneServerLogic {
 
         String hashedString = null;
         try {
-            hashedString = contrib.AeSimpleSHA1.SHA1(stringToHash);
+            hashedString = util.AeSimpleSHA1.SHA1(stringToHash);
         } catch (NoSuchAlgorithmException ex) {
             Logger.getLogger(ZoneServerLogic.class.getName()).log(Level.SEVERE, null, ex);
         } catch (UnsupportedEncodingException ex) {
@@ -252,6 +251,7 @@ public class ZoneServerLogic {
      */
     private class AllNodesPingTimerTask extends TimerTask {
 
+        @Override
         public void run() {
             doZoneUUIDResponse();
         }
@@ -263,6 +263,7 @@ public class ZoneServerLogic {
      */
     private class RemoveHardExpiredNodesTimerTask extends TimerTask {
 
+        @Override
         public void run() {
             for (String aNodeUUID : zsl_ZoneExpireMap.keySet()) {
                 if (isExpiredZone(aNodeUUID, allNodesHardExpire)) {

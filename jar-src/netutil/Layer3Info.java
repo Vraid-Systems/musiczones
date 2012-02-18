@@ -1,7 +1,7 @@
 /*
  * singleton utility class for getting (IP) Network Layer information
  */
-package musiczones;
+package netutil;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -110,13 +110,5 @@ public class Layer3Info {
         }
 
         return null;
-    }
-
-    /**
-     * used in specifying what type of IP Address to grab
-     */
-    public enum IpAddressType {
-
-        IPv4, IPv6
     }
 }

@@ -4,7 +4,7 @@
  * ped_Process is passed as constructor argument and entire thread does nothing else
  * than wait for the given ped_Process to finish and invokes the listeners
  */
-package contrib.ProcessExit;
+package ipc;
 
 import java.util.ArrayList;
 import java.util.List;

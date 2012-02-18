@@ -3,7 +3,7 @@
  * slight modifications from original
  * for slave commands: http://www.mplayerhq.hu/DOCS/tech/slave.txt
  */
-package contrib;
+package audio;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,7 +16,7 @@ import java.io.PrintStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import musiczones.MusicZones;
-import musiczones.ZoneLibraryIndex;
+import zonecontrol.ZoneLibraryIndex;
 
 /**
  * @author Adrian BER
@@ -25,6 +25,7 @@ import musiczones.ZoneLibraryIndex;
 public class JMPlayer {
 
     private static final Logger logger = Logger.getLogger(JMPlayer.class.getName());
+    public static final int kPipeSizeBytes = 3145728; //3MB
 
     /** A thread that reads from an input stream and outputs to another line by line. */
     private static class LineRedirecter extends Thread {
@@ -107,7 +108,7 @@ public class JMPlayer {
 
         // create the piped streams where to redirect the standard output and error of MPlayer
         // specify a bigger pipesize
-        PipedInputStream readFrom = new PipedInputStream(1024 * 1024);
+        PipedInputStream readFrom = new PipedInputStream(kPipeSizeBytes);
         PipedOutputStream writeTo = new PipedOutputStream(readFrom);
         mplayerOutErr = new BufferedReader(new InputStreamReader(readFrom));
 

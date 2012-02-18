@@ -2,26 +2,26 @@
  * singleton class wrapper for controlling a mediaplayer implementation
  * an abstraction away from JMPlayer
  */
-package contrib;
+package audio;
 
-import contrib.ProcessExit.ProcessExitDetector;
-import contrib.ProcessExit.ProcessListener;
+import ipc.ProcessExitDetector;
+import ipc.ProcessListener;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import musiczones.FileSystemType;
 import musiczones.MusicZones;
+import zonecontrol.FileSystemType;
 import zonecontrol.ZoneServerUtility;
 
 /**
  * @author Jason Zerbe
  */
-public class MediaPlayer {
+public class MediaPlayerImpl implements MediaPlayerIFace {
 
-    private static MediaPlayer vmp_SingleInstance = null;
+    private static MediaPlayerImpl vmp_SingleInstance = null;
     private List<String> vmp_MediaUrlStrList = null;
     private int vmp_PlayBackIndexInt = -1;
     private boolean debugMessagesOn = false;
@@ -32,7 +32,7 @@ public class MediaPlayer {
         "wav", "flac", "aac", "wma"}; //MPlayer supports video as well, only wanted audio
     public static final String[] thePlayListContainers = {"pls", "m3u"};
 
-    protected MediaPlayer(boolean theDebugIsOn) {
+    protected MediaPlayerImpl(boolean theDebugIsOn) {
         debugMessagesOn = theDebugIsOn;
         vmp_MediaUrlStrList = new LinkedList<String>();
         String aMPlayerBinPath = ZoneServerUtility.getInstance().loadStringPref(prefMediaPlayerPathKeyStr, "");
@@ -49,20 +49,21 @@ public class MediaPlayer {
         super.finalize();
     }
 
-    public static MediaPlayer getInstance() {
+    public static MediaPlayerImpl getInstance() {
         if (vmp_SingleInstance == null) {
-            vmp_SingleInstance = new MediaPlayer(false);
+            vmp_SingleInstance = new MediaPlayerImpl(false);
         }
         return vmp_SingleInstance;
     }
 
-    public static MediaPlayer getInstance(boolean theDebugIsOn) {
+    public static MediaPlayerImpl getInstance(boolean theDebugIsOn) {
         if (vmp_SingleInstance == null) {
-            vmp_SingleInstance = new MediaPlayer(theDebugIsOn);
+            vmp_SingleInstance = new MediaPlayerImpl(theDebugIsOn);
         }
         return vmp_SingleInstance;
     }
 
+    @Override
     public void addMediaUrl(String theMediaUrlStr) {
         vmp_MediaUrlStrList.add(theMediaUrlStr);
         if (debugMessagesOn) {
@@ -97,6 +98,7 @@ public class MediaPlayer {
         return theMediaUrlStr;
     }
 
+    @Override
     public void playIndex(int theIndex) {
         vmp_PlayBackIndexInt = theIndex;
         try {
@@ -112,6 +114,7 @@ public class MediaPlayer {
                 ProcessExitDetector processExitDetector = new ProcessExitDetector(aMPlayerProcess);
                 processExitDetector.addProcessListener(new ProcessListener() {
 
+                    @Override
                     public void processFinished(Process process) {
                         if (vmp_PlayBackIndexInt > -1) { //if not manually stopped ...
                             final int laterPlayBackIndexInt = vmp_PlayBackIndexInt;
@@ -137,19 +140,22 @@ public class MediaPlayer {
                 processExitDetector.start();
             }
         } catch (IOException ex) {
-            Logger.getLogger(MediaPlayer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MediaPlayerImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
+    @Override
     public void playIndex() {
         playIndex(vmp_PlayBackIndexInt);
     }
 
+    @Override
     public void removeIndex(int theIndex) {
         stop(-1);
         vmp_MediaUrlStrList.remove(theIndex);
     }
 
+    @Override
     public void shufflePlayList() {
         if ((vmp_MediaUrlStrList != null)
                 && (vmp_MediaUrlStrList.size() > 0)
@@ -171,10 +177,12 @@ public class MediaPlayer {
         }
     }
 
+    @Override
     public void togglePlayPause() {
         vmp_JMPlayer.togglePlay();
     }
 
+    @Override
     public void next() {
         if ((vmp_PlayBackIndexInt + 1) < vmp_MediaUrlStrList.size()) {
             vmp_PlayBackIndexInt++;
@@ -184,6 +192,7 @@ public class MediaPlayer {
         }
     }
 
+    @Override
     public void previous() {
         if ((vmp_PlayBackIndexInt - 1) >= 0) {
             vmp_PlayBackIndexInt--;
@@ -193,28 +202,34 @@ public class MediaPlayer {
         }
     }
 
+    @Override
     public void stop(int theIndex) {
         vmp_PlayBackIndexInt = theIndex;
         vmp_JMPlayer.close();
     }
 
+    @Override
     public void stop() {
         stop(-1);
     }
 
+    @Override
     public boolean isStopped() {
         return (vmp_PlayBackIndexInt < 0);
     }
 
+    @Override
     public void clearPlaylist() {
         stop();
         vmp_MediaUrlStrList.clear();
     }
 
+    @Override
     public int getCurrentIndex() {
         return vmp_PlayBackIndexInt;
     }
 
+    @Override
     public List<String> getPlayList() {
         return vmp_MediaUrlStrList;
     }

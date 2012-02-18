@@ -1,7 +1,7 @@
 /*
  * what filesystems are we using?
  */
-package musiczones;
+package zonecontrol;
 
 /**
  * @author Jason Zerbe

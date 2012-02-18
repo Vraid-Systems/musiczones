@@ -2,7 +2,7 @@
  * class for generating a SHA1 hash from text. taken from
  * http://www.anyexample.com/programming/java/java_simple_class_to_compute_sha_1_hash.xml
  */
-package contrib;
+package util;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;

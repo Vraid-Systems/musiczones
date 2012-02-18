@@ -1,7 +1,7 @@
 /*
  * singleton class for issuing HTTP GET requests to master server
  */
-package musiczones;
+package netutil;
 
 import contrib.JettyWebServer;
 import java.io.BufferedReader;
@@ -78,7 +78,7 @@ public class HttpCmdClient {
         String aURLConnectionParamStr = "opt=ping"
                 + "&uuid=" + ZoneServerLogic.getInstance().getUUID()
                 + "&http=" + String.valueOf(JettyWebServer.getInstance().getServerPortInt())
-                + "&address=" + Layer3Info.getInstance().getValidIPAddress(Layer3Info.IpAddressType.IPv4)
+                + "&address=" + Layer3Info.getInstance().getValidIPAddress(IpAddressType.IPv4)
                 + "&name=" + replaceSpacesWithUnderscores(ZoneServerLogic.getInstance().getZoneName());
 
         boolean loggedToMasterServer = false;
@@ -153,7 +153,7 @@ public class HttpCmdClient {
      * @param theUrlArgs String - part after "?"
      * @return ArrayList<String>
      */
-    protected ArrayList<String> returnServerMethod(String theUrlBase, String theUrlArgs) {
+    public ArrayList<String> returnServerMethod(String theUrlBase, String theUrlArgs) {
         //be able to function w/o master server
         if ((theUrlBase == null) || (theUrlBase.equals(""))) {
             return null;

@@ -9,7 +9,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import musiczones.MediaSearchType;
 
 /**
  * @author Jason Zerbe
@@ -42,8 +41,8 @@ public class ZoneSearchMedia_DialogPage extends HttpServlet {
         out.println("<div data-role='fieldcontain' id='searchTypeContain'>"
                 + "<label for='searchType'>Match:</label>"
                 + "<select name='searchType' id='searchType' data-native-menu='false'>"
-                + "<option value='" + MediaSearchType.all.toString() + "'>All Keywords</option>"
-                + "<option value='" + MediaSearchType.any.toString() + "'>Any Keywords</option>"
+                + "<option value='" + ZoneSearchMedia_SearchType.all.toString() + "'>All Keywords</option>"
+                + "<option value='" + ZoneSearchMedia_SearchType.any.toString() + "'>Any Keywords</option>"
                 + "</select></div>");
 
         out.println("</div>"); //end page content

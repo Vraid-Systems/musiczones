@@ -3,7 +3,7 @@
  */
 package servlets;
 
-import contrib.MediaPlayer;
+import audio.MediaPlayerImpl;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLDecoder;
@@ -36,7 +36,7 @@ public class ZonePlaylist extends HttpServlet {
 
         out.println("<div id='zonePlaylistPage' data-role='page' data-theme='d'>"
                 + "<div data-role='header' data-theme='b' data-position='fixed'>");
-        if (MediaPlayer.getInstance().isStopped()) {
+        if (MediaPlayerImpl.getInstance().isStopped()) {
             out.println("<a href='javascript:playList_Clear();' data-role='button' data-icon='delete'>Clear</a>");
         } else {
             out.println("<a href='javascript:playList_Stop();' data-role='button' data-icon='delete'>Stop</a>");
@@ -46,12 +46,12 @@ public class ZonePlaylist extends HttpServlet {
                 + "</div>"
                 + "<div data-role='content'>");
 
-        int aCurrentPlayListIndex = MediaPlayer.getInstance().getCurrentIndex();
+        int aCurrentPlayListIndex = MediaPlayerImpl.getInstance().getCurrentIndex();
 
         out.println("<ul id='zonePlaylist' data-role='listview' data-split-theme='d'>");
-        if (MediaPlayer.getInstance().getPlayList().size() > 0) {
+        if (MediaPlayerImpl.getInstance().getPlayList().size() > 0) {
             int i = 0;
-            for (String aMediaUrlStr : MediaPlayer.getInstance().getPlayList()) {
+            for (String aMediaUrlStr : MediaPlayerImpl.getInstance().getPlayList()) {
                 out.println("<li id='zonePlaylistItem_" + i + "'>");
                 out.println("<a href='javascript:playList_ToggleItem(&quot;zonePlaylistItem_" + i + "&quot;);'>");
                 if (i == aCurrentPlayListIndex) {
@@ -96,7 +96,7 @@ public class ZonePlaylist extends HttpServlet {
             if (opt.equals("add")) {
                 String path = req.getParameter("path");
                 if ((path != null) && (!path.equals(""))) {
-                    MediaPlayer.getInstance().addMediaUrl(URLDecoder.decode(path, "UTF-8"));
+                    MediaPlayerImpl.getInstance().addMediaUrl(URLDecoder.decode(path, "UTF-8"));
                     resp.getOutputStream().println("added " + path + "to playlist");
                 }
             } else if (opt.equals("remove") || opt.equals("toggle")) {
@@ -104,26 +104,26 @@ public class ZonePlaylist extends HttpServlet {
                 if ((indexStr != null) && (!indexStr.equals(""))) {
                     int indexInt = Integer.valueOf(indexStr);
                     if (opt.equals("remove")) {
-                        MediaPlayer.getInstance().removeIndex(indexInt);
+                        MediaPlayerImpl.getInstance().removeIndex(indexInt);
                         resp.getOutputStream().println("removed playlist item #" + indexInt);
                     } else if (opt.equals("toggle")) {
-                        if (MediaPlayer.getInstance().getCurrentIndex() == indexInt) {
-                            MediaPlayer.getInstance().togglePlayPause();
+                        if (MediaPlayerImpl.getInstance().getCurrentIndex() == indexInt) {
+                            MediaPlayerImpl.getInstance().togglePlayPause();
                             resp.getOutputStream().println("playlist item #" + indexInt + " toggled");
                         } else {
-                            MediaPlayer.getInstance().playIndex(indexInt);
+                            MediaPlayerImpl.getInstance().playIndex(indexInt);
                             resp.getOutputStream().println("playing playlist item #" + indexInt);
                         }
                     }
                 }
             } else if (opt.equals("shuffle")) { //shuffle the playlist
-                MediaPlayer.getInstance().shufflePlayList();
+                MediaPlayerImpl.getInstance().shufflePlayList();
                 resp.getOutputStream().println("shuffled playlist");
             } else if (opt.equals("stop")) { //stop now playing
-                MediaPlayer.getInstance().stop();
+                MediaPlayerImpl.getInstance().stop();
                 resp.getOutputStream().println("playback stopped");
             } else if (opt.equals("clear")) { //clear playlist of all items
-                MediaPlayer.getInstance().clearPlaylist();
+                MediaPlayerImpl.getInstance().clearPlaylist();
                 resp.getOutputStream().println("playlist cleared");
             }
         }

@@ -2,7 +2,7 @@
  * class for gobbling up MPlayer process I/O streams so the process does
  * not deadlock the entire system
  */
-package contrib;
+package ipc;
 
 import java.io.BufferedReader;
 import java.io.IOException;
