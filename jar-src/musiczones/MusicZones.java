@@ -161,7 +161,7 @@ public class MusicZones {
             System.out.println("route is ready");
         }
 
-        //first intialize jetty in-case using custom webserver port
+        //first initialize jetty in-case using custom webserver port
         JettyWebServer theWebServer = JettyWebServer.getInstance(global_webInterfacePortInt);
         theWebServer.startServer();
 

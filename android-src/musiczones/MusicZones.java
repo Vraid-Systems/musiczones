@@ -11,6 +11,7 @@ public class MusicZones {
 	protected static boolean isLowMem = false;
 	protected static boolean isOnline = true;
 	protected static boolean isIndexLocalHost = false;
+	protected static int webInterfacePortInt = 80;
 
 	public static boolean getIsDebugOn() {
 		return isDebugOn;
@@ -42,5 +43,13 @@ public class MusicZones {
 
 	public static void setIndexLocalHost(boolean theIndexLocalHostFlag) {
 		isIndexLocalHost = theIndexLocalHostFlag;
+	}
+
+	public static int getWebInterfacePort() {
+		return webInterfacePortInt;
+	}
+
+	public static void setWebInterfacePort(int theWebInterfacePortInt) {
+		webInterfacePortInt = theWebInterfacePortInt;
 	}
 }

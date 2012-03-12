@@ -51,6 +51,7 @@ public class ZoneLibraryIndex {
     protected Timer zli_Timer = null;
     protected boolean debugEventsOn = false;
     private RefreshCIFSMediaTask zli_RCMT = null;
+    private boolean zli_isIndexScheduled = false;
     protected int zli_RefreshCIFSMediaSeconds = 3600; //60 minutes
     protected String[] zli_CIFSPathBlackListArray = {"$"};
     protected int zli_IPv4ScanMin = 1;
@@ -66,9 +67,7 @@ public class ZoneLibraryIndex {
         zli_ArtistMap = new TreeMap<String, LinkedList<String>>();
         zli_Timer = new Timer();
         zli_RCMT = new RefreshCIFSMediaTask();
-        zli_Timer.schedule(zli_RCMT, 0,
-                zli_RefreshCIFSMediaSeconds * 1000);
-        System.out.println("ZLI RefreshCIFSMediaTask added");
+        addIndexBuild();
     }
 
     public static ZoneLibraryIndex getInstance() {
@@ -91,6 +90,19 @@ public class ZoneLibraryIndex {
 
     public void setScanMax(int theScanMax) {
         zli_IPv4ScanMax = theScanMax;
+    }
+    
+    public void addIndexBuild() {
+    	if (!zli_isIndexScheduled) {
+    		zli_Timer.schedule(zli_RCMT, 0, zli_RefreshCIFSMediaSeconds * 1000);
+    		zli_isIndexScheduled = true;
+    		System.out.println("ZLI RefreshCIFSMediaTask added");
+    	}
+    }
+    
+    public void removeIndexBuild() {
+    	zli_Timer.cancel();
+    	zli_isIndexScheduled = false;
     }
 
     public void manualRebuildIndex() {

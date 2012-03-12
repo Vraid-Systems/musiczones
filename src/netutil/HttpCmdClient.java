@@ -22,212 +22,248 @@ import zonecontrol.ZoneServerLogic;
  */
 public class HttpCmdClient {
 
-    private static HttpCmdClient hcc_singleInstance = null;
-    private boolean hcc_DebugOn = false;
-    private String hcc_theMasterServerUrlStr = "http://mz.vraidsys.com/";
-    protected int hcc_kPingServerSeconds = 120; //2 minutes
-    protected Timer hcc_Timer = null;
-    private PingServerTask hcc_PST = null;
+	public static String MASTER_SERVER_URL_STR = "http://mz.vraidsys.com/";
+	private static HttpCmdClient hcc_singleInstance = null;
+	private boolean hcc_DebugOn = false;
+	protected int hcc_kPingServerSeconds = 120; // 2 minutes
+	protected Timer hcc_Timer = null;
+	private PingServerTask hcc_PST = null;
+	private boolean hcc_isPingScheduled = false;
 
-    protected HttpCmdClient(boolean theDebugOn) {
-        hcc_DebugOn = theDebugOn;
-        hcc_Timer = new Timer();
-        hcc_PST = new PingServerTask();
-        hcc_Timer.schedule(hcc_PST, 1000,
-                hcc_kPingServerSeconds * 1000);
-        System.out.println("HCC PingServerTask added");
-    }
+	protected HttpCmdClient(boolean theDebugOn) {
+		hcc_DebugOn = theDebugOn;
+		hcc_Timer = new Timer();
+		hcc_PST = new PingServerTask();
+		addPingTask();
+	}
 
-    public static HttpCmdClient getInstance() {
-        if (hcc_singleInstance == null) {
-            hcc_singleInstance = new HttpCmdClient(false);
-        }
-        return hcc_singleInstance;
-    }
+	public static HttpCmdClient getInstance() {
+		if (hcc_singleInstance == null) {
+			hcc_singleInstance = new HttpCmdClient(false);
+		}
+		return hcc_singleInstance;
+	}
 
-    public static HttpCmdClient getInstance(boolean theDebugOn) {
-        if (hcc_singleInstance == null) {
-            hcc_singleInstance = new HttpCmdClient(theDebugOn);
-        }
-        return hcc_singleInstance;
-    }
+	public static HttpCmdClient getInstance(boolean theDebugOn) {
+		if (hcc_singleInstance == null) {
+			hcc_singleInstance = new HttpCmdClient(theDebugOn);
+		}
+		return hcc_singleInstance;
+	}
 
-    public void setMasterSeverUrlStr(String theServerUrlStr) {
-        hcc_theMasterServerUrlStr = theServerUrlStr;
-    }
+	public void addPingTask() {
+		if (!hcc_isPingScheduled) {
+			hcc_Timer.schedule(hcc_PST, 1000, hcc_kPingServerSeconds * 1000);
+			System.out.println("HCC PingServerTask added");
+		}
+	}
 
-    public String getMasterSeverUrlStr() {
-        return hcc_theMasterServerUrlStr;
-    }
+	public void removePingTask() {
+		hcc_Timer.cancel();
+		hcc_isPingScheduled = false;
+	}
 
-    private class PingServerTask extends TimerTask {
+	private class PingServerTask extends TimerTask {
 
-        @Override
-        public void run() {
-            notifyUp(true, 3);
-        }
-    }
+		@Override
+		public void run() {
+			notifyUp(true, 3);
+		}
+	}
 
-    /**
-     * notify master server (calling) node is up, empty response = no errors
-     * @param thePersistentFlagIsOn boolean - shall it keep retrying?
-     * @param theTryCount int - how many times to attempt?
-     * @return boolean - did server respond with empty page?
-     */
-    public boolean notifyUp(boolean thePersistentFlagIsOn, int theTryCount) {
-        String aURLConnectionParamStr = "opt=ping"
-                + "&uuid=" + ZoneServerLogic.getInstance().getUUID()
-                + "&http=" + String.valueOf(JettyWebServer.getInstance().getServerPortInt())
-                + "&address=" + Layer3Info.getInstance().getValidIPAddress(IpAddressType.IPv4)
-                + "&name=" + replaceSpacesWithUnderscores(ZoneServerLogic.getInstance().getZoneName());
+	/**
+	 * notify master server (calling) node is up, empty response = no errors
+	 * 
+	 * @param thePersistentFlagIsOn
+	 *            boolean - shall it keep retrying?
+	 * @param theTryCount
+	 *            int - how many times to attempt?
+	 * @return boolean - did server respond with empty page?
+	 */
+	public boolean notifyUp(boolean thePersistentFlagIsOn, int theTryCount) {
+		String aURLConnectionParamStr = "opt=ping"
+				+ "&uuid="
+				+ ZoneServerLogic.getInstance().getUUID()
+				+ "&http="
+				+ String.valueOf(JettyWebServer.getInstance()
+						.getServerPortInt())
+				+ "&address="
+				+ Layer3Info.getInstance()
+						.getValidIPAddress(IpAddressType.IPv4)
+				+ "&name="
+				+ replaceSpacesWithUnderscores(ZoneServerLogic.getInstance()
+						.getZoneName());
 
-        boolean loggedToMasterServer = false;
-        int aTryCount = 0;
-        while ((!loggedToMasterServer) && (aTryCount < theTryCount)) {
-            loggedToMasterServer = voidServerMethod(hcc_theMasterServerUrlStr, aURLConnectionParamStr);
-            if (!thePersistentFlagIsOn) {
-                break;
-            }
-            if (!loggedToMasterServer) {
-                try {
-                    Thread.sleep((1 * 1000)); //sleep in milliseconds
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(HttpCmdClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            aTryCount++;
-        }
+		boolean loggedToMasterServer = false;
+		int aTryCount = 0;
+		while ((!loggedToMasterServer) && (aTryCount < theTryCount)) {
+			loggedToMasterServer = voidServerMethod(MASTER_SERVER_URL_STR,
+					aURLConnectionParamStr);
+			if (!thePersistentFlagIsOn) {
+				break;
+			}
+			if (!loggedToMasterServer) {
+				try {
+					Thread.sleep((1 * 1000)); // sleep in milliseconds
+				} catch (InterruptedException ex) {
+					Logger.getLogger(HttpCmdClient.class.getName()).log(
+							Level.SEVERE, null, ex);
+				}
+			}
+			aTryCount++;
+		}
 
-        return loggedToMasterServer;
-    }
+		return loggedToMasterServer;
+	}
 
-    protected String replaceSpacesWithUnderscores(String theSpacedString) {
-        return theSpacedString.replace(" ", "_");
-    }
+	protected String replaceSpacesWithUnderscores(String theSpacedString) {
+		return theSpacedString.replace(" ", "_");
+	}
 
-    /**
-     * notify master server node is down/offline, empty response = no errors
-     * @return boolean - did server respond with empty page?
-     */
-    public boolean notifyDown() {
-        String aURLConnectionParamStr = "opt=ping"
-                + "&uuid=" + ZoneServerLogic.getInstance().getUUID()
-                + "&remove=true";
-        return voidServerMethod(hcc_theMasterServerUrlStr, aURLConnectionParamStr);
-    }
+	/**
+	 * notify master server node is down/offline, empty response = no errors
+	 * 
+	 * @return boolean - did server respond with empty page?
+	 */
+	public boolean notifyDown() {
+		String aURLConnectionParamStr = "opt=ping" + "&uuid="
+				+ ZoneServerLogic.getInstance().getUUID() + "&remove=true";
+		return voidServerMethod(MASTER_SERVER_URL_STR, aURLConnectionParamStr);
+	}
 
-    /**
-     * does the string contain shit from the free hosting provider
-     * @param theRawLine String
-     * @return boolean
-     */
-    protected boolean containsFreeHostShit(String theRawLine) {
-        if (theRawLine.contains("Analytics Code")) {
-            return true;
-        } else if (theRawLine.contains("hosting24")) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+	/**
+	 * does the string contain shit from the free hosting provider
+	 * 
+	 * @param theRawLine
+	 *            String
+	 * @return boolean
+	 */
+	protected boolean containsFreeHostShit(String theRawLine) {
+		if (theRawLine.contains("Analytics Code")) {
+			return true;
+		} else if (theRawLine.contains("hosting24")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
-    /**
-     * HTTP GET should have a void response - empty single line returned
-     * @param theUrlBase String - part before "?"
-     * @param theUrlArgs String - part after "?"
-     * @return boolean - was there a local or server side error?
-     */
-    protected boolean voidServerMethod(String theUrlBase, String theUrlArgs) {
-        ArrayList<String> returnArrayList = returnServerMethod(theUrlBase, theUrlArgs);
-        if ((returnArrayList != null) && (returnArrayList.size() > 1)) {
-            return false;
-        } else {
-            return true;
-        }
-    }
+	/**
+	 * HTTP GET should have a void response - empty single line returned
+	 * 
+	 * @param theUrlBase
+	 *            String - part before "?"
+	 * @param theUrlArgs
+	 *            String - part after "?"
+	 * @return boolean - was there a local or server side error?
+	 */
+	protected boolean voidServerMethod(String theUrlBase, String theUrlArgs) {
+		ArrayList<String> returnArrayList = returnServerMethod(theUrlBase,
+				theUrlArgs);
+		if ((returnArrayList != null) && (returnArrayList.size() > 1)) {
+			return false;
+		} else {
+			return true;
+		}
+	}
 
-    /**
-     * internal method for doing a GET with response retrieval. if theUrlArgs
-     * is null, then just use theUrlBase without trailing "?"
-     * @param theUrlBase String - part before "?"
-     * @param theUrlArgs String - part after "?"
-     * @return ArrayList<String>
-     */
-    public ArrayList<String> returnServerMethod(String theUrlBase, String theUrlArgs) {
-        //be able to function w/o master server
-        if ((theUrlBase == null) || (theUrlBase.equals(""))) {
-            return null;
-        }
+	/**
+	 * internal method for doing a GET with response retrieval. if theUrlArgs is
+	 * null, then just use theUrlBase without trailing "?"
+	 * 
+	 * @param theUrlBase
+	 *            String - part before "?"
+	 * @param theUrlArgs
+	 *            String - part after "?"
+	 * @return ArrayList<String>
+	 */
+	public ArrayList<String> returnServerMethod(String theUrlBase,
+			String theUrlArgs) {
+		// be able to function w/o master server
+		if ((theUrlBase == null) || (theUrlBase.equals(""))) {
+			return null;
+		}
 
-        //create the HTTP buffered reader
-        BufferedReader aBufferedReader = null;
-        try {
-            aBufferedReader = new BufferedReader(new InputStreamReader(getURLConnection(theUrlBase, theUrlArgs).getInputStream()));
-        } catch (IOException ex) {
-            Logger.getLogger(HttpCmdClient.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
+		// create the HTTP buffered reader
+		BufferedReader aBufferedReader = null;
+		try {
+			aBufferedReader = new BufferedReader(new InputStreamReader(
+					getURLConnection(theUrlBase, theUrlArgs).getInputStream()));
+		} catch (IOException ex) {
+			Logger.getLogger(HttpCmdClient.class.getName()).log(Level.SEVERE,
+					null, ex);
+			return null;
+		}
 
-        //read from the HTTP stream
-        ArrayList<String> returnArrayList = new ArrayList<String>();
-        try {
-            String aString = null;
-            while ((aString = aBufferedReader.readLine()) != null) {
-                if (!containsFreeHostShit(aString) && !aString.equals("")) {
-                    returnArrayList.add(aString);
-                }
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(HttpCmdClient.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
+		// read from the HTTP stream
+		ArrayList<String> returnArrayList = new ArrayList<String>();
+		try {
+			String aString = null;
+			while ((aString = aBufferedReader.readLine()) != null) {
+				if (!containsFreeHostShit(aString) && !aString.equals("")) {
+					returnArrayList.add(aString);
+				}
+			}
+		} catch (IOException ex) {
+			Logger.getLogger(HttpCmdClient.class.getName()).log(Level.SEVERE,
+					null, ex);
+			return null;
+		}
 
-        //close up buffered HTTP stream reader
-        try {
-            aBufferedReader.close();
-        } catch (IOException ex) {
-            Logger.getLogger(HttpCmdClient.class.getName()).log(Level.WARNING, null, ex);
-        }
+		// close up buffered HTTP stream reader
+		try {
+			aBufferedReader.close();
+		} catch (IOException ex) {
+			Logger.getLogger(HttpCmdClient.class.getName()).log(Level.WARNING,
+					null, ex);
+		}
 
-        return returnArrayList;
-    }
+		return returnArrayList;
+	}
 
-    /**
-     * helper method for constructing a URLConnection. if theUrlArgs is null
-     * then just use theUrlBase with no trailing "?"
-     * @param theUrlBase String - part before "?"
-     * @param theUrlArgs String - part after "?"
-     * @return URLConnection
-     */
-    protected URLConnection getURLConnection(String theUrlBase, String theUrlArgs) {
-        //create the resolvable url
-        URL aUrl = null;
-        try {
-            if (theUrlArgs == null) {
-                aUrl = new URL(theUrlBase);
-            } else {
-                aUrl = new URL(theUrlBase + "?" + theUrlArgs);
-            }
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(HttpCmdClient.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
+	/**
+	 * helper method for constructing a URLConnection. if theUrlArgs is null
+	 * then just use theUrlBase with no trailing "?"
+	 * 
+	 * @param theUrlBase
+	 *            String - part before "?"
+	 * @param theUrlArgs
+	 *            String - part after "?"
+	 * @return URLConnection
+	 */
+	protected URLConnection getURLConnection(String theUrlBase,
+			String theUrlArgs) {
+		// create the resolvable url
+		URL aUrl = null;
+		try {
+			if (theUrlArgs == null) {
+				aUrl = new URL(theUrlBase);
+			} else {
+				aUrl = new URL(theUrlBase + "?" + theUrlArgs);
+			}
+		} catch (MalformedURLException ex) {
+			Logger.getLogger(HttpCmdClient.class.getName()).log(Level.SEVERE,
+					null, ex);
+			return null;
+		}
 
-        //output debug
-        if (hcc_DebugOn) {
-            System.out.println(this.getClass().getName() + " - URL Connection - " + aUrl.toString());
-        }
+		// output debug
+		if (hcc_DebugOn) {
+			System.out.println(this.getClass().getName()
+					+ " - URL Connection - " + aUrl.toString());
+		}
 
-        //make the connection to the url
-        URLConnection aURLConnection = null;
-        try {
-            aURLConnection = aUrl.openConnection();
-        } catch (IOException ex) {
-            Logger.getLogger(HttpCmdClient.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
+		// make the connection to the url
+		URLConnection aURLConnection = null;
+		try {
+			aURLConnection = aUrl.openConnection();
+		} catch (IOException ex) {
+			Logger.getLogger(HttpCmdClient.class.getName()).log(Level.SEVERE,
+					null, ex);
+			return null;
+		}
 
-        //url connection is ready
-        return aURLConnection;
-    }
+		// url connection is ready
+		return aURLConnection;
+	}
 }

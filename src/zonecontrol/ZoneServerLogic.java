@@ -41,6 +41,7 @@ public class ZoneServerLogic {
     protected HashMap<String, Calendar> zsl_ZoneExpireMap = null; //<UUID, expire Calendar>
     protected HashMap<String, String> zsl_ZoneDashBoardMap = null; //<UUID, dashboard url>
     protected Timer zsl_Timer = null;
+    private boolean zsl_isPingScheduled = false;
     protected final int allNodesPingInterval = 25; //number of seconds between existence notify
     protected final int allNodesExpireInterval = 15; //seconds before node record allowed to be overwritten
     protected final int allNodesHardExpire = 40; //seconds before node is considered offline
@@ -66,11 +67,9 @@ public class ZoneServerLogic {
         zsl_MulticastClient = new ZoneMulticastClient();
         System.out.println("ZSL started");
 
+        zsl_Timer = new Timer();
         if (MusicZones.getIsOnline()) {
-            zsl_Timer = new Timer();
-            zsl_Timer.schedule(new AllNodesPingTimerTask(), 0, allNodesPingInterval * 1000);
-            zsl_Timer.schedule(new RemoveHardExpiredNodesTimerTask(), 0, allNodesHardExpire * 1000);
-            System.out.println("ZSL timed events added");
+        	addPingSchedule();
         }
     }
 
@@ -83,8 +82,23 @@ public class ZoneServerLogic {
 
     @Override
     public void finalize() throws Throwable {
+    	removePingSchedule();
         zsl_MulticastClient.closeClient();
         super.finalize();
+    }
+    
+    public void addPingSchedule() {
+    	if (!zsl_isPingScheduled) {
+    		zsl_Timer.schedule(new AllNodesPingTimerTask(), 0, allNodesPingInterval * 1000);
+            zsl_Timer.schedule(new RemoveHardExpiredNodesTimerTask(), 0, allNodesHardExpire * 1000);
+            System.out.println("ZSL timed events added");
+    		zsl_isPingScheduled = true;
+    	}
+    }
+    
+    public void removePingSchedule() {
+    	zsl_Timer.cancel();
+    	zsl_isPingScheduled = false;
     }
 
     public String getUUID() {

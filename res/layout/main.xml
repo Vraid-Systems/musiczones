@@ -11,12 +11,29 @@
         android:layout_height="wrap_content" >
 
         <TextView
-            android:id="@+id/textViewTitle"
+            android:id="@+id/TextViewTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:text="@string/app_name"
+            android:text="@string/appTitleStr"
             android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <EditText
+            android:id="@+id/EditTextDeviceName"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/TextViewTitle"
+            android:layout_centerHorizontal="true"
+            android:hint="@string/zoneInitNameStr" />
+
+        <Button
+            android:id="@+id/ButtonRunningToggle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/EditTextDeviceName"
+            android:layout_centerHorizontal="true"
+            android:onClick="toggleRunState"
+            android:text="@string/zoneStartStr" />
     </RelativeLayout>
 
 </ScrollView>
