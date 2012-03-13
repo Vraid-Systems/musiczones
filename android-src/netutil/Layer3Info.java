@@ -7,8 +7,6 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author Jason Zerbe
@@ -49,7 +47,7 @@ public class Layer3Info {
 			aNetworkInterfaceEnumeration = NetworkInterface.getNetworkInterfaces();
 		} catch (SocketException ex) {
 			if (l3i_DebugOn) {
-				Logger.getLogger(Layer3Info.class.getName()).log(Level.SEVERE, null, ex);
+				System.err.println(ex);
 			}
 		}
 

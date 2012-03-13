@@ -13,8 +13,6 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import zonecontrol.ZoneServerLogic;
 
 /**
@@ -106,8 +104,7 @@ public class HttpCmdClient {
 				try {
 					Thread.sleep((1 * 1000)); // sleep in milliseconds
 				} catch (InterruptedException ex) {
-					Logger.getLogger(HttpCmdClient.class.getName()).log(
-							Level.SEVERE, null, ex);
+					System.err.println(ex);
 				}
 			}
 			aTryCount++;
@@ -190,8 +187,7 @@ public class HttpCmdClient {
 			aBufferedReader = new BufferedReader(new InputStreamReader(
 					getURLConnection(theUrlBase, theUrlArgs).getInputStream()));
 		} catch (IOException ex) {
-			Logger.getLogger(HttpCmdClient.class.getName()).log(Level.SEVERE,
-					null, ex);
+			System.err.println(ex);
 			return null;
 		}
 
@@ -205,8 +201,7 @@ public class HttpCmdClient {
 				}
 			}
 		} catch (IOException ex) {
-			Logger.getLogger(HttpCmdClient.class.getName()).log(Level.SEVERE,
-					null, ex);
+			System.err.println(ex);
 			return null;
 		}
 
@@ -214,8 +209,7 @@ public class HttpCmdClient {
 		try {
 			aBufferedReader.close();
 		} catch (IOException ex) {
-			Logger.getLogger(HttpCmdClient.class.getName()).log(Level.WARNING,
-					null, ex);
+			System.err.println(ex);
 		}
 
 		return returnArrayList;
@@ -242,8 +236,7 @@ public class HttpCmdClient {
 				aUrl = new URL(theUrlBase + "?" + theUrlArgs);
 			}
 		} catch (MalformedURLException ex) {
-			Logger.getLogger(HttpCmdClient.class.getName()).log(Level.SEVERE,
-					null, ex);
+			System.err.println(ex);
 			return null;
 		}
 
@@ -258,8 +251,7 @@ public class HttpCmdClient {
 		try {
 			aURLConnection = aUrl.openConnection();
 		} catch (IOException ex) {
-			Logger.getLogger(HttpCmdClient.class.getName()).log(Level.SEVERE,
-					null, ex);
+			System.err.println(ex);
 			return null;
 		}
 

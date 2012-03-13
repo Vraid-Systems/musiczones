@@ -16,8 +16,6 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.UnknownHostException;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -45,9 +43,7 @@ public class ZoneMulticastServer {
         try {
             serverThread.join();
         } catch (InterruptedException ex) {
-            Logger.getLogger(
-                    ZoneMulticastServer.class.getName()).log(
-                    Level.SEVERE, null, ex);
+        	System.err.println(ex);
         }
         serverSocket.close();
 
@@ -72,18 +68,14 @@ public class ZoneMulticastServer {
                 serverSocket = new MulticastSocket(
                         ZoneConstants.getInstance().getGroupPortInt());
             } catch (IOException ex) {
-                Logger.getLogger(
-                        ZoneMulticastServer.class.getName()).log(
-                        Level.SEVERE, null, ex);
+            	System.err.println(ex);
             }
 
             try {
                 serverSocket.setTimeToLive(
                         ZoneConstants.getInstance().getGroupTTLInt());
             } catch (IOException ex) {
-                Logger.getLogger(
-                        ZoneMulticastServer.class.getName()).log(
-                        Level.SEVERE, null, ex);
+            	System.err.println(ex);
             }
 
             InetAddress groupAddress = null;
@@ -91,9 +83,7 @@ public class ZoneMulticastServer {
                 groupAddress = InetAddress.getByName(
                         ZoneConstants.getInstance().getGroupAddressStr());
             } catch (UnknownHostException ex) {
-                Logger.getLogger(
-                        ZoneMulticastServer.class.getName()).log(
-                        Level.SEVERE, null, ex);
+            	System.err.println(ex);
             }
 
             boolean serverHasJoinedGroup = false;
@@ -101,16 +91,12 @@ public class ZoneMulticastServer {
                 try {
                     serverSocket.joinGroup(groupAddress);
                 } catch (IOException ex) { //unable to join multicast group
-                    Logger.getLogger(
-                            ZoneMulticastServer.class.getName()).log(
-                            Level.SEVERE, null, ex);
+                	System.err.println(ex);
 
                     try { //pause for 2 seconds to give NIC a chance to connect
                         Thread.sleep(2000);
                     } catch (InterruptedException ex1) {
-                        Logger.getLogger(
-                                ZoneMulticastServer.class.getName()).log(
-                                Level.WARNING, null, ex1);
+                    	System.err.println(ex1);
                     }
 
                     continue; //try again
@@ -129,9 +115,7 @@ public class ZoneMulticastServer {
                 try {
                     serverSocket.receive(packet);
                 } catch (IOException ex) {
-                    Logger.getLogger(
-                            ZoneMulticastServer.class.getName()).log(
-                            Level.SEVERE, null, ex);
+                	System.err.println(ex);
                 }
                 final String theNetworkCommand = new String(buffer).trim().toLowerCase();
 

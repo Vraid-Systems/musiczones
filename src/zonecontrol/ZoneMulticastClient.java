@@ -9,8 +9,6 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.UnknownHostException;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -24,18 +22,14 @@ public class ZoneMulticastClient {
         try {
             clientSocket = new MulticastSocket();
         } catch (IOException ex) {
-            Logger.getLogger(
-                    ZoneMulticastClient.class.getName()).log(
-                    Level.SEVERE, null, ex);
+        	System.err.println(ex);
         }
 
         try {
             clientSocket.setTimeToLive(
                     ZoneConstants.getInstance().getGroupTTLInt());
         } catch (IOException ex) {
-            Logger.getLogger(
-                    ZoneMulticastClient.class.getName()).log(
-                    Level.SEVERE, null, ex);
+        	System.err.println(ex);
         }
 
         System.out.println("ZMC socket ready");
@@ -54,9 +48,7 @@ public class ZoneMulticastClient {
             groupAddress = InetAddress.getByName(
                     ZoneConstants.getInstance().getGroupAddressStr());
         } catch (UnknownHostException ex) {
-            Logger.getLogger(
-                    ZoneMulticastClient.class.getName()).log(
-                    Level.SEVERE, null, ex);
+        	System.err.println(ex);
             return false;
         }
 
@@ -67,9 +59,7 @@ public class ZoneMulticastClient {
         try {
             clientSocket.send(pack);
         } catch (IOException ex) {
-            Logger.getLogger(
-                    ZoneMulticastClient.class.getName()).log(
-                    Level.SEVERE, null, ex);
+        	System.err.println(ex);
             return false;
         }
 

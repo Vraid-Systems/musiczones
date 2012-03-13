@@ -18,8 +18,6 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 import musiczones.MusicZones;
 import netutil.IpAddressType;
@@ -250,9 +248,9 @@ public class ZoneServerLogic {
         try {
             hashedString = util.AeSimpleSHA1.SHA1(stringToHash);
         } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(ZoneServerLogic.class.getName()).log(Level.SEVERE, null, ex);
+        	System.err.println(ex);
         } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(ZoneServerLogic.class.getName()).log(Level.SEVERE, null, ex);
+        	System.err.println(ex);
         }
         System.out.println("Zone UUID = " + hashedString);
 

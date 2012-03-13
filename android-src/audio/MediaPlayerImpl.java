@@ -11,8 +11,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import zonecontrol.FileSystemType;
 import zonecontrol.ZoneServerUtility;
 
@@ -103,8 +101,7 @@ public class MediaPlayerImpl implements MediaPlayerIFace {
 
 	protected void handlePlayIndexEx(Exception ex) {
 		if (debugMessagesOn) {
-			Logger.getLogger(MediaPlayerImpl.class.getName()).log(Level.SEVERE,
-					null, ex);
+			System.err.println(ex);
 		}
 		stop();
 		return;
@@ -169,14 +166,12 @@ public class MediaPlayerImpl implements MediaPlayerIFace {
 			vmp_MediaPlayer.prepare();
 		} catch (IllegalStateException ex) {
 			if (debugMessagesOn) {
-				Logger.getLogger(MediaPlayerImpl.class.getName()).log(
-						Level.SEVERE, null, ex);
+				System.err.println(ex);
 			}
 			stop();
 		} catch (IOException ex) {
 			if (debugMessagesOn) {
-				Logger.getLogger(MediaPlayerImpl.class.getName()).log(
-						Level.WARNING, null, ex);
+				System.err.println(ex);
 			}
 			stop();
 		}

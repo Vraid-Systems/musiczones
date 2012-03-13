@@ -7,8 +7,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import musiczones.MusicZones;
@@ -37,7 +35,7 @@ public class SmbFileSourceImpl implements IFileSource {
             return true;
         } catch (SmbException ex) {
             if (MusicZones.getIsDebugOn()) {
-                Logger.getLogger(SmbFileSourceImpl.class.getName()).log(Level.INFO, null, ex);
+            	System.err.println(ex);
             }
             return false;
         }
@@ -54,7 +52,7 @@ public class SmbFileSourceImpl implements IFileSource {
         try {
             aReturnInputStream = mySmbFile.getInputStream();
         } catch (IOException ex) {
-            Logger.getLogger(SmbFileSourceImpl.class.getName()).log(Level.SEVERE, null, ex);
+        	System.err.println(ex);
         }
         return aReturnInputStream;
     }
@@ -65,7 +63,7 @@ public class SmbFileSourceImpl implements IFileSource {
         try {
             aReturnOutputStream = mySmbFile.getOutputStream();
         } catch (IOException ex) {
-            Logger.getLogger(SmbFileSourceImpl.class.getName()).log(Level.SEVERE, null, ex);
+        	System.err.println(ex);
         }
         return aReturnOutputStream;
     }
@@ -76,7 +74,7 @@ public class SmbFileSourceImpl implements IFileSource {
         try {
             aReturnLong = mySmbFile.length();
         } catch (SmbException ex) {
-            Logger.getLogger(SmbFileSourceImpl.class.getName()).log(Level.SEVERE, null, ex);
+        	System.err.println(ex);
         }
         return aReturnLong;
     }
@@ -88,7 +86,7 @@ public class SmbFileSourceImpl implements IFileSource {
                 mySmbFile.renameTo(((SmbFileSourceImpl) theIFileSource).mySmbFile);
                 return true;
             } catch (SmbException ex) {
-                Logger.getLogger(SmbFileSourceImpl.class.getName()).log(Level.SEVERE, null, ex);
+            	System.err.println(ex);
                 return false;
             }
         } else {

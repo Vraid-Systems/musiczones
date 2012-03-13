@@ -27,8 +27,6 @@ import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import musiczones.MusicZones;
@@ -420,7 +418,7 @@ public class ZoneLibraryIndex {
         try {
             aFullFilePathStr = URLEncoder.encode(theRawFullFilePath, "UTF-8");
         } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
+        	System.err.println(ex);
         }
         if (aFullFilePathStr != null) {
             if (theContainerIsSupported(aFullFilePathStr)) {
@@ -436,11 +434,11 @@ public class ZoneLibraryIndex {
                             aID3MetaData = new ID3MetaData(theRawFullFilePath);
                         } catch (MalformedURLException ex) {
                             if (debugEventsOn) {
-                                Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.WARNING, null, ex);
+                            	System.err.println(ex);
                             }
                         } catch (ID3Exception ex) {
                             if (debugEventsOn) {
-                                Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.WARNING, null, ex);
+                            	System.err.println(ex);
                             }
                         }
 
@@ -600,7 +598,7 @@ public class ZoneLibraryIndex {
             thePathStr = URLEncoder.encode(thePathStr, "UTF-8");
         } catch (UnsupportedEncodingException ex) {
             if (debugEventsOn) {
-                Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
+            	System.err.println(ex);
                 return;
             }
         }
@@ -634,7 +632,7 @@ public class ZoneLibraryIndex {
                 aServerStrEncoded = URLEncoder.encode(aServerSmbFile.toString(), "UTF-8");
             } catch (UnsupportedEncodingException ex) {
                 if (debugEventsOn) {
-                    Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
+                	System.err.println(ex);
                 }
                 continue;
             }
@@ -788,10 +786,10 @@ public class ZoneLibraryIndex {
                     try {
                         aWorkGroupArray = aRootSmbFile.list();
                     } catch (SmbException ex) {
-                        Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.WARNING, null, ex);
+                    	System.err.println(ex);
                     }
                 } catch (MalformedURLException ex) {
-                    Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
+                	System.err.println(ex);
                 }
             }
             //check localhost for possible SMB shares
@@ -802,7 +800,7 @@ public class ZoneLibraryIndex {
                     try {
                         aServerSmbFile = new SmbFile(kSmbPrefix + zoneIPv4Addr + "/");
                     } catch (MalformedURLException ex) {
-                        Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
+                    	System.err.println(ex);
                     }
                     if ((aServerSmbFile != null) && (!aHostList.contains(aServerSmbFile))) {
                         aHostList.add(aServerSmbFile);
@@ -832,7 +830,7 @@ public class ZoneLibraryIndex {
                             try {
                                 aServerSmbFile = new SmbFile(kSmbPrefix + aNewValidIPv4Addr + "/");
                             } catch (MalformedURLException ex) {
-                                Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.SEVERE, null, ex);
+                            	System.err.println(ex);
                             }
                             if ((aServerSmbFile != null) && (!aHostList.contains(aServerSmbFile))) {
                                 aHostList.add(aServerSmbFile);
@@ -855,7 +853,7 @@ public class ZoneLibraryIndex {
                     try {
                         aWorkGroupSmbFile = new SmbFile(kSmbPrefix + aWorkGroup);
                     } catch (MalformedURLException ex) {
-                        Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.WARNING, null, ex);
+                    	System.err.println(ex);
                         continue;
                     }
                     if (aWorkGroupSmbFile == null) {
@@ -866,7 +864,7 @@ public class ZoneLibraryIndex {
                     try {
                         aServerArray = aWorkGroupSmbFile.list();
                     } catch (SmbException ex) {
-                        Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.WARNING, null, ex);
+                    	System.err.println(ex);
                         continue;
                     }
                     if (aServerArray == null) {
@@ -878,7 +876,7 @@ public class ZoneLibraryIndex {
                                 aServerSmbFile = new SmbFile(kSmbPrefix + aServer);
                             } catch (MalformedURLException ex) {
                                 if (debugEventsOn) {
-                                    Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.WARNING, null, ex);
+                                	System.err.println(ex);
                                 }
                             }
                             if (aServerSmbFile == null) {
@@ -890,7 +888,7 @@ public class ZoneLibraryIndex {
                                     aServerSmbFile = new SmbFile(aServerStr);
                                 } catch (MalformedURLException ex) {
                                     if (debugEventsOn) {
-                                        Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.WARNING, null, ex);
+                                    	System.err.println(ex);
                                     }
                                     continue;
                                 }
@@ -930,7 +928,7 @@ public class ZoneLibraryIndex {
                     try {
                         aSharePathArray = aServerSmbFile.list();
                     } catch (SmbException ex) {
-                        Logger.getLogger(ZoneLibraryIndex.class.getName()).log(Level.WARNING, null, ex);
+                    	System.err.println(ex);
                     }
                     aRetryCnt++;
                 }

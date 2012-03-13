@@ -6,8 +6,6 @@ package netutil;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 
@@ -41,8 +39,7 @@ public class CIFSNetworkInterface {
         try {
             aSmbFile = new SmbFile(thePath);
         } catch (MalformedURLException ex) {
-            Logger.getLogger(CIFSNetworkInterface.class.getName()).log(
-                    Level.SEVERE, null, ex);
+        	System.err.println(ex);
             return null;
         }
 
@@ -50,8 +47,7 @@ public class CIFSNetworkInterface {
         try {
             aSmbFileIsDirectory = aSmbFile.isDirectory();
         } catch (SmbException ex) {
-            Logger.getLogger(CIFSNetworkInterface.class.getName()).log(
-                    Level.SEVERE, null, ex);
+        	System.err.println(ex);
             return null;
         }
 
@@ -60,8 +56,7 @@ public class CIFSNetworkInterface {
             try {
                 aSmbFileArray = aSmbFile.listFiles();
             } catch (SmbException ex) {
-                Logger.getLogger(CIFSNetworkInterface.class.getName()).log(
-                        Level.WARNING, null, ex);
+            	System.err.println(ex);
                 return null;
             }
             if (aSmbFileArray == null) {
