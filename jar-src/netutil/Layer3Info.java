@@ -62,7 +62,7 @@ public class Layer3Info {
         String isValidExternalAddressStr = "address=" + aIPv4AddrStr;
         String aURLConnectionParamStr = "opt=address";
         ArrayList<String> returnArrayList = HttpCmdClient.getInstance().returnServerMethod(
-                HttpCmdClient.getInstance().getMasterSeverUrlStr(), aURLConnectionParamStr);
+                HttpCmdClient.MASTER_SERVER_URL_STR, aURLConnectionParamStr);
         if (returnArrayList == null) {
             return false;
         } else {
