@@ -26,6 +26,7 @@ import java.util.logging.Logger;
 public class ZoneMulticastServer {
 
     protected Thread serverThread = null;
+    protected ZoneThread myZoneThread = null;
     protected MulticastSocket serverSocket = null;
     protected boolean printNetworkCommandToTerminal = false;
 
@@ -34,7 +35,7 @@ public class ZoneMulticastServer {
     }
 
     public void startServer() {
-        ZoneThread aZoneThread = new ZoneThread();
+    	myZoneThread = new ZoneThread();
     }
 
     public void stopServer() {

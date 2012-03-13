@@ -769,7 +769,8 @@ public class ZoneLibraryIndex {
 
         private String kSmbPrefix = "smb://";
 
-        @Override
+        @SuppressWarnings("unused") //"aWorkGroupSmbFile == null" is not dead code
+		@Override
         public void run() {
             if (getIndexIsBuilding()) {
                 return; //stop if index is already building
