@@ -3,11 +3,6 @@
  */
 package com.vraidsys.musiczones;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -29,6 +24,7 @@ import zonecontrol.ZoneServerLogic;
  * @author Jason Zerbe
  */
 public class MusicZonesActivity extends Activity {
+	boolean myZoneIsRunning = false;
 	ZoneMulticastServer myZoneMulticastServer = null;
 
 	/** Called when the activity is first created. */
@@ -44,28 +40,13 @@ public class MusicZonesActivity extends Activity {
 		setContentView(R.layout.main);
 	}
 
-	/** check if zone has a route to the master server **/
+	/** check if zone is connected to network **/
 	protected boolean isZoneOnline() {
 		boolean aReturnBooleanOnlineFlag = false;
-		InetAddress aInetAddress = null;
-		try {
-			aInetAddress = InetAddress
-					.getByName(HttpCmdClient.MASTER_SERVER_URL_STR);
-		} catch (UnknownHostException ex) {
-			Logger.getLogger(MusicZonesActivity.class.getName()).log(
-					Level.WARNING, null, ex);
-		}
-		if (aInetAddress != null) {
-			byte[] aInetAddressBytes = aInetAddress.getAddress();
-			int aIpv4AddrInt = ((aInetAddressBytes[3] & 0xff) << 24)
-					| ((aInetAddressBytes[2] & 0xff) << 16)
-					| ((aInetAddressBytes[1] & 0xff) << 8)
-					| (aInetAddressBytes[0] & 0xff);
-
-			ConnectivityManager aConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-			aReturnBooleanOnlineFlag = aConnectivityManager.requestRouteToHost(
-					ConnectivityManager.TYPE_WIFI, aIpv4AddrInt);
-		}
+		
+		ConnectivityManager aConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		aReturnBooleanOnlineFlag = aConnectivityManager.getActiveNetworkInfo().isConnected();
+		
 		return aReturnBooleanOnlineFlag;
 	}
 
@@ -75,7 +56,7 @@ public class MusicZonesActivity extends Activity {
 
 		MusicZones.setIsOnline(isZoneOnline()); // recheck at toggle event
 
-		if (theClickedButton.getText().equals(R.string.zoneStartStr)) {
+		if (!myZoneIsRunning) {
 			// first initialize jetty in-case using custom webserver port
 			JettyWebServer theWebServer = JettyWebServer.getInstance(MusicZones
 					.getWebInterfacePort());
@@ -98,8 +79,7 @@ public class MusicZonesActivity extends Activity {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException ex) {
-				Logger.getLogger(MusicZonesActivity.class.getName()).log(
-						Level.WARNING, null, ex);
+				System.err.println(ex);
 			}
 
 			// after networking is in place, finally ready to start accepting
@@ -121,8 +101,10 @@ public class MusicZonesActivity extends Activity {
 
 			// swap the UI button
 			theClickedButton.setText(R.string.zoneStopStr);
+			
 			// zone is now started
-		} else if (theClickedButton.getText().equals(R.string.zoneStopStr)) {
+			myZoneIsRunning = true;
+		} else if (myZoneIsRunning) {
 			// make sure zone is no longer up according to master server
 			HttpCmdClient.getInstance().removePingTask();
 
@@ -138,7 +120,9 @@ public class MusicZonesActivity extends Activity {
 
 			// swap the UI button
 			theClickedButton.setText(R.string.zoneStartStr);
+
 			// zone has stopped
+			myZoneIsRunning = false;
 		}
 	}
 }
