@@ -6,13 +6,9 @@
  */
 package contrib;
 
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.webapp.WebAppContext;
-import org.springframework.core.io.ClassPathResource;
 import servlets.ZoneLibrary;
 import servlets.ZonePlaylist;
 import servlets.ZoneRadio;
@@ -20,8 +16,7 @@ import servlets.ZoneSelection_Page;
 import servlets.ZoneSearchMedia_DialogPage;
 
 /**
- * @author Mort Bay Consulting / Codehaus / Eclipse
- * @see http://docs.codehaus.org/display/JETTY/Embedding+Jetty#EmbeddingJetty-QuickStartServletsand.jsppages%28hostedwithinthesame.jarastheembedder%29
+ * @author Jason Zerbe
  */
 public class JettyWebServer {
 
@@ -29,7 +24,7 @@ public class JettyWebServer {
     protected Server jws_serverInstance = null;
     protected int jws_serverPortInt = 80;
     protected String webAppContextPathStr = "/";
-    protected String webAppDirStr = "../webapp";
+    protected String webAppDirStr = "file:///android_asset/webapp";
 
     protected JettyWebServer(int theServerPortInt) {
         jws_serverInstance = new Server(theServerPortInt);
@@ -38,11 +33,7 @@ public class JettyWebServer {
         WebAppContext webAppContext = new WebAppContext();
         webAppContext.setServer(jws_serverInstance);
         webAppContext.setContextPath(webAppContextPathStr);
-        try {
-            webAppContext.setResourceBase(new ClassPathResource(webAppDirStr).getURL().toString());
-        } catch (IOException ex) {
-            Logger.getLogger(JettyWebServer.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        webAppContext.setResourceBase(webAppDirStr);
         webAppContext.addServlet(new ServletHolder(new ZoneSelection_Page()), "/servlets/list-zones");
         webAppContext.addServlet(new ServletHolder(new ZonePlaylist()), "/servlets/playlist");
         webAppContext.addServlet(new ServletHolder(new ZoneLibrary()), "/servlets/library");
@@ -73,7 +64,7 @@ public class JettyWebServer {
         try {
             jws_serverInstance.start();
         } catch (Exception ex) {
-            Logger.getLogger(JettyWebServer.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println(ex);
         }
     }
 
@@ -85,7 +76,7 @@ public class JettyWebServer {
         try {
             jws_serverInstance.stop();
         } catch (Exception ex) {
-            Logger.getLogger(JettyWebServer.class.getName()).log(Level.SEVERE, null, ex);
+        	System.err.println(ex);
         }
     }
 }
