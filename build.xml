@@ -1,7 +1,7 @@
 
 <project name="MusicZones" default="jar-dist" basedir=".">
     <description>
-        ant buildfile for the MusicZones controller software
+        ant buildfile for the java MusicZones software
     </description>
 
     <!-- for javadoc -->
@@ -11,10 +11,8 @@
     <!-- directories and files -->
     <property name="libs.dir" location="libs" />
     <property name="src.dir" location="src" />
-    <property name="android.src.dir" location="android-src" />
     <property name="jar.src.dir" location="jar-src" />
     <property name="test.dir" location="test" />
-    <property name="bin.dir" location="bin" />
     <property name="jar.src.build.dir" location="jar-build-src" />
     <property name="jar.test.build.dir" location="jar-build-test" />
     <property name="docs.dir" location="docs" />
@@ -29,67 +27,6 @@
     <property name="javac.debug" value="true" />
     <property name="javac.fork" value="true" />
     <property name="javac.optimize" value="true" />
-
-
-    <!-- setup Android build environment -->
-    <!-- The local.properties file is created and updated by the 'android'
-    tool. It contains the path to the SDK. It should *NOT* be checked into
-    Version Control Systems. -->
-    <property name="sdk.dir" value="C:\android-sdk-windows" />
-    <property file="local.properties" />
-
-    <!-- The ant.properties file can be created by you. It is only
-    edited by the 'android' tool to add properties to it.
-    This is the place to change some Ant specific build properties.
-    Here are some properties you may want to change/update:
-
-    source.dir
-         The name of the source directory. Default is 'src'.
-    out.dir
-         The name of the output directory. Default is 'bin'.
-
-    For other overridable properties, look at the beginning of the rules
-    files in the SDK, at tools/ant/build.xml
-
-    Properties related to the SDK location or the project target should
-    be updated using the 'android' tool with the 'update' action.
-
-    This file is an integral part of the build system for your
-    application and should be checked into Version Control Systems. -->
-    <property file="ant.properties" />
-
-    <!-- The project.properties file is created and updated by the 'android'
-    tool, as well as ADT.
-
-    This contains project specific properties such as project target, and library
-    dependencies. Lower level build properties are stored in ant.properties
-    (or in .classpath for Eclipse projects).
-
-    This file is an integral part of the build system for your
-    application and should be checked into Version Control Systems. -->
-    <loadproperties srcFile="project.properties" />
-
-    <!-- quick check on sdk.dir -->
-    <fail message="missing sdk.dir. generate local.properties 'android update project' or use env var" unless="sdk.dir" />
-
-    <!-- Import the actual build file.
-    To customize existing targets, there are two options:
-    - Customize only one target:
-        - copy/paste the target into this file, *before* the <import> task.
-        - customize it to your needs.
-    - Customize the whole content of build.xml
-        - copy/paste the content of the rules files (minus the top node)
-          into this file, replacing the <import> task.
-        - customize to your needs.
-
-    ***********************
-    ****** IMPORTANT ******
-    ***********************
-    In all cases you must update the value of version-tag below to read 'custom' instead of an integer,
-    in order to avoid having your file be overridden by tools such as "android update project"
-    -->
-    <!-- version-tag: 1 -->
-    <import file="${sdk.dir}/tools/ant/build.xml" />
 
 
     <!-- javadoc is independent of build process -->
@@ -118,21 +55,8 @@
     <target name="clean-all" description="clean up all generated content">
         <delete dir="${jar.src.build.dir}" />
         <delete dir="${jar.test.build.dir}" />
-        <delete dir="${bin.dir}" />
         <delete dir="${docs.dir}" />
         <delete file="${dist.file}" />
-    </target>
-
-    <target name="android-help" depends="help"
-    description="android build help">
-    </target>
-
-    <target name="android-debug-build" depends="debug"
-    description="build Android project in debug mode">
-    </target>
-
-    <target name="android-release-build" depends="release"
-    description="build Android project in release mode">
     </target>
 
 
