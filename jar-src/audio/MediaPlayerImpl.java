@@ -10,8 +10,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import musiczones.MusicZones;
 import zonecontrol.FileSystemType;
 import zonecontrol.ZoneServerUtility;
@@ -122,7 +120,7 @@ public class MediaPlayerImpl implements MediaPlayerIFace {
                             try {
                                 Thread.sleep(lengthOfPauseBetweenMediaInSeconds * 1000);
                             } catch (InterruptedException ex) {
-                                Logger.getLogger(MusicZones.class.getName()).log(Level.SEVERE, null, ex);
+                                System.err.println(ex);
                             }
 
                             if (debugMessagesOn) {
@@ -140,7 +138,7 @@ public class MediaPlayerImpl implements MediaPlayerIFace {
                 processExitDetector.start();
             }
         } catch (IOException ex) {
-            Logger.getLogger(MediaPlayerImpl.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println(ex);
         }
     }
 

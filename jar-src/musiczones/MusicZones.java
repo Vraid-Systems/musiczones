@@ -6,8 +6,6 @@ package musiczones;
 import audio.MediaPlayerImpl;
 import contrib.JettyWebServer;
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import netutil.HttpCmdClient;
 import netutil.IpAddressType;
 import netutil.Layer3Info;
@@ -154,7 +152,7 @@ public class MusicZones {
                         }
                         Thread.sleep((2 * 1000)); //2 seconds
                     } catch (InterruptedException ex) {
-                        Logger.getLogger(MusicZones.class.getName()).log(Level.WARNING, null, ex);
+                        System.err.println(ex);
                     }
                 }
             }
@@ -178,7 +176,7 @@ public class MusicZones {
         try {
             Thread.sleep(100);
         } catch (InterruptedException ex) {
-            Logger.getLogger(MusicZones.class.getName()).log(Level.WARNING, null, ex);
+            System.err.println(ex);
         }
 
         //after networking is in place, finally ready to start accepting control packets

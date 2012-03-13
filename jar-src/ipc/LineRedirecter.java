@@ -10,8 +10,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author Adrian
@@ -37,9 +35,7 @@ public class LineRedirecter extends Thread {
                 printStream.println(line);
             }
         } catch (IOException ex) {
-            Logger.getLogger(
-                    LineRedirecter.class.getName()).log(
-                    Level.SEVERE, null, ex);
+            System.err.println(ex);
         }
     }
 }

@@ -8,8 +8,6 @@ package ipc;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author Adrian BER
@@ -51,7 +49,7 @@ public class ProcessExitDetector extends Thread {
                 listener.processFinished(ped_Process);
             }
         } catch (InterruptedException ex) {
-            Logger.getLogger(ProcessExitDetector.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println(ex);
         }
     }
 

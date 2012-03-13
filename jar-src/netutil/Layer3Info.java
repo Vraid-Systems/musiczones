@@ -11,8 +11,6 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author Jason Zerbe
@@ -84,7 +82,7 @@ public class Layer3Info {
         try {
             aNetworkInterfaceEnumeration = NetworkInterface.getNetworkInterfaces();
         } catch (SocketException ex) {
-            Logger.getLogger(Layer3Info.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println(ex);
         }
         while (aNetworkInterfaceEnumeration.hasMoreElements()) {
             NetworkInterface currentNetworkInterface = aNetworkInterfaceEnumeration.nextElement();
@@ -93,7 +91,7 @@ public class Layer3Info {
                     continue;
                 }
             } catch (SocketException ex) {
-                Logger.getLogger(Layer3Info.class.getName()).log(Level.SEVERE, null, ex);
+                System.err.println(ex);
             }
 
             for (InterfaceAddress currentNetworkInterfaceAddress : currentNetworkInterface.getInterfaceAddresses()) {

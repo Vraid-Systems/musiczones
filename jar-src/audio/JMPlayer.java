@@ -63,7 +63,7 @@ public class JMPlayer {
                     printStream.println(line);
                 }
             } catch (IOException ex) {
-                Logger.getLogger(JMPlayer.class.getName()).log(Level.SEVERE, null, ex);
+                System.err.println(ex);
             }
         }
     }
@@ -267,7 +267,7 @@ public class JMPlayer {
                     }
                 }
             } catch (IOException ex) {
-                Logger.getLogger(JMPlayer.class.getName()).log(Level.SEVERE, null, ex);
+                System.err.println(ex);
             }
         }
         return line;
