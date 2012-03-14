@@ -89,8 +89,8 @@ public class ZoneServerLogic {
     	if (!zsl_isPingScheduled) {
     		zsl_Timer.schedule(new AllNodesPingTimerTask(), 0, allNodesPingInterval * 1000);
             zsl_Timer.schedule(new RemoveHardExpiredNodesTimerTask(), 0, allNodesHardExpire * 1000);
+            zsl_isPingScheduled = true;
             System.out.println("ZSL timed events added");
-    		zsl_isPingScheduled = true;
     	}
     }
     

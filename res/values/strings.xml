@@ -5,6 +5,8 @@
     <string name="appTitleStr">Music Zones</string>
     <string name="zoneInitNameStr">Android MusicZone Name</string>
     <string name="zoneStartStr">Start Zone</string>
+    <string name="zoneStartingStr">&#8230; Starting Zone &#8230;</string>
     <string name="zoneStopStr">Stop Zone</string>
+    <string name="zoneStoppingStr">&#8230; Stopping Zone &#8230;</string>
 
 </resources>

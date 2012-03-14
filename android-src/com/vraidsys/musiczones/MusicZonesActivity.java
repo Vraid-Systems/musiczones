@@ -11,6 +11,7 @@ import android.text.Editable;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import audio.MediaPlayerImpl;
 import contrib.JettyWebServer;
@@ -24,6 +25,7 @@ import zonecontrol.ZoneServerLogic;
  * @author Jason Zerbe
  */
 public class MusicZonesActivity extends Activity {
+	TextView myTextViewStatus;
 	boolean myZoneIsRunning = false;
 	ZoneMulticastServer myZoneMulticastServer = null;
 
@@ -38,15 +40,18 @@ public class MusicZonesActivity extends Activity {
 		// start UI
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
+		myTextViewStatus = (TextView) findViewById(R.id.TextViewStatus);
+		myTextViewStatus.setVisibility(View.INVISIBLE);
 	}
 
 	/** check if zone is connected to network **/
 	protected boolean isZoneOnline() {
 		boolean aReturnBooleanOnlineFlag = false;
-		
+
 		ConnectivityManager aConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-		aReturnBooleanOnlineFlag = aConnectivityManager.getActiveNetworkInfo().isConnected();
-		
+		aReturnBooleanOnlineFlag = aConnectivityManager.getActiveNetworkInfo()
+				.isConnected();
+
 		return aReturnBooleanOnlineFlag;
 	}
 
@@ -54,9 +59,13 @@ public class MusicZonesActivity extends Activity {
 	public void toggleRunState(View theClickedView) {
 		Button theClickedButton = (Button) theClickedView;
 
+		myTextViewStatus.setVisibility(View.VISIBLE);
+
 		MusicZones.setIsOnline(isZoneOnline()); // recheck at toggle event
 
 		if (!myZoneIsRunning) {
+			myTextViewStatus.setText(R.string.zoneStartingStr);
+
 			// first initialize jetty in-case using custom webserver port
 			JettyWebServer theWebServer = JettyWebServer.getInstance(MusicZones
 					.getWebInterfacePort());
@@ -66,12 +75,12 @@ public class MusicZonesActivity extends Activity {
 			MediaPlayerImpl.getInstance(MusicZones.getIsDebugOn());
 
 			// then bring up the zone controller logic and set the zone name
-			ZoneServerLogic mainServerLogic = ZoneServerLogic.getInstance();
+			ZoneServerLogic aZoneServerLogic = ZoneServerLogic.getInstance();
 			EditText aEditTextDeviceName = (EditText) findViewById(R.id.EditTextDeviceName);
 			Editable aEditable = aEditTextDeviceName.getText();
 			String aZoneName = aEditable.toString();
 			if ((aZoneName != null) && (!"".equals(aZoneName))) {
-				mainServerLogic.setZoneName(aZoneName);
+				aZoneServerLogic.setZoneName(aZoneName);
 			}
 
 			// pause just enough (1/10 second) to prevent receiving own init
@@ -91,8 +100,9 @@ public class MusicZonesActivity extends Activity {
 			}
 
 			// start up the library indexing service
-			ZoneLibraryIndex.getInstance(MusicZones.getIsDebugOn())
-					.addIndexBuild();
+			ZoneLibraryIndex aZoneLibraryIndex = ZoneLibraryIndex
+					.getInstance(MusicZones.getIsDebugOn());
+			aZoneLibraryIndex.addIndexBuild();
 
 			// start the master server notification point
 			if (MusicZones.getIsOnline()) {
@@ -101,10 +111,12 @@ public class MusicZonesActivity extends Activity {
 
 			// swap the UI button
 			theClickedButton.setText(R.string.zoneStopStr);
-			
+
 			// zone is now started
 			myZoneIsRunning = true;
 		} else if (myZoneIsRunning) {
+			myTextViewStatus.setText(R.string.zoneStoppingStr);
+
 			// make sure zone is no longer up according to master server
 			HttpCmdClient.getInstance().removePingTask();
 
@@ -124,5 +136,7 @@ public class MusicZonesActivity extends Activity {
 			// zone has stopped
 			myZoneIsRunning = false;
 		}
+
+		myTextViewStatus.setVisibility(View.INVISIBLE);
 	}
 }

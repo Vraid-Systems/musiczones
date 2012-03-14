@@ -34,6 +34,13 @@
             android:layout_centerHorizontal="true"
             android:onClick="toggleRunState"
             android:text="@string/zoneStartStr" />
+
+        <TextView
+            android:id="@+id/TextViewStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/ButtonRunningToggle"
+            android:layout_centerHorizontal="true" />
     </RelativeLayout>
 
 </ScrollView>

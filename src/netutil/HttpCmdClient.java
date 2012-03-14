@@ -52,6 +52,7 @@ public class HttpCmdClient {
 	public void addPingTask() {
 		if (!hcc_isPingScheduled) {
 			hcc_Timer.schedule(hcc_PST, 1000, hcc_kPingServerSeconds * 1000);
+			hcc_isPingScheduled = true;
 			System.out.println("HCC PingServerTask added");
 		}
 	}
