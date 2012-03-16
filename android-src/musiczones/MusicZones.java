@@ -11,7 +11,7 @@ public class MusicZones {
 	protected static boolean isLowMem = false;
 	protected static boolean isOnline = true;
 	protected static boolean isIndexLocalHost = false;
-	protected static int webInterfacePortInt = 80;
+	protected static int webInterfacePortInt = 2320;
 
 	public static boolean getIsDebugOn() {
 		return isDebugOn;

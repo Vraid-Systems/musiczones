@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -25,6 +26,7 @@ import zonecontrol.ZoneServerLogic;
  * @author Jason Zerbe
  */
 public class MusicZonesActivity extends Activity {
+	CheckBox myCheckBoxDebugOn;
 	TextView myTextViewStatus;
 	boolean myZoneIsRunning = false;
 	ZoneMulticastServer myZoneMulticastServer = null;
@@ -35,13 +37,13 @@ public class MusicZonesActivity extends Activity {
 		MusicZones.setIndexLocalHost(false);
 		MusicZones.setIsDebugOn(false);
 		MusicZones.setIsLowMem(false);
-		MusicZones.setIsOnline(isZoneOnline());
+		MusicZones.setIsOnline(true);
 
 		// start UI
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
+		myCheckBoxDebugOn = (CheckBox) findViewById(R.id.CheckBoxDebugOn);
 		myTextViewStatus = (TextView) findViewById(R.id.TextViewStatus);
-		myTextViewStatus.setVisibility(View.INVISIBLE);
 	}
 
 	/** check if zone is connected to network **/
@@ -59,12 +61,11 @@ public class MusicZonesActivity extends Activity {
 	public void toggleRunState(View theClickedView) {
 		Button theClickedButton = (Button) theClickedView;
 
-		myTextViewStatus.setVisibility(View.VISIBLE);
-
+		MusicZones.setIsDebugOn(myCheckBoxDebugOn.isChecked());
 		MusicZones.setIsOnline(isZoneOnline()); // recheck at toggle event
 
 		if (!myZoneIsRunning) {
-			myTextViewStatus.setText(R.string.zoneStartingStr);
+			myTextViewStatus.append("Starting Zone ... ");
 
 			// first initialize jetty in-case using custom webserver port
 			JettyWebServer theWebServer = JettyWebServer.getInstance(MusicZones
@@ -114,8 +115,9 @@ public class MusicZonesActivity extends Activity {
 
 			// zone is now started
 			myZoneIsRunning = true;
+			myTextViewStatus.append("Zone Started\n");
 		} else if (myZoneIsRunning) {
-			myTextViewStatus.setText(R.string.zoneStoppingStr);
+			myTextViewStatus.append("Stopping Zone ... ");
 
 			// make sure zone is no longer up according to master server
 			HttpCmdClient.getInstance().removePingTask();
@@ -135,8 +137,7 @@ public class MusicZonesActivity extends Activity {
 
 			// zone has stopped
 			myZoneIsRunning = false;
+			myTextViewStatus.append("Zone Stopped\n");
 		}
-
-		myTextViewStatus.setVisibility(View.INVISIBLE);
 	}
 }
