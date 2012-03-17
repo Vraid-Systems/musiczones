@@ -338,6 +338,26 @@ public class ZoneLibraryIndex {
     public HashMap<String, String> getAllFiles() {
         return zli_FileMap;
     }
+    
+    /**
+     * guess if the indexer will get stuck recursing to infinity if it follows the child
+     * @param theParentPath String
+     * @param theChildPath String
+     * @return boolean - will index recurse to infinity?
+     */
+    protected boolean willPathRecurseToInf(String theParentPath, String theChildPath) {
+    	String theSplitStr = "/";
+    	if (!theParentPath.contains("/")) {
+    		theSplitStr = "\\";
+    	}
+    	
+    	String[] aParentPathArray = theParentPath.split(theSplitStr);
+    	String aParentPathDirStr = aParentPathArray[(aParentPathArray.length - 1)];
+    	String[] aChildPathArray = theChildPath.split(theSplitStr);
+    	String aChildPathDirStr = aChildPathArray[(aChildPathArray.length - 1)];
+    	
+    	return (aParentPathDirStr.equals(aChildPathDirStr));
+    }
 
     /**
      * iteratively index the raw paths of the file system
@@ -360,11 +380,17 @@ public class ZoneLibraryIndex {
                     ArrayList<SmbFile> tempSmbFiles = CIFSNetworkInterface.getInstance().getDirectoryList(iSmbFile.getPath());
                     if ((tempSmbFiles != null) && (tempSmbFiles.size() > 0)) {
                         for (SmbFile tempSmbFile : tempSmbFiles) {
-                            aSmbFileLinkedList.addFirst(tempSmbFile);
-
-                            if (debugEventsOn) {
-                                System.out.println("ZLI indexPath - will follow " + tempSmbFile.toString());
-                            }
+                        	if (willPathRecurseToInf(tempSmbFile.getParent(), tempSmbFile.getPath())) {
+                        		if (debugEventsOn) {
+                        			System.err.println("ZLI indexPath - " + tempSmbFile.toString() + " will go to INF");
+                        		}
+                        	} else {
+                        		aSmbFileLinkedList.addFirst(tempSmbFile);
+                        		
+                        		if (debugEventsOn) {
+                        			System.out.println("ZLI indexPath - will follow " + tempSmbFile.toString());
+                        		}
+                        	}
                         }
                     }
                 } else { //have a file, add it to the various index TreeMaps
@@ -388,7 +414,17 @@ public class ZoneLibraryIndex {
                     File[] tempFileArray = iFile.listFiles();
                     if (tempFileArray != null) {
                         for (File tempFile : tempFileArray) {
-                            aFileLinkedList.addFirst(tempFile);
+                            if (willPathRecurseToInf(iFile.getPath(), tempFile.getPath())) {
+                        		if (debugEventsOn) {
+                        			System.err.println("ZLI indexPath - " + tempFile.getPath() + " will go to INF");
+                        		}
+                        	} else {
+                        		aFileLinkedList.addFirst(tempFile);
+                        		
+                        		if (debugEventsOn) {
+                        			System.out.println("ZLI indexPath - will follow " + tempFile.getPath().toString());
+                        		}
+                        	}
                         }
                     }
                 } else { //have a file, add it to the file index map
