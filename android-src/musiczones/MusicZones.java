@@ -3,15 +3,26 @@
  */
 package musiczones;
 
+import android.content.res.AssetManager;
+
 /**
  * @author Jason Zerbe
  */
 public class MusicZones {
+	protected static AssetManager myAssetManager = null;
 	protected static boolean isDebugOn = false;
 	protected static boolean isLowMem = false;
 	protected static boolean isOnline = true;
 	protected static boolean isIndexLocalHost = false;
 	protected static int webInterfacePortInt = 2320;
+
+	public static AssetManager getAssets() {
+		return myAssetManager;
+	}
+
+	public static void setAssets(AssetManager theAssetManager) {
+		myAssetManager = theAssetManager;
+	}
 
 	public static boolean getIsDebugOn() {
 		return isDebugOn;

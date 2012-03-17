@@ -7,8 +7,10 @@
 package contrib;
 
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.jetty.webapp.WebAppContext;
+
+import servlets.StaticProxy;
 import servlets.ZoneLibrary;
 import servlets.ZonePlaylist;
 import servlets.ZoneRadio;
@@ -20,63 +22,66 @@ import servlets.ZoneSearchMedia_DialogPage;
  */
 public class JettyWebServer {
 
-    private static JettyWebServer jws_SingleInstance = null;
-    protected Server jws_serverInstance = null;
-    protected static int jws_serverPortInt = 2320;
-    protected String webAppContextPathStr = "/";
-    protected String webAppDirStr = "file:///android_asset/webapp";
+	private static JettyWebServer jws_SingleInstance = null;
+	protected Server jws_serverInstance = null;
+	protected static int jws_serverPortInt = 2320;
 
-    protected JettyWebServer(int theServerPortInt) {
-        jws_serverInstance = new Server(theServerPortInt);
-        jws_serverPortInt = theServerPortInt;
+	protected JettyWebServer(int theServerPortInt) {
+		jws_serverInstance = new Server(theServerPortInt);
+		jws_serverPortInt = theServerPortInt;
 
-        WebAppContext webAppContext = new WebAppContext();
-        webAppContext.setServer(jws_serverInstance);
-        webAppContext.setContextPath(webAppContextPathStr);
-        webAppContext.setResourceBase(webAppDirStr);
-        webAppContext.addServlet(new ServletHolder(new ZoneSelection_Page()), "/servlets/list-zones");
-        webAppContext.addServlet(new ServletHolder(new ZonePlaylist()), "/servlets/playlist");
-        webAppContext.addServlet(new ServletHolder(new ZoneLibrary()), "/servlets/library");
-        webAppContext.addServlet(new ServletHolder(new ZoneSearchMedia_DialogPage()), "/servlets/library-search-dialog");
-        webAppContext.addServlet(new ServletHolder(new ZoneRadio()), "/servlets/radio");
-        jws_serverInstance.addHandler(webAppContext);
-    }
+		ServletHandler aServletHandler = new ServletHandler();
+		aServletHandler.addServletWithMapping(new ServletHolder(
+				new ZoneSelection_Page()), "/servlets/list-zones");
+		aServletHandler.addServletWithMapping(new ServletHolder(
+				new ZonePlaylist()), "/servlets/playlist");
+		aServletHandler.addServletWithMapping(new ServletHolder(
+				new ZoneLibrary()), "/servlets/library");
+		aServletHandler.addServletWithMapping(new ServletHolder(
+				new ZoneSearchMedia_DialogPage()),
+				"/servlets/library-search-dialog");
+		aServletHandler.addServletWithMapping(
+				new ServletHolder(new ZoneRadio()), "/servlets/radio");
+		aServletHandler.addServletWithMapping(new ServletHolder(
+				new StaticProxy()), "/*");
+		jws_serverInstance.addHandler(aServletHandler);
+	}
 
-    public static JettyWebServer getInstance() {
-        if (jws_SingleInstance == null) {
-            jws_SingleInstance = new JettyWebServer(jws_serverPortInt);
-        }
-        return jws_SingleInstance;
-    }
+	public static JettyWebServer getInstance() {
+		if (jws_SingleInstance == null) {
+			jws_SingleInstance = new JettyWebServer(jws_serverPortInt);
+		}
+		return jws_SingleInstance;
+	}
 
-    public static JettyWebServer getInstance(int theServerPortInt) {
-        if (jws_SingleInstance == null) {
-            jws_SingleInstance = new JettyWebServer(theServerPortInt);
-        }
-        return jws_SingleInstance;
-    }
+	public static JettyWebServer getInstance(int theServerPortInt) {
+		if (jws_SingleInstance == null) {
+			jws_SingleInstance = new JettyWebServer(theServerPortInt);
+		}
+		return jws_SingleInstance;
+	}
 
-    public int getServerPortInt() {
-        return jws_serverPortInt;
-    }
+	public int getServerPortInt() {
+		return jws_serverPortInt;
+	}
 
-    public void startServer() {
-        try {
-            jws_serverInstance.start();
-        } catch (Exception ex) {
-            System.err.println(ex);
-        }
-    }
+	public void startServer() {
+		try {
+			jws_serverInstance.start();
+		} catch (Exception ex) {
+			System.err.println(ex);
+		}
+	}
 
-    public boolean isServerRunning() {
-        return jws_serverInstance.isRunning();
-    }
+	public boolean isServerRunning() {
+		return jws_serverInstance.isRunning();
+	}
 
-    public void stopServer() {
-        try {
-            jws_serverInstance.stop();
-        } catch (Exception ex) {
-        	System.err.println(ex);
-        }
-    }
+	public void stopServer() {
+		try {
+			jws_serverInstance.stop();
+		} catch (Exception ex) {
+			System.err.println(ex);
+		}
+	}
 }

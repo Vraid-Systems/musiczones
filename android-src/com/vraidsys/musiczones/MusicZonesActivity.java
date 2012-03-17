@@ -42,6 +42,7 @@ public class MusicZonesActivity extends Activity {
 		// start UI
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
+		MusicZones.setAssets(this.getAssets());
 		myCheckBoxDebugOn = (CheckBox) findViewById(R.id.CheckBoxDebugOn);
 		myTextViewStatus = (TextView) findViewById(R.id.TextViewStatus);
 	}

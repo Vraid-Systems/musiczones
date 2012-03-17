@@ -49,7 +49,8 @@ public class ZonePlaylist extends HttpServlet {
         int aCurrentPlayListIndex = MediaPlayerImpl.getInstance().getCurrentIndex();
 
         out.println("<ul id='zonePlaylist' data-role='listview' data-split-theme='d'>");
-        if (MediaPlayerImpl.getInstance().getPlayList().size() > 0) {
+        if ((MediaPlayerImpl.getInstance().getPlayList() != null)
+        		&& (MediaPlayerImpl.getInstance().getPlayList().size() > 0)) {
             int i = 0;
             for (String aMediaUrlStr : MediaPlayerImpl.getInstance().getPlayList()) {
                 out.println("<li id='zonePlaylistItem_" + i + "'>");

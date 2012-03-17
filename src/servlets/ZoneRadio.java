@@ -1,5 +1,5 @@
 /*
- * manges pulling and displaying internet radio stations
+ * manages pulling and displaying Internet radio stations
  */
 package servlets;
 
