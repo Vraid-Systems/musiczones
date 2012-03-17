@@ -24,7 +24,7 @@ public class JettyWebServer {
 
     private static JettyWebServer jws_SingleInstance = null;
     protected Server jws_serverInstance = null;
-    protected int jws_serverPortInt = 80;
+    protected static int jws_serverPortInt = 2320;
     protected String webAppContextPathStr = "/";
     protected String webAppDirStr = "../webapp";
 
@@ -50,7 +50,7 @@ public class JettyWebServer {
 
     public static JettyWebServer getInstance() {
         if (jws_SingleInstance == null) {
-            jws_SingleInstance = new JettyWebServer(80);
+            jws_SingleInstance = new JettyWebServer(jws_serverPortInt);
         }
         return jws_SingleInstance;
     }

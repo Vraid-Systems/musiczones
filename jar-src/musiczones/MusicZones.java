@@ -20,7 +20,7 @@ import zonecontrol.ZoneServerUtility;
 public class MusicZones {
 
     protected static String global_ZoneName = null;
-    protected static int global_webInterfacePortInt = 80;
+    protected static int global_webInterfacePortInt = 2320;
     protected static String global_MPlayerBinPath = null;
     protected static int global_ScanMinInt = 1;
     protected static int global_ScanMaxInt = 10;
@@ -31,7 +31,7 @@ public class MusicZones {
     protected static String global_MPlayerNotFoundStr = "unable to find mplayer executable, please use --mplayer-bin-path=";
     protected static final String global_usageStr = "usage: java -jar mmc.jar "
             + "--zone-name=[zone controller's name] "
-            + "--web-port=[web interface port number (default=80)] "
+            + "--web-port=[web interface port number (default=2320)] "
             + "--mplayer-bin-path=[path to mplayer] "
             + "--set-scan-min=[last octet of IPv4 in int] "
             + "--set-scan-max=[last octent of IPv4 in int] "
