@@ -1,7 +1,7 @@
 MusicZones
 =============
 
-This source tree contains both vanilla Java 1.5 code and Android specific source
+This source tree contains both vanilla Java 1.5 code and Android 1.6 source
 files that make use of the standard Java code and libraries.
 
 There are three major components to the MusicZones application:
