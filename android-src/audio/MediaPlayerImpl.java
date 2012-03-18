@@ -5,10 +5,13 @@ package audio;
 
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.Build;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import zonecontrol.FileSystemType;
@@ -25,6 +28,7 @@ public class MediaPlayerImpl implements MediaPlayerIFace {
 
 	private static MediaPlayerImpl vmp_SingleInstance = null;
 	private static MediaPlayer vmp_MediaPlayer = null;
+	private static StreamProxy vmp_StreamProxy = null;
 
 	private List<String> vmp_MediaUrlStrList = null;
 	private int vmp_PlayBackIndexInt = -1;
@@ -33,17 +37,28 @@ public class MediaPlayerImpl implements MediaPlayerIFace {
 
 	protected MediaPlayerImpl(boolean theDebugIsOn) {
 		debugMessagesOn = theDebugIsOn;
+		vmp_MediaUrlStrList = new ArrayList<String>();
 		vmp_MediaPlayer = new MediaPlayer();
 		vmp_MediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 	}
 
 	@Override
 	public void finalize() throws Throwable {
+		close();
+		super.finalize();
+	}
+
+	public void close() {
+		stop();
+
 		if (vmp_MediaPlayer != null) {
 			vmp_MediaPlayer.stop();
 			vmp_MediaPlayer.release();
 		}
-		super.finalize();
+
+		if (vmp_StreamProxy != null) {
+			vmp_StreamProxy.stop();
+		}
 	}
 
 	public static MediaPlayerImpl getInstance(boolean theDebugIsOn) {
@@ -115,11 +130,32 @@ public class MediaPlayerImpl implements MediaPlayerIFace {
 		if (debugMessagesOn) {
 			System.out.println("will now play: " + theMediaStr);
 		}
+		
+		vmp_MediaPlayer.reset();
 
 		// different ways to set the plackback file depending on source
 		if (vmp_MediaUrlStrList.get(vmp_PlayBackIndexInt).contains(
 				FileSystemType.radio.toString().concat(
 						ZoneServerUtility.prefixUriStr))) {
+
+			// http://code.google.com/p/npr-android-app/source/search?q=mediaPlayer.setDataSource&origq=mediaPlayer.setDataSource&btnG=Search+Trunk
+			// From 2.2 on (SDK ver 8), the local mediaplayer can handle
+			// Shoutcast streams natively. Let's detect that, and not proxy.
+			int aSdkVersion = 0;
+			try {
+				aSdkVersion = Integer.parseInt(Build.VERSION.SDK);
+			} catch (NumberFormatException ignored) {
+			}
+			if (aSdkVersion < 8) {
+				if (vmp_StreamProxy == null) {
+					vmp_StreamProxy = new StreamProxy();
+					vmp_StreamProxy.init();
+					vmp_StreamProxy.start();
+				}
+				theMediaStr = String.format("http://127.0.0.1:%d/%s",
+						vmp_StreamProxy.getPort(), theMediaStr);
+			}
+
 			try {
 				vmp_MediaPlayer.setDataSource(theMediaStr);
 			} catch (IllegalArgumentException ex) {
@@ -129,6 +165,8 @@ public class MediaPlayerImpl implements MediaPlayerIFace {
 			} catch (IOException ex) {
 				handlePlayIndexEx(ex);
 			}
+			
+			vmp_MediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 		} else if (vmp_MediaUrlStrList.get(vmp_PlayBackIndexInt).contains(
 				FileSystemType.smb.toString().concat(
 						ZoneServerUtility.prefixUriStr))) {

@@ -130,6 +130,9 @@ public class MusicZonesActivity extends Activity {
 			myZoneMulticastServer.stopServer();
 			ZoneServerLogic.getInstance().removePingSchedule();
 
+			// stop all audio playback
+			MediaPlayerImpl.getInstance().close();
+
 			// stop the web server process (un-bind)
 			JettyWebServer.getInstance().stopServer();
 
