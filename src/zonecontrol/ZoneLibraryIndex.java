@@ -99,9 +99,7 @@ public class ZoneLibraryIndex {
     }
     
     public void removeIndexBuild() {
-    	if (zli_RCMT != null) {
-    		zli_RCMT.cancel();
-    	}
+    	zli_Timer.cancel();
     	zli_isIndexScheduled = false;
     }
 

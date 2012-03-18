@@ -58,9 +58,7 @@ public class HttpCmdClient {
 	}
 
 	public void removePingTask() {
-		if (hcc_PST != null) {
-			hcc_PST.cancel();
-		}
+		hcc_Timer.cancel();
 		hcc_isPingScheduled = false;
 	}
 
