@@ -50,7 +50,7 @@ public class ZoneLibraryIndex {
     protected boolean debugEventsOn = false;
     private RefreshCIFSMediaTask zli_RCMT = null;
     private boolean zli_isIndexScheduled = false;
-    protected int zli_RefreshCIFSMediaSeconds = 3600; //60 minutes
+    protected int zli_RefreshCIFSMediaSeconds = (3600 * 2); //2 hours
     protected String[] zli_CIFSPathBlackListArray = {"$"};
     protected int zli_IPv4ScanMin = 1;
     protected int zli_IPv4ScanMax = 10;
@@ -373,7 +373,7 @@ public class ZoneLibraryIndex {
             ArrayList<SmbFile> aCIFSDirList = CIFSNetworkInterface.getInstance().getDirectoryList(thePathStr);
             LinkedList<SmbFile> aSmbFileLinkedList = new LinkedList<SmbFile>(aCIFSDirList);
 
-            while (aSmbFileLinkedList.peek() != null) {
+            while (zli_isIndexScheduled && (aSmbFileLinkedList.peek() != null)) {
                 SmbFile iSmbFile = aSmbFileLinkedList.removeFirst();
 
                 if (iSmbFile.getPath().endsWith("/")) { //recurse into directory during search
@@ -407,7 +407,7 @@ public class ZoneLibraryIndex {
             LinkedList<File> aFileLinkedList = new LinkedList<File>();
             aFileLinkedList.addAll(Arrays.asList(files));
 
-            while (aFileLinkedList.peek() != null) {
+            while (zli_isIndexScheduled && (aFileLinkedList.peek() != null)) {
                 File iFile = aFileLinkedList.removeFirst();
 
                 if (iFile.isDirectory()) { //recurse into directory during search
@@ -970,7 +970,7 @@ public class ZoneLibraryIndex {
                 }
 
                 if (aSharePathArray == null) {
-                    aHostList.remove(aServerSmbFile);
+                    continue;
                 } else {
                     for (String aSharePath : aSharePathArray) {
                         aSharePath = aSharePath.toLowerCase(Locale.ENGLISH);

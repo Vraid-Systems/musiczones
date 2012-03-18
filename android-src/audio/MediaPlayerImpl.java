@@ -3,6 +3,8 @@
  */
 package audio;
 
+import android.app.Activity;
+import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Build;
@@ -11,16 +13,23 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import jcifs.smb.SmbException;
+import jcifs.smb.SmbFileInputStream;
+
+import netutil.CIFSNetworkInterface;
 import zonecontrol.FileSystemType;
 import zonecontrol.ZoneServerUtility;
 
 /**
  * @author Jason Zerbe
  */
-public class MediaPlayerImpl implements MediaPlayerIFace {
+public class MediaPlayerImpl extends Activity implements MediaPlayerIFace {
 
 	public static final String[] theSupportedContainers = { "mp3", "mp4",
 			"ogg", "wav", "aac" };
@@ -31,6 +40,7 @@ public class MediaPlayerImpl implements MediaPlayerIFace {
 	private static StreamProxy vmp_StreamProxy = null;
 
 	private List<String> vmp_MediaUrlStrList = null;
+	private List<String> vmp_LocalFileNameList = null;
 	private int vmp_PlayBackIndexInt = -1;
 	private boolean debugMessagesOn = false;
 	protected int lengthOfPauseBetweenMediaInSeconds = 2;
@@ -38,6 +48,7 @@ public class MediaPlayerImpl implements MediaPlayerIFace {
 	protected MediaPlayerImpl(boolean theDebugIsOn) {
 		debugMessagesOn = theDebugIsOn;
 		vmp_MediaUrlStrList = new ArrayList<String>();
+		vmp_LocalFileNameList = new ArrayList<String>();
 		vmp_MediaPlayer = new MediaPlayer();
 		vmp_MediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 	}
@@ -52,12 +63,15 @@ public class MediaPlayerImpl implements MediaPlayerIFace {
 		stop();
 
 		if (vmp_MediaPlayer != null) {
-			vmp_MediaPlayer.stop();
 			vmp_MediaPlayer.release();
 		}
 
 		if (vmp_StreamProxy != null) {
 			vmp_StreamProxy.stop();
+		}
+
+		for (String aFileName : vmp_LocalFileNameList) {
+			deleteFile(aFileName);
 		}
 	}
 
@@ -114,12 +128,16 @@ public class MediaPlayerImpl implements MediaPlayerIFace {
 		return theMediaUrlStr;
 	}
 
+	protected String getPlayIndexFileName(int theIndex) {
+		String[] aFilePathArray = vmp_MediaUrlStrList.get(theIndex).split("/");
+		return aFilePathArray[(aFilePathArray.length - 1)];
+	}
+
 	protected void handlePlayIndexEx(Exception ex) {
 		if (debugMessagesOn) {
 			System.err.println(ex);
 		}
 		stop();
-		return;
 	}
 
 	@Override
@@ -130,13 +148,14 @@ public class MediaPlayerImpl implements MediaPlayerIFace {
 		if (debugMessagesOn) {
 			System.out.println("will now play: " + theMediaStr);
 		}
-		
+
 		vmp_MediaPlayer.reset();
+		vmp_MediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
 		// different ways to set the plackback file depending on source
 		if (vmp_MediaUrlStrList.get(vmp_PlayBackIndexInt).contains(
 				FileSystemType.radio.toString().concat(
-						ZoneServerUtility.prefixUriStr))) {
+						ZoneServerUtility.prefixUriStr))) { // radio stream
 
 			// http://code.google.com/p/npr-android-app/source/search?q=mediaPlayer.setDataSource&origq=mediaPlayer.setDataSource&btnG=Search+Trunk
 			// From 2.2 on (SDK ver 8), the local mediaplayer can handle
@@ -160,42 +179,113 @@ public class MediaPlayerImpl implements MediaPlayerIFace {
 				vmp_MediaPlayer.setDataSource(theMediaStr);
 			} catch (IllegalArgumentException ex) {
 				handlePlayIndexEx(ex);
+				return;
 			} catch (IllegalStateException ex) {
 				handlePlayIndexEx(ex);
+				return;
 			} catch (IOException ex) {
 				handlePlayIndexEx(ex);
+				return;
 			}
-			
-			vmp_MediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 		} else if (vmp_MediaUrlStrList.get(vmp_PlayBackIndexInt).contains(
 				FileSystemType.smb.toString().concat(
-						ZoneServerUtility.prefixUriStr))) {
-			// TODO: copy file from samba share to local storage and then play
-			// file
+						ZoneServerUtility.prefixUriStr))) { // SMB file
+			// copy the SMB file to internal storage
+			SmbFileInputStream aSmbFileInputStream = null;
 			try {
-				vmp_MediaPlayer.setDataSource("");
-			} catch (IllegalArgumentException ex) {
+				aSmbFileInputStream = new SmbFileInputStream(theMediaStr);
+			} catch (SmbException ex) {
+
+				// try unformatted before error-ing out
+				theMediaStr = vmp_MediaUrlStrList.get(vmp_PlayBackIndexInt);
+				try {
+					aSmbFileInputStream = new SmbFileInputStream(theMediaStr);
+				} catch (SmbException ex1) {
+					handlePlayIndexEx(ex1);
+					return;
+				} catch (MalformedURLException ex1) {
+					handlePlayIndexEx(ex1);
+					return;
+				} catch (UnknownHostException ex1) {
+					handlePlayIndexEx(ex1);
+					return;
+				}
+			} catch (MalformedURLException ex) {
 				handlePlayIndexEx(ex);
-			} catch (IllegalStateException ex) {
+				return;
+			} catch (UnknownHostException ex) {
 				handlePlayIndexEx(ex);
-			} catch (IOException ex) {
-				handlePlayIndexEx(ex);
+				return;
 			}
-		} else {
-			FileInputStream aFileInputStream = null;
 			try {
-				aFileInputStream = new FileInputStream(new File(theMediaStr));
+				String aPlayBackFileNameStr = getPlayIndexFileName(vmp_PlayBackIndexInt);
+				boolean aTransferWorked = CIFSNetworkInterface.getInstance()
+						.transferSmbInputStreamToFileOutputStream(
+								aSmbFileInputStream,
+								openFileOutput(aPlayBackFileNameStr,
+										Context.MODE_PRIVATE));
+				if (!aTransferWorked) {
+					System.err.println("transfer of " + aPlayBackFileNameStr
+							+ " failed");
+					return;
+				}
+				vmp_LocalFileNameList.add(aPlayBackFileNameStr);
 			} catch (FileNotFoundException ex) {
 				handlePlayIndexEx(ex);
+				return;
+			}
+
+			// play the file from internal storage
+			FileInputStream aFileInputStream = null;
+			try {
+				aFileInputStream = openFileInput(getPlayIndexFileName(vmp_PlayBackIndexInt));
+			} catch (FileNotFoundException ex) {
+				handlePlayIndexEx(ex);
+				return;
 			}
 			try {
 				vmp_MediaPlayer.setDataSource(aFileInputStream.getFD());
 			} catch (IllegalArgumentException ex) {
 				handlePlayIndexEx(ex);
+				return;
 			} catch (IllegalStateException ex) {
 				handlePlayIndexEx(ex);
+				return;
 			} catch (IOException ex) {
 				handlePlayIndexEx(ex);
+				return;
+			}
+			try {
+				aFileInputStream.close();
+			} catch (IOException ex) {
+				handlePlayIndexEx(ex);
+				return;
+			}
+		} else { // local file
+			FileInputStream aFileInputStream = null;
+			try {
+				aFileInputStream = new FileInputStream(new File(theMediaStr));
+			} catch (FileNotFoundException ex) {
+				handlePlayIndexEx(ex);
+				return;
+			}
+			try {
+				vmp_MediaPlayer.setDataSource(aFileInputStream.getFD());
+			} catch (IllegalArgumentException ex) {
+				handlePlayIndexEx(ex);
+				return;
+			} catch (IllegalStateException ex) {
+				handlePlayIndexEx(ex);
+				return;
+			} catch (IOException ex) {
+				handlePlayIndexEx(ex);
+				return;
+			}
+			try {
+				aFileInputStream.close();
+			} catch (IOException ex) {
+				handlePlayIndexEx(ex);
+				return;
 			}
 		}
 
@@ -203,15 +293,9 @@ public class MediaPlayerImpl implements MediaPlayerIFace {
 		try {
 			vmp_MediaPlayer.prepare();
 		} catch (IllegalStateException ex) {
-			if (debugMessagesOn) {
-				System.err.println(ex);
-			}
-			stop();
+			handlePlayIndexEx(ex);
 		} catch (IOException ex) {
-			if (debugMessagesOn) {
-				System.err.println(ex);
-			}
-			stop();
+			handlePlayIndexEx(ex);
 		}
 		// start playback
 		vmp_MediaPlayer.start();
