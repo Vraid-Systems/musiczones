@@ -3,15 +3,16 @@
  */
 package audio;
 
-import android.app.Activity;
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Build;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
@@ -22,6 +23,7 @@ import java.util.List;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFileInputStream;
 
+import musiczones.MusicZones;
 import netutil.CIFSNetworkInterface;
 import zonecontrol.FileSystemType;
 import zonecontrol.ZoneServerUtility;
@@ -29,7 +31,7 @@ import zonecontrol.ZoneServerUtility;
 /**
  * @author Jason Zerbe
  */
-public class MediaPlayerImpl extends Activity implements MediaPlayerIFace {
+public class MediaPlayerImpl implements MediaPlayerIFace, OnCompletionListener {
 
 	public static final String[] theSupportedContainers = { "mp3", "mp4",
 			"ogg", "wav", "aac" };
@@ -51,6 +53,8 @@ public class MediaPlayerImpl extends Activity implements MediaPlayerIFace {
 		vmp_LocalFileNameList = new ArrayList<String>();
 		vmp_MediaPlayer = new MediaPlayer();
 		vmp_MediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+		vmp_MediaPlayer.setLooping(false);
+		vmp_MediaPlayer.setOnCompletionListener(this);
 	}
 
 	@Override
@@ -71,7 +75,7 @@ public class MediaPlayerImpl extends Activity implements MediaPlayerIFace {
 		}
 
 		for (String aFileName : vmp_LocalFileNameList) {
-			deleteFile(aFileName);
+			MusicZones.getApplicationContext().deleteFile(aFileName);
 		}
 	}
 
@@ -190,55 +194,77 @@ public class MediaPlayerImpl extends Activity implements MediaPlayerIFace {
 		} else if (vmp_MediaUrlStrList.get(vmp_PlayBackIndexInt).contains(
 				FileSystemType.smb.toString().concat(
 						ZoneServerUtility.prefixUriStr))) { // SMB file
-			// copy the SMB file to internal storage
-			SmbFileInputStream aSmbFileInputStream = null;
+			// check if file is already stored on the internal storage
+			FileInputStream aFileInputStream = null;
+			String aPlayBackFileNameStr = getPlayIndexFileName(vmp_PlayBackIndexInt);
 			try {
-				aSmbFileInputStream = new SmbFileInputStream(theMediaStr);
-			} catch (SmbException ex) {
-
-				// try unformatted before error-ing out
-				theMediaStr = vmp_MediaUrlStrList.get(vmp_PlayBackIndexInt);
+				aFileInputStream = MusicZones.getApplicationContext()
+						.openFileInput(aPlayBackFileNameStr);
+			} catch (FileNotFoundException ex) {
+				aFileInputStream = null;
+				if (debugMessagesOn) {
+					System.out.println(ex);
+				}
+			}
+			if (aFileInputStream == null) { // need to copy
+				// SETUP to copy the SMB file to internal storage
+				SmbFileInputStream aSmbFileInputStream = null;
 				try {
 					aSmbFileInputStream = new SmbFileInputStream(theMediaStr);
-				} catch (SmbException ex1) {
-					handlePlayIndexEx(ex1);
+				} catch (SmbException ex) {
+
+					// try unformatted before error-ing out
+					theMediaStr = vmp_MediaUrlStrList.get(vmp_PlayBackIndexInt);
+					try {
+						aSmbFileInputStream = new SmbFileInputStream(
+								theMediaStr);
+					} catch (SmbException ex1) {
+						handlePlayIndexEx(ex1);
+						return;
+					} catch (MalformedURLException ex1) {
+						handlePlayIndexEx(ex1);
+						return;
+					} catch (UnknownHostException ex1) {
+						handlePlayIndexEx(ex1);
+						return;
+					}
+				} catch (MalformedURLException ex) {
+					handlePlayIndexEx(ex);
 					return;
-				} catch (MalformedURLException ex1) {
-					handlePlayIndexEx(ex1);
-					return;
-				} catch (UnknownHostException ex1) {
-					handlePlayIndexEx(ex1);
+				} catch (UnknownHostException ex) {
+					handlePlayIndexEx(ex);
 					return;
 				}
-			} catch (MalformedURLException ex) {
-				handlePlayIndexEx(ex);
-				return;
-			} catch (UnknownHostException ex) {
-				handlePlayIndexEx(ex);
-				return;
-			}
-			try {
-				String aPlayBackFileNameStr = getPlayIndexFileName(vmp_PlayBackIndexInt);
+
+				// copy SMB file to internal storage
+				FileOutputStream aFileOutputStream = null;
+				try {
+					aFileOutputStream = MusicZones.getApplicationContext()
+							.openFileOutput(aPlayBackFileNameStr,
+									Context.MODE_PRIVATE);
+				} catch (FileNotFoundException ex) {
+					handlePlayIndexEx(ex);
+					return;
+				}
+				if (aFileOutputStream == null) {
+					return;
+				}
 				boolean aTransferWorked = CIFSNetworkInterface.getInstance()
 						.transferSmbInputStreamToFileOutputStream(
-								aSmbFileInputStream,
-								openFileOutput(aPlayBackFileNameStr,
-										Context.MODE_PRIVATE));
+								aSmbFileInputStream, aFileOutputStream);
 				if (!aTransferWorked) {
 					System.err.println("transfer of " + aPlayBackFileNameStr
 							+ " failed");
 					return;
 				}
+				// log that we need to delete
 				vmp_LocalFileNameList.add(aPlayBackFileNameStr);
-			} catch (FileNotFoundException ex) {
-				handlePlayIndexEx(ex);
-				return;
 			}
 
 			// play the file from internal storage
-			FileInputStream aFileInputStream = null;
 			try {
-				aFileInputStream = openFileInput(getPlayIndexFileName(vmp_PlayBackIndexInt));
+				aFileInputStream = MusicZones.getApplicationContext()
+						.openFileInput(aPlayBackFileNameStr);
 			} catch (FileNotFoundException ex) {
 				handlePlayIndexEx(ex);
 				return;
@@ -299,6 +325,11 @@ public class MediaPlayerImpl extends Activity implements MediaPlayerIFace {
 		}
 		// start playback
 		vmp_MediaPlayer.start();
+	}
+
+	@Override
+	public void onCompletion(MediaPlayer theMediaPlayer) {
+		next();
 	}
 
 	@Override

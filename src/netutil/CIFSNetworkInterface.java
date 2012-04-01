@@ -33,8 +33,11 @@ public class CIFSNetworkInterface {
 
 	/**
 	 * copy a remote SMB file to local storage
-	 * @param theRemotePath String
-	 * @param theLocalPath String
+	 * 
+	 * @param theRemotePath
+	 *            String
+	 * @param theLocalPath
+	 *            String
 	 * @return boolean - was the remote file copied to local storage?
 	 */
 	public boolean copyRemoteFileToLocalFile(String theRemotePath,
@@ -59,7 +62,7 @@ public class CIFSNetworkInterface {
 			System.err.println(e);
 			return false;
 		}
-		
+
 		boolean aTransferWorkedFlag = transferSmbInputStreamToFileOutputStream(
 				aSmbFileInputStream, aFileOutputStream);
 		if (!aTransferWorkedFlag) {
@@ -70,15 +73,22 @@ public class CIFSNetworkInterface {
 	}
 
 	/**
-	 * transfer bytes between SmbFileInputStream and FileOutputStream
-	 * closes both streams when done
-	 * @param theSmbFileInputStream SmbFileInputStream
-	 * @param theFileOutputStream FileOutputStream
+	 * transfer bytes between SmbFileInputStream and FileOutputStream closes
+	 * both streams when done
+	 * 
+	 * @param theSmbFileInputStream
+	 *            SmbFileInputStream
+	 * @param theFileOutputStream
+	 *            FileOutputStream
 	 * @return boolean - did the byte transfer work?
 	 */
 	public boolean transferSmbInputStreamToFileOutputStream(
 			SmbFileInputStream theSmbFileInputStream,
 			FileOutputStream theFileOutputStream) {
+		if ((theSmbFileInputStream == null) || (theFileOutputStream == null)) {
+			return false;
+		}
+
 		byte[] aByteArray = new byte[4096];
 		int aBytesReadCount = 0;
 		try {
@@ -89,7 +99,7 @@ public class CIFSNetworkInterface {
 			System.err.println(e);
 			return false;
 		}
-		
+
 		try {
 			theSmbFileInputStream.close();
 		} catch (IOException e) {
@@ -106,14 +116,16 @@ public class CIFSNetworkInterface {
 		} catch (IOException e) {
 			System.err.println(e);
 		}
-		
+
 		return true;
 	}
 
 	/**
 	 * create a SmbFile from the passed path, and after making sure it is indeed
 	 * a directory, grab the directory contents
-	 * @param thePath String
+	 * 
+	 * @param thePath
+	 *            String
 	 * @return ArrayList<SmbFile>, on error null
 	 */
 	public ArrayList<SmbFile> getDirectoryList(String thePath) {

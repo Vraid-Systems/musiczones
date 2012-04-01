@@ -43,6 +43,7 @@ public class MusicZonesActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 		MusicZones.setAssets(this.getAssets());
+		MusicZones.setApplicationContext(this.getApplicationContext());
 		myCheckBoxDebugOn = (CheckBox) findViewById(R.id.CheckBoxDebugOn);
 		myTextViewStatus = (TextView) findViewById(R.id.TextViewStatus);
 	}
@@ -112,36 +113,19 @@ public class MusicZonesActivity extends Activity {
 			}
 
 			// swap the UI button
-			theClickedButton.setText(R.string.zoneStopStr);
+			theClickedButton.setText(R.string.zoneExitStr);
 
 			// zone is now started
 			myZoneIsRunning = true;
 			myTextViewStatus.append("Zone Started\n");
 		} else if (myZoneIsRunning) {
-			myTextViewStatus.append("Stopping Zone ... ");
-
-			// make sure zone is no longer up according to master server
-			HttpCmdClient.getInstance().removePingTask();
-
-			// stop zone from crawling network
-			ZoneLibraryIndex.getInstance().removeIndexBuild();
-
-			// leave multicast group
-			myZoneMulticastServer.stopServer();
-			ZoneServerLogic.getInstance().removePingSchedule();
-
-			// stop all audio playback
+			myTextViewStatus.append("Zone Stopping ...\n");
+			
+			// clean up all locally stored audio files
 			MediaPlayerImpl.getInstance().close();
 
-			// stop the web server process (un-bind)
-			JettyWebServer.getInstance().stopServer();
-
-			// swap the UI button
-			theClickedButton.setText(R.string.zoneStartStr);
-
-			// zone has stopped
-			myZoneIsRunning = false;
-			myTextViewStatus.append("Zone Stopped\n");
+			// immediately end the process
+			android.os.Process.killProcess(android.os.Process.myPid());
 		}
 	}
 }

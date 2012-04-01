@@ -3,6 +3,7 @@
  */
 package musiczones;
 
+import android.content.Context;
 import android.content.res.AssetManager;
 
 /**
@@ -10,6 +11,7 @@ import android.content.res.AssetManager;
  */
 public class MusicZones {
 	protected static AssetManager myAssetManager = null;
+	protected static Context myApplicationContext = null;
 	protected static boolean isDebugOn = false;
 	protected static boolean isLowMem = false;
 	protected static boolean isOnline = true;
@@ -22,6 +24,14 @@ public class MusicZones {
 
 	public static void setAssets(AssetManager theAssetManager) {
 		myAssetManager = theAssetManager;
+	}
+
+	public static Context getApplicationContext() {
+		return myApplicationContext;
+	}
+
+	public static void setApplicationContext(Context theContext) {
+		myApplicationContext = theContext;
 	}
 
 	public static boolean getIsDebugOn() {

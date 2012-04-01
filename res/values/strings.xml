@@ -6,6 +6,6 @@
     <string name="formParamDebugStr">Debug</string>
     <string name="zoneInitNameStr">Zone Name</string>
     <string name="zoneStartStr">Start Zone</string>
-    <string name="zoneStopStr">Stop Zone</string>
+    <string name="zoneExitStr">Stop and Exit</string>
 
 </resources>
