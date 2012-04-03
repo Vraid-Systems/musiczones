@@ -3,7 +3,6 @@
 
     <string name="appNameStr">MusicZones</string>
     <string name="appTitleStr">Music Zones</string>
-    <string name="formParamDebugStr">Debug</string>
     <string name="zoneInitNameStr">Zone Name</string>
     <string name="zoneStartStr">Start Zone</string>
     <string name="zoneExitStr">Stop and Exit</string>

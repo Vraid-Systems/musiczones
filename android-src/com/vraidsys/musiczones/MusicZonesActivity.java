@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -26,7 +25,6 @@ import zonecontrol.ZoneServerLogic;
  * @author Jason Zerbe
  */
 public class MusicZonesActivity extends Activity {
-	CheckBox myCheckBoxDebugOn;
 	TextView myTextViewStatus;
 	boolean myZoneIsRunning = false;
 	ZoneMulticastServer myZoneMulticastServer = null;
@@ -44,7 +42,6 @@ public class MusicZonesActivity extends Activity {
 		setContentView(R.layout.main);
 		MusicZones.setAssets(this.getAssets());
 		MusicZones.setApplicationContext(this.getApplicationContext());
-		myCheckBoxDebugOn = (CheckBox) findViewById(R.id.CheckBoxDebugOn);
 		myTextViewStatus = (TextView) findViewById(R.id.TextViewStatus);
 	}
 
@@ -63,7 +60,6 @@ public class MusicZonesActivity extends Activity {
 	public void toggleRunState(View theClickedView) {
 		Button theClickedButton = (Button) theClickedView;
 
-		MusicZones.setIsDebugOn(myCheckBoxDebugOn.isChecked());
 		MusicZones.setIsOnline(isZoneOnline()); // recheck at toggle event
 
 		if (!myZoneIsRunning) {
@@ -120,7 +116,7 @@ public class MusicZonesActivity extends Activity {
 			myTextViewStatus.append("Zone Started\n");
 		} else if (myZoneIsRunning) {
 			myTextViewStatus.append("Zone Stopping ...\n");
-			
+
 			// clean up all locally stored audio files
 			MediaPlayerImpl.getInstance().close();
 
