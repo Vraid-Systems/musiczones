@@ -13,7 +13,6 @@ import org.mortbay.jetty.servlet.ServletHolder;
 import servlets.StaticProxy;
 import servlets.ZoneLibrary;
 import servlets.ZonePlaylist;
-import servlets.ZoneRadio;
 import servlets.ZoneSelection_Page;
 import servlets.ZoneSearchMedia_DialogPage;
 
@@ -40,8 +39,6 @@ public class JettyWebServer {
 		aServletHandler.addServletWithMapping(new ServletHolder(
 				new ZoneSearchMedia_DialogPage()),
 				"/servlets/library-search-dialog");
-		aServletHandler.addServletWithMapping(
-				new ServletHolder(new ZoneRadio()), "/servlets/radio");
 		aServletHandler.addServletWithMapping(new ServletHolder(
 				new StaticProxy()), "/*");
 		jws_serverInstance.addHandler(aServletHandler);

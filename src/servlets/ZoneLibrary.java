@@ -58,8 +58,7 @@ public class ZoneLibrary extends HttpServlet {
 
         out.println("<div id='zoneLibraryPage' data-role='page' data-theme='d'>"
                 + "<div data-role='header' data-theme='b' data-position='fixed'>"
-                + "<a href='javascript:librarySearchPage_Load();' "
-                + "data-role='button' data-icon='search'>Search</a>"
+                + "<a href='javascript:goBack();' data-role='button' data-icon='back'>Back</a>"
                 + "<h1>Library</h1>");
 
         if ((req.getParameter("type") != null)
@@ -99,7 +98,7 @@ public class ZoneLibrary extends HttpServlet {
             if (outputFilesMap.size() > 0) {
                 int i = 0;
                 for (String aTempFileName : outputFilesMap.keySet()) {
-                    out.println("<li id='zoneLibraryListItem_" + i + "'>");
+                    out.println("<li data-icon=plus' id='zoneLibraryListItem_" + i + "'>");
                     out.println("<a href='javascript:playList_addMediaPath_NoRedir(&quot;"
                             + outputFilesMap.get(aTempFileName) + "&quot;);'>"
                             + aTempFileName + "</a>");
@@ -128,7 +127,7 @@ public class ZoneLibrary extends HttpServlet {
                             if (aSubMap.size() > 0) {
                                 int i = 0;
                                 for (String aTempAlbumName : aSubMap.keySet()) {
-                                    out.println("<li id='zoneLibraryListItem_" + i + "'>");
+                                    out.println("<li data-icon='arrow-r' id='zoneLibraryListItem_" + i + "'>");
                                     out.println("<a href='javascript:mediaLibrary_SubList(&quot;"
                                             + ID3FieldList.Album.toString() + "&quot;, "
                                             + "&quot;" + aTempAlbumName.replace("'", kQuoteReplaceStr) + "&quot;);'>"
@@ -143,7 +142,7 @@ public class ZoneLibrary extends HttpServlet {
                         if (outputAlbumMap.size() > 0) {
                             int i = 0;
                             for (String aTempAlbum : outputAlbumMap.keySet()) {
-                                out.println("<li id='zoneLibraryListItem_" + i + "'>");
+                                out.println("<li data-icon=plus' id='zoneLibraryListItem_" + i + "'>");
                                 out.println("<a href='javascript:playList_addMediaPath_NoRedir(&quot;"
                                         + outputAlbumMap.get(aTempAlbum) + "&quot;);'>"
                                         + aTempAlbum + "</a>");
@@ -165,7 +164,7 @@ public class ZoneLibrary extends HttpServlet {
                             continue;
                         } else {
                             aFirstCharStr = aNewFirstCharStr;
-                            out.println("<li id='zoneLibraryListItem_" + i + "'>");
+                            out.println("<li data-icon='arrow-r' id='zoneLibraryListItem_" + i + "'>");
                             out.println("<a href='javascript:mediaLibrary_SubList(&quot;"
                                     + ID3FieldList.Album.toString() + "&quot;, "
                                     + "&quot;" + aFirstCharStr.replace("'", kQuoteReplaceStr) + "&quot;);'>"
@@ -193,7 +192,7 @@ public class ZoneLibrary extends HttpServlet {
                             if (aSubMap.size() > 0) {
                                 int i = 0;
                                 for (String aTempArtistName : aSubMap.keySet()) {
-                                    out.println("<li id='zoneLibraryListItem_" + i + "'>");
+                                    out.println("<li data-icon='arrow-r' id='zoneLibraryListItem_" + i + "'>");
                                     out.println("<a href='javascript:mediaLibrary_SubList(&quot;"
                                             + ID3FieldList.Artist.toString() + "&quot;, "
                                             + "&quot;" + aTempArtistName.replace("'", kQuoteReplaceStr) + "&quot;);'>"
@@ -208,7 +207,7 @@ public class ZoneLibrary extends HttpServlet {
                         if (outputTitlesMap.size() > 0) {
                             int i = 0;
                             for (String aTempTitle : outputTitlesMap.keySet()) {
-                                out.println("<li id='zoneLibraryListItem_" + i + "'>");
+                                out.println("<li data-icon=plus' id='zoneLibraryListItem_" + i + "'>");
                                 out.println("<a href='javascript:playList_addMediaPath_NoRedir(&quot;"
                                         + outputTitlesMap.get(aTempTitle) + "&quot;);'>"
                                         + aTempTitle + "</a>");
@@ -230,7 +229,7 @@ public class ZoneLibrary extends HttpServlet {
                             continue;
                         } else {
                             aFirstCharStr = aNewFirstCharStr;
-                            out.println("<li id='zoneLibraryListItem_" + i + "'>");
+                            out.println("<li data-icon='arrow-r' id='zoneLibraryListItem_" + i + "'>");
                             out.println("<a href='javascript:mediaLibrary_SubList(&quot;"
                                     + ID3FieldList.Artist.toString() + "&quot;, "
                                     + "&quot;" + aFirstCharStr.replace("'", kQuoteReplaceStr) + "&quot;);'>"
@@ -250,7 +249,7 @@ public class ZoneLibrary extends HttpServlet {
                     if (outputTitlesMap.size() > 0) {
                         int i = 0;
                         for (String aTempTitle : outputTitlesMap.keySet()) {
-                            out.println("<li id='zoneLibraryListItem_" + i + "'>");
+                            out.println("<li data-icon=plus' id='zoneLibraryListItem_" + i + "'>");
                             out.println("<a href='javascript:playList_addMediaPath_NoRedir(&quot;"
                                     + outputTitlesMap.get(aTempTitle) + "&quot;);'>"
                                     + aTempTitle + "</a>");
@@ -263,7 +262,7 @@ public class ZoneLibrary extends HttpServlet {
                     if (outputGenreMap.size() > 0) {
                         int i = 0;
                         for (String aTempGenre : outputGenreMap.keySet()) {
-                            out.println("<li id='zoneLibraryListItem_" + i + "'>");
+                            out.println("<li data-icon='arrow-r' id='zoneLibraryListItem_" + i + "'>");
                             out.println("<a href='javascript:mediaLibrary_SubList(&quot;"
                                     + ID3FieldList.Genre.toString() + "&quot;, "
                                     + "&quot;" + aTempGenre.replace("'", kQuoteReplaceStr) + "&quot;);'>"
@@ -292,7 +291,7 @@ public class ZoneLibrary extends HttpServlet {
                             continue;
                         } else {
                             aPreviousPathList.add(aFullPathFromRandomFileName);
-                            out.println("<li id='zoneLibraryListItem_" + i + "'>");
+                            out.println("<li data-icon=plus' id='zoneLibraryListItem_" + i + "'>");
                             out.println("<a href='javascript:playList_addMediaPath_NoRedir(&quot;"
                                     + aFullPathFromRandomFileName + "&quot;);'>"
                                     + aRandomFileName + "</a>");
@@ -321,7 +320,7 @@ public class ZoneLibrary extends HttpServlet {
                             int i = 0;
                             for (String aTempTitle : aSubMap.keySet()) {
                                 for (String aTempFileName : aSubMap.get(aTempTitle)) {
-                                    out.println("<li id='zoneLibraryListItem_" + i + "'>");
+                                    out.println("<li data-icon=plus' id='zoneLibraryListItem_" + i + "'>");
                                     out.println("<a href='javascript:playList_addMediaPath_NoRedir(&quot;"
                                             + ZoneLibraryIndex.getInstance().getFullPathFromFileName(aTempFileName)
                                             + "&quot;);'>" + aTempTitle + "</a>");
@@ -341,7 +340,7 @@ public class ZoneLibrary extends HttpServlet {
                             continue;
                         } else {
                             aFirstCharStr = aNewFirstCharStr;
-                            out.println("<li id='zoneLibraryListItem_" + i + "'>");
+                            out.println("<li data-icon='arrow-r' id='zoneLibraryListItem_" + i + "'>");
                             out.println("<a href='javascript:mediaLibrary_SubList(&quot;"
                                     + ID3FieldList.Title.toString() + "&quot;, "
                                     + "&quot;" + aFirstCharStr.replace("'", kQuoteReplaceStr) + "&quot;);'>"
@@ -366,7 +365,7 @@ public class ZoneLibrary extends HttpServlet {
                     int i = 0;
                     for (String aTempFileName : outputFilesMap.keySet()) {
                         if ((i >= startIndexInt) && (i <= endIndexInt)) {
-                            out.println("<li id='zoneLibraryListItem_" + i + "'>");
+                            out.println("<li data-icon=plus' id='zoneLibraryListItem_" + i + "'>");
                             out.println("<a href='javascript:playList_addMediaPath_NoRedir(&quot;"
                                     + outputFilesMap.get(aTempFileName) + "&quot;);'>"
                                     + aTempFileName + "</a>");
@@ -406,7 +405,7 @@ public class ZoneLibrary extends HttpServlet {
                 + "<li><a href='javascript:zoneSelection_Load();'>Other Zones</a></li>"
                 + "<li><a href='javascript:playList_Load();'>Now Playing</a></li>"
                 + "<li><a href='javascript:mediaLibrary_Load();' class='ui-btn-active ui-state-persist'>Library</a></li>"
-                + "<li><a href='javascript:radioPage_Load();'>Radio</a></li>"
+                + "<li><a href='javascript:librarySearchPage_Load();'>Search</a></li>"
                 + "</ul>"
                 + "</div>"
                 + "</div>"

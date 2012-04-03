@@ -13,7 +13,6 @@ import org.mortbay.jetty.webapp.WebAppContext;
 import org.springframework.core.io.ClassPathResource;
 import servlets.ZoneLibrary;
 import servlets.ZonePlaylist;
-import servlets.ZoneRadio;
 import servlets.ZoneSelection_Page;
 import servlets.ZoneSearchMedia_DialogPage;
 
@@ -44,7 +43,6 @@ public class JettyWebServer {
         webAppContext.addServlet(new ServletHolder(new ZonePlaylist()), "/servlets/playlist");
         webAppContext.addServlet(new ServletHolder(new ZoneLibrary()), "/servlets/library");
         webAppContext.addServlet(new ServletHolder(new ZoneSearchMedia_DialogPage()), "/servlets/library-search-dialog");
-        webAppContext.addServlet(new ServletHolder(new ZoneRadio()), "/servlets/radio");
         jws_serverInstance.addHandler(webAppContext);
     }
 

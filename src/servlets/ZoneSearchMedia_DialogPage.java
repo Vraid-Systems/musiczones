@@ -26,10 +26,10 @@ public class ZoneSearchMedia_DialogPage extends HttpServlet {
 
         out.println("<div id='zoneSearchMediaPage' data-role='page' data-theme='d'>");
 
-        out.println("<div data-role='header' data-theme='b' data-position='fixed'>");
-        out.println("<a href='javascript:mediaLibrary_Load();' data-icon='delete'>Cancel</a>");
+        out.println("<div data-role='header' data-theme='b'>");
+        out.println("<a href='javascript:goBack();' data-role='button' data-icon='back'>Back</a>");
         out.println("<h1>Search Media</h1> ");
-        out.println("<a href='javascript:librarySearchPage_Search();' data-icon='search'>Search</a>");
+        out.println("<a href='javascript:librarySearchPage_Search();' data-role='button' data-icon='search'>Search</a>");
         out.println("</div>");
 
         out.println("<div data-role='content'>");

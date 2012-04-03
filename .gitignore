@@ -1,5 +1,6 @@
-
 /bin
 /gen
+/jar-build-src
 /local.properties
+/mz.jar
 /nbproject/private/

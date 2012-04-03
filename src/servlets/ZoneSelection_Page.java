@@ -33,7 +33,8 @@ public class ZoneSelection_Page extends HttpServlet {
 
         //build the zone selection page
         out.println("<div id='zoneSelectionPage' data-role='page' data-theme='d'>"
-                + "<div data-role='header' data-theme='b' data-position='fixed'>"
+                + "<div data-role='header' data-theme='b'>"
+                + "<a href='javascript:goBack();' data-role='button' data-icon='back'>Back</a>"
                 + "<h1>Other Zones</h1>"
                 + "</div>"
                 + "<div data-role='content'>"
@@ -43,7 +44,7 @@ public class ZoneSelection_Page extends HttpServlet {
         for (String aNodeUUIDStr : zcld_ZoneInfoMap.keySet()) {
             String aNodeDashBoardUrlStr = zcld_ZoneDashBoardMap.get(aNodeUUIDStr);
             String aNodeName = zcld_ZoneInfoMap.get(aNodeUUIDStr);
-            aPageContentPartListStr += "<li><a href='" + aNodeDashBoardUrlStr + "'>" + aNodeName + "</a></li>\n";
+            aPageContentPartListStr += "<li data-icon='arrow-r'><a href='" + aNodeDashBoardUrlStr + "'>" + aNodeName + "</a></li>\n";
         }
         out.print(aPageContentPartListStr);
 
@@ -55,7 +56,7 @@ public class ZoneSelection_Page extends HttpServlet {
                 + "<li><a href='javascript:zoneSelection_Load();' class='ui-btn-active ui-state-persist'>Other Zones</a></li>"
                 + "<li><a href='javascript:playList_Load();'>Now Playing</a></li>"
                 + "<li><a href='javascript:mediaLibrary_Load();'>Library</a></li>"
-                + "<li><a href='javascript:radioPage_Load();'>Radio</a></li>"
+                + "<li><a href='javascript:librarySearchPage_Load();'>Search</a></li>"
                 + "</ul>"
                 + "</div>"
                 + "</div>"

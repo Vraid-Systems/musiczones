@@ -36,13 +36,14 @@ public class ZonePlaylist extends HttpServlet {
 
         out.println("<div id='zonePlaylistPage' data-role='page' data-theme='d'>"
                 + "<div data-role='header' data-theme='b' data-position='fixed'>");
+        out.println("<a href='javascript:goBack();' data-role='button' data-icon='back'>Back</a>");
+        out.println("<h1>Now Playing</h1>");
         if (MediaPlayerImpl.getInstance().isStopped()) {
             out.println("<a href='javascript:playList_Clear();' data-role='button' data-icon='delete'>Clear</a>");
         } else {
             out.println("<a href='javascript:playList_Stop();' data-role='button' data-icon='delete'>Stop</a>");
         }
-        out.println("<h1>Now Playing</h1>"
-                + "<a href='javascript:playList_Shuffle();' data-role='button' data-icon='grid'>Shuffle</a>"
+        out.println("<!--a href='javascript:playList_Shuffle();' data-role='button' data-icon='grid'>Shuffle</a-->"
                 + "</div>"
                 + "<div data-role='content'>");
 
@@ -53,7 +54,7 @@ public class ZonePlaylist extends HttpServlet {
         		&& (MediaPlayerImpl.getInstance().getPlayList().size() > 0)) {
             int i = 0;
             for (String aMediaUrlStr : MediaPlayerImpl.getInstance().getPlayList()) {
-                out.println("<li id='zonePlaylistItem_" + i + "'>");
+                out.println("<li data-icon='arrow-r' id='zonePlaylistItem_" + i + "'>");
                 out.println("<a href='javascript:playList_ToggleItem(&quot;zonePlaylistItem_" + i + "&quot;);'>");
                 if (i == aCurrentPlayListIndex) {
                     out.println("<img src='/speaker.png' class='ui-li-icon' />");
@@ -64,7 +65,7 @@ public class ZonePlaylist extends HttpServlet {
                 i++;
             }
         } else {
-            out.println("<li><a href='javascript:mediaLibrary_Load();'>Add some media from the Library!</a>"
+            out.println("<li data-icon='arrow-r'><a href='javascript:mediaLibrary_Load();'>Add some media from the Library!</a>"
                     + "<a href='javascript:mediaLibrary_Load();' data-role='button' data-icon='plus'>Add</a></li>");
         }
         out.println("</ul>");
@@ -76,7 +77,7 @@ public class ZonePlaylist extends HttpServlet {
                 + "<li><a href='javascript:zoneSelection_Load();'>Other Zones</a></li>"
                 + "<li><a href='javascript:playList_Load();' class='ui-btn-active ui-state-persist'>Now Playing</a></li>"
                 + "<li><a href='javascript:mediaLibrary_Load();'>Library</a></li>"
-                + "<li><a href='javascript:radioPage_Load();'>Radio</a></li>"
+                + "<li><a href='javascript:librarySearchPage_Load();'>Search</a></li>"
                 + "</ul>"
                 + "</div>"
                 + "</div>"
