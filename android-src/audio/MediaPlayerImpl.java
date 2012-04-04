@@ -74,8 +74,15 @@ public class MediaPlayerImpl implements MediaPlayerIFace, OnCompletionListener {
 			vmp_StreamProxy.stop();
 		}
 
-		for (String aFileName : vmp_LocalFileNameList) {
-			MusicZones.getApplicationContext().deleteFile(aFileName);
+		if (MusicZones.getAppExternalStorageRoot() == null) {
+			for (String aFileName : vmp_LocalFileNameList) {
+				MusicZones.getApplicationContext().deleteFile(aFileName);
+			}
+		} else {
+			for (String aFileName : vmp_LocalFileNameList) {
+				File aDeleteFile = new File(aFileName);
+				aDeleteFile.delete();
+			}
 		}
 	}
 
@@ -194,12 +201,18 @@ public class MediaPlayerImpl implements MediaPlayerIFace, OnCompletionListener {
 		} else if (vmp_MediaUrlStrList.get(vmp_PlayBackIndexInt).contains(
 				FileSystemType.smb.toString().concat(
 						ZoneServerUtility.prefixUriStr))) { // SMB file
-			// check if file is already stored on the internal storage
+			// check if file is already on device storage
 			FileInputStream aFileInputStream = null;
 			String aPlayBackFileNameStr = getPlayIndexFileName(vmp_PlayBackIndexInt);
 			try {
-				aFileInputStream = MusicZones.getApplicationContext()
-						.openFileInput(aPlayBackFileNameStr);
+				if (MusicZones.getAppExternalStorageRoot() == null) {
+					aFileInputStream = MusicZones.getApplicationContext()
+							.openFileInput(aPlayBackFileNameStr);
+				} else {
+					aFileInputStream = new FileInputStream(
+							MusicZones.getAppExternalStorageRoot() + "/"
+									+ aPlayBackFileNameStr);
+				}
 			} catch (FileNotFoundException ex) {
 				aFileInputStream = null;
 				if (debugMessagesOn) {
@@ -236,12 +249,18 @@ public class MediaPlayerImpl implements MediaPlayerIFace, OnCompletionListener {
 					return;
 				}
 
-				// copy SMB file to internal storage
+				// copy SMB file to device internal or external storage
 				FileOutputStream aFileOutputStream = null;
 				try {
-					aFileOutputStream = MusicZones.getApplicationContext()
-							.openFileOutput(aPlayBackFileNameStr,
-									Context.MODE_PRIVATE);
+					if (MusicZones.getAppExternalStorageRoot() == null) {
+						aFileOutputStream = MusicZones.getApplicationContext()
+								.openFileOutput(aPlayBackFileNameStr,
+										Context.MODE_PRIVATE);
+					} else {
+						aFileOutputStream = new FileOutputStream(
+								MusicZones.getAppExternalStorageRoot() + "/"
+										+ aPlayBackFileNameStr);
+					}
 				} catch (FileNotFoundException ex) {
 					handlePlayIndexEx(ex);
 					return;
@@ -261,10 +280,16 @@ public class MediaPlayerImpl implements MediaPlayerIFace, OnCompletionListener {
 				vmp_LocalFileNameList.add(aPlayBackFileNameStr);
 			}
 
-			// play the file from internal storage
+			// play the file from local device storage
 			try {
-				aFileInputStream = MusicZones.getApplicationContext()
-						.openFileInput(aPlayBackFileNameStr);
+				if (MusicZones.getAppExternalStorageRoot() == null) {
+					aFileInputStream = MusicZones.getApplicationContext()
+							.openFileInput(aPlayBackFileNameStr);
+				} else {
+					aFileInputStream = new FileInputStream(
+							MusicZones.getAppExternalStorageRoot() + "/"
+									+ aPlayBackFileNameStr);
+				}
 			} catch (FileNotFoundException ex) {
 				handlePlayIndexEx(ex);
 				return;
