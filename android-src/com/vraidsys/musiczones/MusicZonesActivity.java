@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.Editable;
 import android.view.View;
 import android.widget.Button;
@@ -60,7 +61,18 @@ public class MusicZonesActivity extends Activity {
 	public void toggleRunState(View theClickedView) {
 		Button theClickedButton = (Button) theClickedView;
 
-		MusicZones.setIsOnline(isZoneOnline()); // recheck at toggle event
+		// does the zone have a route to the WAN
+		MusicZones.setIsOnline(isZoneOnline());
+
+		// check if we can write data to external storage
+		String state = Environment.getExternalStorageState();
+		if (Environment.MEDIA_MOUNTED.equals(state)) {
+			String aRootPathStr = Environment.getExternalStorageDirectory()
+					.getAbsolutePath();
+			MusicZones.setAppExternalStorageRoot(aRootPathStr + "/musiczones");
+		} else {
+			MusicZones.setAppExternalStorageRoot(null);
+		}
 
 		if (!myZoneIsRunning) {
 			myTextViewStatus.append("Starting Zone ... ");

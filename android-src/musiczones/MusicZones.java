@@ -12,6 +12,7 @@ import android.content.res.AssetManager;
 public class MusicZones {
 	protected static AssetManager myAssetManager = null;
 	protected static Context myApplicationContext = null;
+	protected static String myApplicationExternalStorage = null;
 	protected static boolean isDebugOn = false;
 	protected static boolean isLowMem = false;
 	protected static boolean isOnline = true;
@@ -32,6 +33,14 @@ public class MusicZones {
 
 	public static void setApplicationContext(Context theContext) {
 		myApplicationContext = theContext;
+	}
+
+	public static String getAppExternalStorageRoot() {
+		return myApplicationExternalStorage;
+	}
+
+	public static void setAppExternalStorageRoot(String theAppExternalStorageRoot) {
+		myApplicationExternalStorage = theAppExternalStorageRoot;
 	}
 
 	public static boolean getIsDebugOn() {
