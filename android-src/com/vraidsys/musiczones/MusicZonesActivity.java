@@ -3,6 +3,8 @@
  */
 package com.vraidsys.musiczones;
 
+import java.io.File;
+
 import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -43,6 +45,8 @@ public class MusicZonesActivity extends Activity {
 		setContentView(R.layout.main);
 		MusicZones.setAssets(this.getAssets());
 		MusicZones.setApplicationContext(this.getApplicationContext());
+		MusicZones.setAppPackageName(this.getApplicationContext()
+				.getPackageName());
 		myTextViewStatus = (TextView) findViewById(R.id.TextViewStatus);
 	}
 
@@ -65,13 +69,20 @@ public class MusicZonesActivity extends Activity {
 		MusicZones.setIsOnline(isZoneOnline());
 
 		// check if we can write data to external storage
+		MusicZones.setAppExternalStorageRoot(null); // default to unable
 		String state = Environment.getExternalStorageState();
 		if (Environment.MEDIA_MOUNTED.equals(state)) {
 			String aRootPathStr = Environment.getExternalStorageDirectory()
 					.getAbsolutePath();
-			MusicZones.setAppExternalStorageRoot(aRootPathStr + "/musiczones");
-		} else {
-			MusicZones.setAppExternalStorageRoot(null);
+			String aExternalPathStr = aRootPathStr + File.separator + "Android"
+					+ File.separator + "data" + File.separator
+					+ MusicZones.getAppPackageName() + File.separator + "files";
+			File aExternalPath = new File(aExternalPathStr);
+			boolean isExternDirReady = aExternalPath.mkdirs()
+					|| aExternalPath.exists();
+			if (isExternDirReady) {
+				MusicZones.setAppExternalStorageRoot(aExternalPathStr);
+			}
 		}
 
 		if (!myZoneIsRunning) {

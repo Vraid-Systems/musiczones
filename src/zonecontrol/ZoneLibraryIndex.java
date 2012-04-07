@@ -3,8 +3,6 @@
  * only indexes one copy of media with a certain filename
  *
  * support for grabbing ID3 metadata on MP3 files only
- *
- * NOTE: recursive symlinks in path to index kills this
  */
 package zonecontrol;
 
@@ -50,7 +48,7 @@ public class ZoneLibraryIndex {
     protected boolean debugEventsOn = false;
     private RefreshCIFSMediaTask zli_RCMT = null;
     private boolean zli_isIndexScheduled = false;
-    protected int zli_RefreshCIFSMediaSeconds = (3600 * 2); //2 hours
+    protected int zli_RefreshCIFSMediaSeconds = (3600 * 2); // 2 hours
     protected String[] zli_CIFSPathBlackListArray = {"$"};
     protected int zli_IPv4ScanMin = 1;
     protected int zli_IPv4ScanMax = 10;
@@ -89,18 +87,18 @@ public class ZoneLibraryIndex {
     public void setScanMax(int theScanMax) {
         zli_IPv4ScanMax = theScanMax;
     }
-    
+
     public void addIndexBuild() {
-    	if (!zli_isIndexScheduled) {
-    		zli_Timer.schedule(zli_RCMT, 0, zli_RefreshCIFSMediaSeconds * 1000);
-    		zli_isIndexScheduled = true;
-    		System.out.println("ZLI RefreshCIFSMediaTask added");
-    	}
+        if (!zli_isIndexScheduled) {
+            zli_Timer.schedule(zli_RCMT, 0, zli_RefreshCIFSMediaSeconds * 1000);
+            zli_isIndexScheduled = true;
+            System.out.println("ZLI RefreshCIFSMediaTask added");
+        }
     }
-    
+
     public void removeIndexBuild() {
-    	zli_Timer.cancel();
-    	zli_isIndexScheduled = false;
+        zli_Timer.cancel();
+        zli_isIndexScheduled = false;
     }
 
     public void manualRebuildIndex() {
@@ -118,13 +116,14 @@ public class ZoneLibraryIndex {
     /**
      * build a TreeMap (ordered according to the natural ordering of its keys)
      * of all genres with available files
+     *
      * @return TreeMap<String - genre, LinkedList<String - filename>>
      */
     public TreeMap<String, LinkedList<String>> getGenreMap() {
         TreeMap<String, LinkedList<String>> returnFileMap = new TreeMap<String, LinkedList<String>>();
         for (Entry<String, LinkedList<String>> aTempEntry : zli_GenreMap.entrySet()) {
             for (String aTempFileName : aTempEntry.getValue()) {
-                if (zli_FileMap.containsKey(aTempFileName)) { //check to be sure online copy of file
+                if (zli_FileMap.containsKey(aTempFileName)) {
                     if (returnFileMap.containsKey(aTempEntry.getKey())) {
                         if (returnFileMap.get(aTempEntry.getKey()) == null) {
                             LinkedList<String> aFileNameLL = new LinkedList<String>();
@@ -146,8 +145,9 @@ public class ZoneLibraryIndex {
 
     /**
      * build a TreeMap (ordered according to the natural ordering of its keys)
-     * that contains the song title (or fails to filename)
-     * and the complete path information from the genre
+     * that contains the song title (or fails to filename) and the complete path
+     * information from the genre
+     *
      * @param theGenre String
      * @return TreeMap<String - title, String - file path>
      */
@@ -155,7 +155,7 @@ public class ZoneLibraryIndex {
         TreeMap<String, String> returnFileMap = new TreeMap<String, String>();
         LinkedList<String> aTempFileNameList = zli_GenreMap.get(theGenre);
         for (String aTempFileName : aTempFileNameList) {
-            if (zli_FileMap.containsKey(aTempFileName)) { //check to be sure online copy of file
+            if (zli_FileMap.containsKey(aTempFileName)) {
                 String aTempTitle = getTitleFromFileName(aTempFileName);
                 if (aTempTitle == null) {
                     aTempTitle = aTempFileName;
@@ -171,13 +171,14 @@ public class ZoneLibraryIndex {
     /**
      * build a TreeMap (ordered according to the natural ordering of its keys)
      * of all albums with available files
+     *
      * @return TreeMap<String - album, LinkedList<String - filename>>
      */
     public TreeMap<String, LinkedList<String>> getAlbumMap() {
         TreeMap<String, LinkedList<String>> returnFileMap = new TreeMap<String, LinkedList<String>>();
         for (Entry<String, LinkedList<String>> aTempEntry : zli_AlbumMap.entrySet()) {
             for (String aTempFileName : aTempEntry.getValue()) {
-                if (zli_FileMap.containsKey(aTempFileName)) { //check to be sure online copy of file
+                if (zli_FileMap.containsKey(aTempFileName)) {
                     if (returnFileMap.containsKey(aTempEntry.getKey())) {
                         if (returnFileMap.get(aTempEntry.getKey()) == null) {
                             LinkedList<String> aFileNameLL = new LinkedList<String>();
@@ -199,8 +200,9 @@ public class ZoneLibraryIndex {
 
     /**
      * build a TreeMap (ordered according to the natural ordering of its keys)
-     * that contains the song title (or fails to filename)
-     * and the complete path information from the album name
+     * that contains the song title (or fails to filename) and the complete path
+     * information from the album name
+     *
      * @param theAlbumName String
      * @return TreeMap<String - title, String - file path>
      */
@@ -208,7 +210,7 @@ public class ZoneLibraryIndex {
         TreeMap<String, String> returnFileMap = new TreeMap<String, String>();
         LinkedList<String> aTempFileNameList = zli_AlbumMap.get(theAlbumName);
         for (String aTempFileName : aTempFileNameList) {
-            if (zli_FileMap.containsKey(aTempFileName)) { //check to be sure online copy of file
+            if (zli_FileMap.containsKey(aTempFileName)) {
                 String aTempTitle = getTitleFromFileName(aTempFileName);
                 if (aTempTitle == null) {
                     aTempTitle = aTempFileName;
@@ -224,13 +226,14 @@ public class ZoneLibraryIndex {
     /**
      * build a TreeMap (ordered according to the natural ordering of its keys)
      * of all artists with available files
+     *
      * @return TreeMap<String - artist, LinkedList<String - filename>>
      */
     public TreeMap<String, LinkedList<String>> getArtistMap() {
         TreeMap<String, LinkedList<String>> returnFileMap = new TreeMap<String, LinkedList<String>>();
         for (Entry<String, LinkedList<String>> aTempEntry : zli_ArtistMap.entrySet()) {
             for (String aTempFileName : aTempEntry.getValue()) {
-                if (zli_FileMap.containsKey(aTempFileName)) { //check to be sure online copy of file
+                if (zli_FileMap.containsKey(aTempFileName)) {
                     if (returnFileMap.containsKey(aTempEntry.getKey())) {
                         if (returnFileMap.get(aTempEntry.getKey()) == null) {
                             LinkedList<String> aFileNameLL = new LinkedList<String>();
@@ -252,8 +255,9 @@ public class ZoneLibraryIndex {
 
     /**
      * build a TreeMap (ordered according to the natural ordering of its keys)
-     * that contains the song title (or fails to filename)
-     * and the complete path information
+     * that contains the song title (or fails to filename) and the complete path
+     * information
+     *
      * @param theArtistName String
      * @return TreeMap<String - title, String - file path>
      */
@@ -261,7 +265,7 @@ public class ZoneLibraryIndex {
         TreeMap<String, String> returnFileMap = new TreeMap<String, String>();
         LinkedList<String> aTempFileNameList = zli_ArtistMap.get(theArtistName);
         for (String aTempFileName : aTempFileNameList) {
-            if (zli_FileMap.containsKey(aTempFileName)) { //check to be sure online copy of file
+            if (zli_FileMap.containsKey(aTempFileName)) {
                 String aTempTitle = getTitleFromFileName(aTempFileName);
                 if (aTempTitle == null) {
                     aTempTitle = aTempFileName;
@@ -276,6 +280,7 @@ public class ZoneLibraryIndex {
 
     /**
      * return the title based on the given file name
+     *
      * @param theFileName String
      * @return String
      */
@@ -292,6 +297,7 @@ public class ZoneLibraryIndex {
 
     /**
      * dump the title TreeMap
+     *
      * @return <String - title, LinkedList<String - filenames>>
      */
     public TreeMap<String, LinkedList<String>> getAllTitles() {
@@ -305,6 +311,7 @@ public class ZoneLibraryIndex {
     /**
      * return a TreeMap<String - filename, String - full file path> of filenames
      * that match the given search parameters in the library index
+     *
      * @param theKeywordStrArray String[]
      * @param matchAllKeywords boolean
      * @param theStartIndexInt Integer
@@ -338,30 +345,33 @@ public class ZoneLibraryIndex {
     public HashMap<String, String> getAllFiles() {
         return zli_FileMap;
     }
-    
+
     /**
-     * guess if the indexer will get stuck recursing to infinity if it follows the child
+     * guess if the indexer will get stuck recursing to infinity if it follows
+     * the child
+     *
      * @param theParentPath String
      * @param theChildPath String
      * @return boolean - will index recurse to infinity?
      */
     protected boolean willPathRecurseToInf(String theParentPath, String theChildPath) {
-    	String theSplitStr = "/";
-    	if (!theParentPath.contains("/")) {
-    		theSplitStr = "\\";
-    	}
-    	
-    	String[] aParentPathArray = theParentPath.split(theSplitStr);
-    	String aParentPathDirStr = aParentPathArray[(aParentPathArray.length - 1)];
-    	String[] aChildPathArray = theChildPath.split(theSplitStr);
-    	String aChildPathDirStr = aChildPathArray[(aChildPathArray.length - 1)];
-    	
-    	return (aParentPathDirStr.equals(aChildPathDirStr));
+        String theSplitStr = "/";
+        if (!theParentPath.contains("/")) {
+            theSplitStr = "\\";
+        }
+
+        String[] aParentPathArray = theParentPath.split(theSplitStr);
+        String aParentPathDirStr = aParentPathArray[(aParentPathArray.length - 1)];
+        String[] aChildPathArray = theChildPath.split(theSplitStr);
+        String aChildPathDirStr = aChildPathArray[(aChildPathArray.length - 1)];
+
+        return (aParentPathDirStr.equals(aChildPathDirStr));
     }
 
     /**
-     * iteratively index the raw paths of the file system
-     * currently supports: CIFS and local files
+     * iteratively index the raw paths of the file system currently supports:
+     * CIFS and local files
+     *
      * @param thePathStr String
      */
     protected void indexPath(String thePathStr) {
@@ -369,31 +379,31 @@ public class ZoneLibraryIndex {
             System.out.println("ZLI indexPath - will now index " + thePathStr);
         }
 
-        if (thePathStr.contains(FileSystemType.smb.toString().concat(ZoneServerUtility.prefixUriStr))) { //CIFS share
+        if (thePathStr.contains(FileSystemType.smb.toString().concat(ZoneServerUtility.prefixUriStr))) { // CIFS share
             ArrayList<SmbFile> aCIFSDirList = CIFSNetworkInterface.getInstance().getDirectoryList(thePathStr);
             LinkedList<SmbFile> aSmbFileLinkedList = new LinkedList<SmbFile>(aCIFSDirList);
 
             while (zli_isIndexScheduled && (aSmbFileLinkedList.peek() != null)) {
                 SmbFile iSmbFile = aSmbFileLinkedList.removeFirst();
 
-                if (iSmbFile.getPath().endsWith("/")) { //recurse into directory during search
+                if (iSmbFile.getPath().endsWith("/")) { // recurse into directory during search
                     ArrayList<SmbFile> tempSmbFiles = CIFSNetworkInterface.getInstance().getDirectoryList(iSmbFile.getPath());
                     if ((tempSmbFiles != null) && (tempSmbFiles.size() > 0)) {
                         for (SmbFile tempSmbFile : tempSmbFiles) {
-                        	if (willPathRecurseToInf(tempSmbFile.getParent(), tempSmbFile.getPath())) {
-                        		if (debugEventsOn) {
-                        			System.err.println("ZLI indexPath - " + tempSmbFile.toString() + " will go to INF");
-                        		}
-                        	} else {
-                        		aSmbFileLinkedList.addFirst(tempSmbFile);
-                        		
-                        		if (debugEventsOn) {
-                        			System.out.println("ZLI indexPath - will follow " + tempSmbFile.toString());
-                        		}
-                        	}
+                            if (willPathRecurseToInf(tempSmbFile.getParent(), tempSmbFile.getPath())) {
+                                if (debugEventsOn) {
+                                    System.err.println("ZLI indexPath - " + tempSmbFile.toString() + " will go to INF");
+                                }
+                            } else {
+                                aSmbFileLinkedList.addFirst(tempSmbFile);
+
+                                if (debugEventsOn) {
+                                    System.out.println("ZLI indexPath - will follow " + tempSmbFile.toString());
+                                }
+                            }
                         }
                     }
-                } else { //have a file, add it to the various index TreeMaps
+                } else { // have a file, add it to the various index TreeMaps
                     addFileToMaps(iSmbFile.getPath(), iSmbFile.getName());
                 }
             }
@@ -401,7 +411,7 @@ public class ZoneLibraryIndex {
             if (debugEventsOn) {
                 System.out.println("ZLI indexPath - done indexing " + thePathStr);
             }
-        } else { //local filesytem
+        } else { // local filesytem
             File dir = new File(thePathStr);
             File[] files = dir.listFiles();
             LinkedList<File> aFileLinkedList = new LinkedList<File>();
@@ -410,28 +420,27 @@ public class ZoneLibraryIndex {
             while (zli_isIndexScheduled && (aFileLinkedList.peek() != null)) {
                 File iFile = aFileLinkedList.removeFirst();
 
-                if (iFile.isDirectory()) { //recurse into directory during search
+                if (iFile.isDirectory()) { // recurse into directory during search
                     File[] tempFileArray = iFile.listFiles();
                     if (tempFileArray != null) {
                         for (File tempFile : tempFileArray) {
                             if (willPathRecurseToInf(iFile.getPath(), tempFile.getPath())) {
-                        		if (debugEventsOn) {
-                        			System.err.println("ZLI indexPath - " + tempFile.getPath() + " will go to INF");
-                        		}
-                        	} else {
-                        		aFileLinkedList.addFirst(tempFile);
-                        		
-                        		if (debugEventsOn) {
-                        			System.out.println("ZLI indexPath - will follow " + tempFile.getPath().toString());
-                        		}
-                        	}
+                                if (debugEventsOn) {
+                                    System.err.println("ZLI indexPath - " + tempFile.getPath() + " will go to INF");
+                                }
+                            } else {
+                                aFileLinkedList.addFirst(tempFile);
+
+                                if (debugEventsOn) {
+                                    System.out.println("ZLI indexPath - will follow " + tempFile.getPath().toString());
+                                }
+                            }
                         }
                     }
-                } else { //have a file, add it to the file index map
+                } else { // have a file, add it to the file index map
                     String tempFilePathStr = iFile.getAbsolutePath();
                     if (tempFilePathStr.contains("\\")) {
                         tempFilePathStr = tempFilePathStr.replaceAll("\\\\+", "/");
-                        //see http://www.java-forums.org/advanced-java/16452-replacing-backslashes-string-object.html#post59396
                     }
 
                     addFileToMaps(tempFilePathStr, iFile.getName());
@@ -446,6 +455,7 @@ public class ZoneLibraryIndex {
 
     /**
      * actually add the file and its information to the various TreeMaps
+     *
      * @param theRawFullFilePath String
      * @param theRawFileName String
      */
@@ -454,7 +464,7 @@ public class ZoneLibraryIndex {
         try {
             aFullFilePathStr = URLEncoder.encode(theRawFullFilePath, "UTF-8");
         } catch (UnsupportedEncodingException ex) {
-        	System.err.println(ex);
+            System.err.println(ex);
         }
         if (aFullFilePathStr != null) {
             if (theContainerIsSupported(aFullFilePathStr)) {
@@ -470,11 +480,11 @@ public class ZoneLibraryIndex {
                             aID3MetaData = new ID3MetaData(theRawFullFilePath);
                         } catch (MalformedURLException ex) {
                             if (debugEventsOn) {
-                            	System.err.println(ex);
+                                System.err.println(ex);
                             }
                         } catch (ID3Exception ex) {
                             if (debugEventsOn) {
-                            	System.err.println(ex);
+                                System.err.println(ex);
                             }
                         }
 
@@ -513,6 +523,7 @@ public class ZoneLibraryIndex {
 
     /**
      * add a filename to a album group, create if !exists
+     *
      * @param theFileName String
      * @param theAlbumTitle String
      */
@@ -541,6 +552,7 @@ public class ZoneLibraryIndex {
 
     /**
      * add a filename to an artist group, create if it does not exist
+     *
      * @param theFileName String
      * @param theArtistNameList List<String>
      */
@@ -568,6 +580,7 @@ public class ZoneLibraryIndex {
 
     /**
      * add a filename to multiple genres
+     *
      * @param theFileName String
      * @param theGenreList ArrayList<String>
      */
@@ -578,7 +591,7 @@ public class ZoneLibraryIndex {
 
         for (String aGenre : theGenreList) {
             if (aGenre.contains("(") || aGenre.contains(")")) {
-                continue; //do not add corrupted genres
+                continue; // do not add corrupted genres
             }
             if (aGenre.equals("")) {
                 aGenre = "Unknown";
@@ -601,6 +614,7 @@ public class ZoneLibraryIndex {
 
     /**
      * add a filename to an title group, create if it does not exist
+     *
      * @param theFileName String
      * @param theSongTitle String
      */
@@ -626,6 +640,7 @@ public class ZoneLibraryIndex {
 
     /**
      * remove all files from the library index that contain the path string
+     *
      * @param thePathStr String
      */
     protected void removePath(String thePathStr) {
@@ -634,7 +649,7 @@ public class ZoneLibraryIndex {
             thePathStr = URLEncoder.encode(thePathStr, "UTF-8");
         } catch (UnsupportedEncodingException ex) {
             if (debugEventsOn) {
-            	System.err.println(ex);
+                System.err.println(ex);
                 return;
             }
         }
@@ -653,6 +668,7 @@ public class ZoneLibraryIndex {
 
     /**
      * remove all indexed media that does not have an online host
+     *
      * @param theHostList LinkedList<SmbFile>
      */
     protected void removeOffline(LinkedList<SmbFile> theHostList) {
@@ -668,7 +684,7 @@ public class ZoneLibraryIndex {
                 aServerStrEncoded = URLEncoder.encode(aServerSmbFile.toString(), "UTF-8");
             } catch (UnsupportedEncodingException ex) {
                 if (debugEventsOn) {
-                	System.err.println(ex);
+                    System.err.println(ex);
                 }
                 continue;
             }
@@ -692,8 +708,8 @@ public class ZoneLibraryIndex {
     }
 
     /**
-     * function to see if the given string matches (all or any) of the keyword array strings
-     * returns true if no keywords are given
+     * function to see if the given string matches (all or any) of the keyword
+     * array strings returns true if no keywords are given
      *
      * @param theString String
      * @param theKeywords String[]
@@ -723,6 +739,7 @@ public class ZoneLibraryIndex {
 
     /**
      * check the extension for ".mp3"
+     *
      * @param theFileName String
      * @return boolean - is the extension ".mp3"?
      */
@@ -731,8 +748,9 @@ public class ZoneLibraryIndex {
     }
 
     /**
-     * exact string matching of filename extension to see if file is in
-     * one of the supported container formats
+     * exact string matching of filename extension to see if file is in one of
+     * the supported container formats
+     *
      * @param theFileName String
      * @return boolean - is it supported?
      */
@@ -749,8 +767,9 @@ public class ZoneLibraryIndex {
     }
 
     /**
-     * check to see if file is a valid playlist container file based
-     * on exact string extension matching
+     * check to see if file is a valid playlist container file based on exact
+     * string extension matching
+     *
      * @param theFileName String
      * @return boolean - is it a playlist file?
      */
@@ -765,6 +784,7 @@ public class ZoneLibraryIndex {
 
     /**
      * check if the passed path string is a blacklisted one
+     *
      * @param thePathStr String
      * @return boolean - is it blacklisted?
      */
@@ -787,34 +807,35 @@ public class ZoneLibraryIndex {
         InetSocketAddress aTestInetSocketAddress = new InetSocketAddress(theValidIPv4Addr, 139);
         Socket aTestSocket = new Socket();
         try {
-            aTestSocket.connect(aTestInetSocketAddress, 100); //milliseconds
+            aTestSocket.connect(aTestInetSocketAddress, 100); // milliseconds
             aTestSocket.close();
             return true;
         } catch (Exception ex) {
-            return false; //socket not open
+            return false; // socket not open
         }
     }
 
     /**
-     * private timed task that adds all supported media from all CIFS shares on local network
-     * if we are unable to raise the Master Browser, then scrape the local subnet for shares
+     * private timed task that adds all supported media from all CIFS shares on
+     * local network if we are unable to raise the Master Browser, then scrape
+     * the local subnet for shares
      */
     private class RefreshCIFSMediaTask extends TimerTask {
 
         private String kSmbPrefix = "smb://";
 
-        @SuppressWarnings("unused") //"aWorkGroupSmbFile == null" is not dead code
-		@Override
+        @SuppressWarnings("unused") // "aWorkGroupSmbFile == null" is not dead code
+        @Override
         public void run() {
             if (getIndexIsBuilding()) {
-                return; //stop if index is already building
+                return; // stop if index is already building
             } else {
                 setIndexIsBuilding(true);
             }
 
             LinkedList<SmbFile> aHostList = new LinkedList<SmbFile>();
 
-            //query CIFS master browser for any workgroups
+            // query CIFS master browser for any workgroups
             String[] aWorkGroupArray = null;
             if (MusicZones.getIsOnline()) {
                 try {
@@ -822,13 +843,15 @@ public class ZoneLibraryIndex {
                     try {
                         aWorkGroupArray = aRootSmbFile.list();
                     } catch (SmbException ex) {
-                    	System.err.println(ex);
+                        System.err.println("ROOT SmbException = " + ex);
+                        aWorkGroupArray = null;
                     }
                 } catch (MalformedURLException ex) {
-                	System.err.println(ex);
+                    System.err.println("ROOT MalformedURLException = " + ex);
+                    aWorkGroupArray = null;
                 }
             }
-            //check localhost for possible SMB shares
+            // check localhost for possible SMB shares
             if (MusicZones.getIsIndexLocalHost()) {
                 String zoneIPv4Addr = Layer3Info.getInstance().getValidIPAddress(IpAddressType.IPv4).trim();
                 if (zoneIPv4Addr != null) {
@@ -836,71 +859,37 @@ public class ZoneLibraryIndex {
                     try {
                         aServerSmbFile = new SmbFile(kSmbPrefix + zoneIPv4Addr + "/");
                     } catch (MalformedURLException ex) {
-                    	System.err.println(ex);
+                        System.err.println(ex);
                     }
                     if ((aServerSmbFile != null) && (!aHostList.contains(aServerSmbFile))) {
                         aHostList.add(aServerSmbFile);
 
                         if (debugEventsOn) {
-                            System.out.println("ZLI RefreshSearchIndexTask - added "
-                                    + aServerSmbFile.toString() + " to host cache");
+                            System.out.println("ZLI RefreshSearchIndexTask - added " + aServerSmbFile.toString() + " to host cache");
                         }
                     }
                 }
             }
-            //scrape subnet for servers if none found with master browsers
-            if (MusicZones.getIsOnline() && (aWorkGroupArray == null)) {
-                System.err.println("ZLI RefreshSearchIndexTask - no workgroups found");
-                String zoneIPv4Addr = Layer3Info.getInstance().getValidIPAddress(IpAddressType.IPv4).trim();
-                System.out.println("ZLI RefreshSearchIndexTask - " + zoneIPv4Addr + " will now scrape subnet ...");
-                String[] zoneIPv4AddrOctets = zoneIPv4Addr.split("\\."); //dot is reserved char in regex
-                if (zoneIPv4AddrOctets.length == 4) {
-                    String aValidIPv4Prefix = zoneIPv4AddrOctets[0] + "."
-                            + zoneIPv4AddrOctets[1] + "." + zoneIPv4AddrOctets[2] + ".";
-                    for (int i = zli_IPv4ScanMin; i <= zli_IPv4ScanMax; i++) {
-                        String aNewValidIPv4Addr = aValidIPv4Prefix + String.valueOf(i);
-
-                        if (isPossibleSambaHost(aNewValidIPv4Addr)) {
-                            //if TCP 139 is active then add to host list
-                            SmbFile aServerSmbFile = null;
-                            try {
-                                aServerSmbFile = new SmbFile(kSmbPrefix + aNewValidIPv4Addr + "/");
-                            } catch (MalformedURLException ex) {
-                            	System.err.println(ex);
-                            }
-                            if ((aServerSmbFile != null) && (!aHostList.contains(aServerSmbFile))) {
-                                aHostList.add(aServerSmbFile);
-
-                                if (debugEventsOn) {
-                                    System.out.println("ZLI RefreshSearchIndexTask - added "
-                                            + aServerSmbFile.toString() + " to host cache");
-                                }
-                            }
-                        }
-                    }
-                    System.out.println("ZLI RefreshSearchIndexTask - subnet scraping done");
-                } else {
-                    System.err.println("ZLI RefreshSearchIndexTask - unable to build subnet "
-                            + "prefix for scraping - got " + zoneIPv4AddrOctets.length + " octets");
-                }
-            } else if (aWorkGroupArray != null) { //check workgroups for servers if found with master browser
+            // check workgroups for servers if found with master browser
+            if (aWorkGroupArray != null) {
                 for (String aWorkGroup : aWorkGroupArray) {
                     SmbFile aWorkGroupSmbFile = null;
                     try {
                         aWorkGroupSmbFile = new SmbFile(kSmbPrefix + aWorkGroup);
                     } catch (MalformedURLException ex) {
-                    	System.err.println(ex);
+                        System.err.println(ex);
                         continue;
                     }
                     if (aWorkGroupSmbFile == null) {
                         continue;
                     }
 
-                    String[] aServerArray = null; //get a list of servers in workgroup
+                    String[] aServerArray = null;
+                    // get a list of servers in workgroup
                     try {
                         aServerArray = aWorkGroupSmbFile.list();
                     } catch (SmbException ex) {
-                    	System.err.println(ex);
+                        System.err.println(ex);
                         continue;
                     }
                     if (aServerArray == null) {
@@ -912,30 +901,29 @@ public class ZoneLibraryIndex {
                                 aServerSmbFile = new SmbFile(kSmbPrefix + aServer);
                             } catch (MalformedURLException ex) {
                                 if (debugEventsOn) {
-                                	System.err.println(ex);
+                                    System.err.println(ex);
                                 }
                             }
                             if (aServerSmbFile == null) {
                                 continue;
-                            } else if (!aServerSmbFile.toString().endsWith("/")) { //pre-format each server address
+                            } else if (!aServerSmbFile.toString().endsWith("/")) {
                                 String aServerStr = aServerSmbFile.toString() + "/";
                                 aServerStr = aServerStr.toLowerCase(Locale.ENGLISH);
                                 try {
                                     aServerSmbFile = new SmbFile(aServerStr);
                                 } catch (MalformedURLException ex) {
                                     if (debugEventsOn) {
-                                    	System.err.println(ex);
+                                        System.err.println(ex);
                                     }
                                     continue;
                                 }
                             }
 
-                            if (!aHostList.contains(aServerSmbFile)) { //do not have server in list, add it
+                            if (!aHostList.contains(aServerSmbFile)) {
                                 aHostList.add(aServerSmbFile);
 
                                 if (debugEventsOn) {
-                                    System.out.println("ZLI RefreshSearchIndexTask - added "
-                                            + aServerSmbFile.toString() + " to host cache");
+                                    System.out.println("ZLI RefreshSearchIndexTask - added " + aServerSmbFile.toString() + " to host cache");
                                 }
                             }
                         }
@@ -943,15 +931,54 @@ public class ZoneLibraryIndex {
                 }
             }
 
-            //remove all indexed media that does not have an online host
+            // scrape subnet for servers if none found with master browser
+            if (MusicZones.getIsOnline() && (aHostList.isEmpty())) {
+                System.err.println("ZLI RefreshSearchIndexTask - no workgroups found");
+                String zoneIPv4Addr = Layer3Info.getInstance().getValidIPAddress(IpAddressType.IPv4).trim();
+                System.out.println("ZLI RefreshSearchIndexTask - " + zoneIPv4Addr + " will now scrape subnet ...");
+                String[] zoneIPv4AddrOctets = zoneIPv4Addr.split("\\.");
+                if (zoneIPv4AddrOctets.length == 4) {
+                    String aValidIPv4Prefix = zoneIPv4AddrOctets[0] + "."
+                            + zoneIPv4AddrOctets[1] + "."
+                            + zoneIPv4AddrOctets[2] + ".";
+                    for (int i = zli_IPv4ScanMin; i <= zli_IPv4ScanMax; i++) {
+                        String aNewValidIPv4Addr = aValidIPv4Prefix + String.valueOf(i);
+
+                        if (isPossibleSambaHost(aNewValidIPv4Addr)) {
+                            // if TCP 139 is active then add to host list
+                            SmbFile aServerSmbFile = null;
+                            try {
+                                aServerSmbFile = new SmbFile(kSmbPrefix + aNewValidIPv4Addr + "/");
+                            } catch (MalformedURLException ex) {
+                                System.err.println(ex);
+                            }
+                            if ((aServerSmbFile != null) && (!aHostList.contains(aServerSmbFile))) {
+                                aHostList.add(aServerSmbFile);
+
+                                if (debugEventsOn) {
+                                    System.out.println("ZLI RefreshSearchIndexTask - added " + aServerSmbFile.toString() + " to host cache");
+                                }
+                            }
+                        }
+                    }
+                    System.out.println("ZLI RefreshSearchIndexTask - subnet scraping done");
+                } else {
+                    System.err.println("ZLI RefreshSearchIndexTask - unable to build subnet "
+                            + "prefix for scraping - got "
+                            + zoneIPv4AddrOctets.length + " octets");
+                }
+            }
+
+            // remove all indexed media that does not have an online host
             removeOffline(aHostList);
 
-            //spider all open shares on indexed servers for media
+            // spider all open shares on indexed servers for media
             Iterator<SmbFile> aServerSmbFileIter = aHostList.iterator();
             while (aServerSmbFileIter.hasNext()) {
                 SmbFile aServerSmbFile = aServerSmbFileIter.next();
 
-                //malformed fast scanning of TCP 139 earlier causes RST here, needed retry after timeout
+                // malformed fast scanning of TCP 139 earlier causes RST here,
+                // needed retry after timeout
                 String[] aSharePathArray = null;
                 int aRetryCnt = 0;
                 int aMaxRetryCnt = 3;
@@ -964,7 +991,7 @@ public class ZoneLibraryIndex {
                     try {
                         aSharePathArray = aServerSmbFile.list();
                     } catch (SmbException ex) {
-                    	System.err.println(ex);
+                        System.err.println(ex);
                     }
                     aRetryCnt++;
                 }
@@ -984,7 +1011,7 @@ public class ZoneLibraryIndex {
                 }
             }
 
-            //done building index
+            // done building index
             setIndexIsBuilding(false);
         }
     }
